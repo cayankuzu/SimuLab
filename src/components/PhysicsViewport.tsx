@@ -28,6 +28,8 @@ export interface ViewOverlays {
   trail: boolean;
   grid: boolean;
   axes3D: boolean;
+  fbd: boolean;
+  strobe: boolean;
 }
 
 interface PhysicsViewportProps {
@@ -127,6 +129,8 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
   lang,
   overlays,
   onToggleOverlay,
+  isRunning,
+  fps,
   oscParams,
   oscState,
   onOscDrag,
@@ -156,6 +160,10 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
   const massMeshRef = useRef<THREE.Mesh | null>(null);
   const oscVelArrowRef = useRef<THREE.ArrowHelper | null>(null);
   const oscForceArrowRef = useRef<THREE.ArrowHelper | null>(null);
+  const oscFSpringArrowRef = useRef<THREE.ArrowHelper | null>(null);
+  const oscFDamperArrowRef = useRef<THREE.ArrowHelper | null>(null);
+  const oscFDriveArrowRef = useRef<THREE.ArrowHelper | null>(null);
+  const oscStrobeGroupRef = useRef<THREE.Group | null>(null);
 
   // Dynamic Pendulum 3D Meshes
   const pendRodsRef = useRef<THREE.Mesh[]>([]);
@@ -166,6 +174,10 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
   const pendGhostTrailLineRef = useRef<THREE.Line | null>(null);
   const pendVelArrowRef = useRef<THREE.ArrowHelper | null>(null);
   const pendForceArrowRef = useRef<THREE.ArrowHelper | null>(null);
+  const pendTensionArrowRef = useRef<THREE.ArrowHelper | null>(null);
+  const pendGravityArrowRef = useRef<THREE.ArrowHelper | null>(null);
+  const pendStrobeGroupRef = useRef<THREE.Group | null>(null);
+  const lastStrobeTimeRef = useRef<number>(0);
 
   // Trail Histories (3D points)
   const trailPointsRef = useRef<THREE.Vector3[]>([]);
@@ -603,6 +615,51 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     oscGroup.add(oscForceArrow);
     oscForceArrowRef.current = oscForceArrow;
 
+    // FBD Component Arrows for Spring Oscillator
+    // 1. Spring Restoring Force (Yellow/Gold)
+    const oscFSpringArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, 0, 0),
+      1,
+      0xeab308,
+      0.32,
+      0.16
+    );
+    oscFSpringArrow.visible = false;
+    oscGroup.add(oscFSpringArrow);
+    oscFSpringArrowRef.current = oscFSpringArrow;
+
+    // 2. Damper / Friction Force (Purple)
+    const oscFDamperArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, 0, 0),
+      1,
+      0xa855f7,
+      0.32,
+      0.16
+    );
+    oscFDamperArrow.visible = false;
+    oscGroup.add(oscFDamperArrow);
+    oscFDamperArrowRef.current = oscFDamperArrow;
+
+    // 3. External Motor Drive Force (Red)
+    const oscFDriveArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, 0, 0),
+      1,
+      0xef4444,
+      0.32,
+      0.16
+    );
+    oscFDriveArrow.visible = false;
+    oscGroup.add(oscFDriveArrow);
+    oscFDriveArrowRef.current = oscFDriveArrow;
+
+    // Strobe Ghost Group for Oscillator
+    const oscStrobeGroup = new THREE.Group();
+    oscGroup.add(oscStrobeGroup);
+    oscStrobeGroupRef.current = oscStrobeGroup;
+
     // 9. Pendulum 3D Group
     const pendGroup = new THREE.Group();
     scene.add(pendGroup);
@@ -727,6 +784,38 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     );
     pendGroup.add(pendForceArrow);
     pendForceArrowRef.current = pendForceArrow;
+
+    // FBD Arrows for Pendulum
+    // 1. String Tension (Sky Blue - points towards parent pivot)
+    const pendTensionArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(0, 1, 0),
+      new THREE.Vector3(0, 0, 0),
+      1,
+      0x38bdf8,
+      0.32,
+      0.15
+    );
+    pendTensionArrow.visible = false;
+    pendGroup.add(pendTensionArrow);
+    pendTensionArrowRef.current = pendTensionArrow;
+
+    // 2. Gravity Force (Red - points straight down)
+    const pendGravityArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(0, -1, 0),
+      new THREE.Vector3(0, 0, 0),
+      1,
+      0xef4444,
+      0.32,
+      0.15
+    );
+    pendGravityArrow.visible = false;
+    pendGroup.add(pendGravityArrow);
+    pendGravityArrowRef.current = pendGravityArrow;
+
+    // Strobe Ghost Group for Pendulum
+    const pendStrobeGroup = new THREE.Group();
+    pendGroup.add(pendStrobeGroup);
+    pendStrobeGroupRef.current = pendStrobeGroup;
 
     // 10. Pointer Events directly on renderer.domElement
     const dom = renderer.domElement;
@@ -999,7 +1088,87 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
         0.18
       );
     }
-  }, [moduleId, oscState, oscParams, overlays.velocityVec, overlays.forceVec]);
+
+    // FBD Component Arrows (Spring, Damper, Drive)
+    const showFBD = Boolean(overlays.fbd);
+    if (oscFSpringArrowRef.current) {
+      const fSpring = -oscParams.stiffness * oscState.x;
+      oscFSpringArrowRef.current.visible = showFBD && Math.abs(fSpring) > 0.4;
+      const dir = fSpring >= 0 ? 1 : -1;
+      oscFSpringArrowRef.current.setDirection(new THREE.Vector3(dir, 0, 0));
+      oscFSpringArrowRef.current.position.set(blockX, 0.7, 0.65);
+      oscFSpringArrowRef.current.setLength(
+        Math.min(3.6, Math.max(0.4, Math.abs(fSpring) * 0.04)),
+        0.3,
+        0.15
+      );
+    }
+    if (oscFDamperArrowRef.current) {
+      const fDamper = -oscParams.damping * oscState.v;
+      oscFDamperArrowRef.current.visible = showFBD && Math.abs(fDamper) > 0.2;
+      const dir = fDamper >= 0 ? 1 : -1;
+      oscFDamperArrowRef.current.setDirection(new THREE.Vector3(dir, 0, 0));
+      oscFDamperArrowRef.current.position.set(blockX, -0.7, 0.65);
+      oscFDamperArrowRef.current.setLength(
+        Math.min(3.6, Math.max(0.4, Math.abs(fDamper) * 0.16)),
+        0.3,
+        0.15
+      );
+    }
+    if (oscFDriveArrowRef.current) {
+      const fDrive = oscParams.driveAmp * Math.cos(oscParams.driveFreq * oscState.t);
+      oscFDriveArrowRef.current.visible = showFBD && Math.abs(fDrive) > 0.4;
+      const dir = fDrive >= 0 ? 1 : -1;
+      oscFDriveArrowRef.current.setDirection(new THREE.Vector3(dir, 0, 0));
+      oscFDriveArrowRef.current.position.set(blockX, 0, 0.95);
+      oscFDriveArrowRef.current.setLength(
+        Math.min(3.6, Math.max(0.4, Math.abs(fDrive) * 0.05)),
+        0.3,
+        0.15
+      );
+    }
+
+    // Strobe Ghost Snapshots for Oscillator
+    if (oscStrobeGroupRef.current) {
+      const grp = oscStrobeGroupRef.current;
+      grp.visible = Boolean(overlays.strobe);
+      if (overlays.strobe && isRunning) {
+        const now = oscState.t;
+        if (now - lastStrobeTimeRef.current > 0.28) {
+          lastStrobeTimeRef.current = now;
+          const ghostGeom = new THREE.BoxGeometry(1.65, 1.35, 1.35);
+          const ghostMat = new THREE.MeshBasicMaterial({
+            color: 0x38bdf8,
+            transparent: true,
+            opacity: 0.16,
+            wireframe: true,
+          });
+          const ghost = new THREE.Mesh(ghostGeom, ghostMat);
+          ghost.position.set(blockX, 0, 0);
+          const s = Math.max(0.7, Math.min(1.4, Math.cbrt(oscParams.mass / 2.0)));
+          ghost.scale.set(s, s, s);
+          grp.add(ghost);
+
+          while (grp.children.length > 8) {
+            grp.remove(grp.children[0]);
+          }
+        }
+      } else if (!overlays.strobe && grp.children.length > 0) {
+        while (grp.children.length > 0) {
+          grp.remove(grp.children[0]);
+        }
+      }
+    }
+  }, [
+    moduleId,
+    oscState,
+    oscParams,
+    overlays.velocityVec,
+    overlays.forceVec,
+    overlays.fbd,
+    overlays.strobe,
+    isRunning,
+  ]);
 
   // ==========================================
   // UPDATE MULTI-PENDULUM 3D ON EVERY TICK
@@ -1147,6 +1316,63 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
       }
     }
 
+    // Pendulum FBD: Tension & Gravity
+    const showPendFBD = Boolean(overlays.fbd);
+    if (pendGravityArrowRef.current) {
+      pendGravityArrowRef.current.visible = showPendFBD;
+      pendGravityArrowRef.current.position.copy(tipPos);
+      pendGravityArrowRef.current.setDirection(new THREE.Vector3(0, -1, 0));
+      const tipMass = pendParams.masses[tipIdx] || 1.0;
+      const gLen = Math.min(3.0, Math.max(0.4, tipMass * pendParams.g * 0.12));
+      pendGravityArrowRef.current.setLength(gLen, 0.28, 0.14);
+    }
+
+    if (pendTensionArrowRef.current) {
+      pendTensionArrowRef.current.visible = showPendFBD;
+      pendTensionArrowRef.current.position.copy(tipPos);
+      const parentPos =
+        tipIdx > 0
+          ? new THREE.Vector3(
+              pivot.x + positions[tipIdx - 1].x * pScale,
+              pivot.y - positions[tipIdx - 1].y * pScale,
+              0
+            )
+          : new THREE.Vector3(pivot.x, pivot.y, 0);
+      const tDir = new THREE.Vector3().subVectors(parentPos, tipPos).normalize();
+      pendTensionArrowRef.current.setDirection(tDir);
+      pendTensionArrowRef.current.setLength(1.8, 0.28, 0.14);
+    }
+
+    // Strobe Ghost Spheres for Pendulum
+    if (pendStrobeGroupRef.current) {
+      const pGrp = pendStrobeGroupRef.current;
+      pGrp.visible = Boolean(overlays.strobe);
+      if (overlays.strobe && isRunning) {
+        const now = pendState.t;
+        if (now - lastStrobeTimeRef.current > 0.28) {
+          lastStrobeTimeRef.current = now;
+          const ghostGeom = new THREE.SphereGeometry(0.28, 16, 16);
+          const ghostMat = new THREE.MeshBasicMaterial({
+            color: 0x2dd4bf,
+            transparent: true,
+            opacity: 0.2,
+            wireframe: true,
+          });
+          const ghost = new THREE.Mesh(ghostGeom, ghostMat);
+          ghost.position.copy(tipPos);
+          pGrp.add(ghost);
+
+          while (pGrp.children.length > 8) {
+            pGrp.remove(pGrp.children[0]);
+          }
+        }
+      } else if (!overlays.strobe && pGrp.children.length > 0) {
+        while (pGrp.children.length > 0) {
+          pGrp.remove(pGrp.children[0]);
+        }
+      }
+    }
+
     // Ghost Pendulum in 3D
     if (pendParams.ghostEnabled && pendState.ghostThetas) {
       const ghostKin = getNPendulumKinematics(
@@ -1257,6 +1483,9 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     overlays.velocityVec,
     overlays.forceVec,
     overlays.trail,
+    overlays.fbd,
+    overlays.strobe,
+    isRunning,
   ]);
 
   // ==========================================
@@ -1504,7 +1733,9 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
               { key: "grid", label: "3B Izgara", dot: "bg-zinc-400" },
               { key: "velocityVec", label: "v (Hız)", dot: "bg-emerald-400" },
               { key: "forceVec", label: "F (Kuvvet)", dot: "bg-amber-400" },
+              { key: "fbd", label: "Kuvvet Ayrıştırma (FBD)", dot: "bg-purple-400" },
               { key: "trail", label: "İz", dot: "bg-sky-400" },
+              { key: "strobe", label: "Stroboskop (Flaş)", dot: "bg-teal-400" },
             ] as const
           ).map((item) => {
             const active = overlays[item.key];

@@ -12,6 +12,9 @@ import {
   HelpCircle,
   Waves,
   GitBranch,
+  Volume2,
+  VolumeX,
+  Trophy,
 } from "lucide-react";
 
 interface TopToolbarProps {
@@ -26,6 +29,11 @@ interface TopToolbarProps {
   lang: Language;
   onChangeLang: (lang: Language) => void;
   onOpenGuide: () => void;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
+  onOpenChallenges?: () => void;
+  completedChallengesCount?: number;
+  totalChallengesCount?: number;
 }
 
 const TIME_SCALES = [0.25, 0.5, 1.0, 2.0];
@@ -42,6 +50,11 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
   lang,
   onChangeLang,
   onOpenGuide,
+  isMuted = true,
+  onToggleMute,
+  onOpenChallenges,
+  completedChallengesCount = 0,
+  totalChallengesCount = 4,
 }) => {
   const t = translations[lang];
 
@@ -150,8 +163,42 @@ export const TopToolbar: React.FC<TopToolbarProps> = ({
         </div>
       </div>
 
-      {/* Right: Guide & Language */}
+      {/* Right: Challenges, Sound, Guide & Language */}
       <div className="flex items-center gap-2">
+        {/* Lab Challenges Button */}
+        {onOpenChallenges && (
+          <button
+            onClick={onOpenChallenges}
+            className="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#1a1d26] hover:bg-[#252a38] text-amber-300 border border-amber-400/30 flex items-center gap-1.5 transition cursor-pointer"
+            title="Laboratuvar Görevleri"
+          >
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden md:inline font-mono">Görevler</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-400/20 text-amber-300 font-bold">
+              {completedChallengesCount}/{totalChallengesCount}
+            </span>
+          </button>
+        )}
+
+        {/* Audio Mute/Unmute */}
+        {onToggleMute && (
+          <button
+            onClick={onToggleMute}
+            className={`p-1.5 rounded-lg text-xs transition cursor-pointer border ${
+              !isMuted
+                ? "bg-amber-400/20 text-amber-300 border-amber-400/40"
+                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border-transparent"
+            }`}
+            title={!isMuted ? "Sesi Kapat" : "Fiziksel Frekans Sesini Aç"}
+          >
+            {!isMuted ? (
+              <Volume2 className="w-4 h-4 text-amber-400" />
+            ) : (
+              <VolumeX className="w-4 h-4" />
+            )}
+          </button>
+        )}
+
         <button
           onClick={onOpenGuide}
           className="px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 flex items-center gap-1.5 transition cursor-pointer"

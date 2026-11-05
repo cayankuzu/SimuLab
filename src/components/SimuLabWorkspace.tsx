@@ -14,6 +14,7 @@ import {
   createInitialPendulumState,
   stepPendulumRK4,
   computePendulumEnergy,
+  computePendulumAngularDifferenceDeg,
   PhasePoint,
   EnergySnapshot,
 } from "@/engine/physicsModules";
@@ -22,6 +23,8 @@ import { TopToolbar } from "./TopToolbar";
 import { CourseGuidePanel } from "./CourseGuidePanel";
 import type { ViewOverlays } from "./PhysicsViewport";
 import { InspectorPanel } from "./InspectorPanel";
+import { LabChallengesModal, ChallengeStatus } from "./LabChallengesModal";
+import { physicsAudio } from "@/utils/audioEngine";
 import { Sparkles, X, CheckCircle2 } from "lucide-react";
 
 const PhysicsViewport = dynamic(
@@ -44,6 +47,43 @@ export const SimuLabWorkspace: React.FC = () => {
   const [timeScale, setTimeScale] = useState<number>(1.0);
   const [fps, setFps] = useState<number>(60);
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
+  const [showChallengesModal, setShowChallengesModal] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(true);
+
+  const [challenges, setChallenges] = useState<ChallengeStatus[]>([
+    {
+      id: "critical",
+      title: "Kritik Sönümleme (Amortisör)",
+      desc: "Yay sönüm katsayısını (c) öyle ayarla ki sistem salınım yapmadan tek periyotta dursun (ζ ≈ 1.0).",
+      category: "oscillator",
+      completed: false,
+      hint: "Ayarlar sekmesinden 'Amortisör' hazır senaryosunu seç veya c değerini 2√(km)'ye eşitle.",
+    },
+    {
+      id: "resonance",
+      title: "Rezonans Patlaması",
+      desc: "Dış motor frekansını (ω) doğal frekansa (ω₀) kilitle ve salınım genliğini 3.5m üzerine çıkar!",
+      category: "oscillator",
+      completed: false,
+      hint: "Ayarlar'dan 'Rezonans' seçeneğine tıkla veya motor frekansını ω₀ değerine eşitle.",
+    },
+    {
+      id: "chaos",
+      title: "Kaos & Kelebek Etkisi",
+      desc: "Çoklu sarkaçta ikiz sarkacı aç ve 60° üzerinde açısal ayrışma yakala.",
+      category: "pendulum",
+      completed: false,
+      hint: "2'li veya 4'lü sarkaç seç, açıyı geniş çekip bırak; pembe ikiz sarkaç birkaç saniye içinde kaosa girer.",
+    },
+    {
+      id: "space",
+      title: "Dünya Dışı Salınım",
+      desc: "Sarkacı Ay (1.62) veya Uzay (0-G) ortamına geçirerek periyot değişimini gözlemle.",
+      category: "pendulum",
+      completed: false,
+      hint: "Ayarlar sekmesinden 'Ay' veya 'Uzay' butonuna tıkla.",
+    },
+  ]);
 
   const [overlays, setOverlays] = useState<ViewOverlays>({
     velocityVec: true,
@@ -51,6 +91,8 @@ export const SimuLabWorkspace: React.FC = () => {
     trail: true,
     grid: true,
     axes3D: true,
+    fbd: false,
+    strobe: false,
   });
 
   useEffect(() => {
@@ -164,6 +206,27 @@ export const SimuLabWorkspace: React.FC = () => {
         if (arr.length > 180) arr.shift();
         return arr;
       });
+
+      // Audio & Challenges for Oscillator
+      const oP = oscParamsRef.current;
+      const omega0 = Math.sqrt(oP.stiffness / Math.max(0.1, oP.mass));
+      const isRes =
+        oP.driveAmp > 0.1 &&
+        Math.abs(oP.driveFreq - omega0) / omega0 < 0.12 &&
+        Math.abs(next.x) > 3.0;
+      physicsAudio.updateSpringAudio(omega0, next.x, isRes);
+
+      const zeta = oP.damping / (2 * Math.sqrt(oP.stiffness * oP.mass));
+      if (Math.abs(zeta - 1.0) <= 0.08) {
+        setChallenges((prev) =>
+          prev.map((c) => (c.id === "critical" ? { ...c, completed: true } : c))
+        );
+      }
+      if (isRes && Math.abs(next.x) >= 3.5) {
+        setChallenges((prev) =>
+          prev.map((c) => (c.id === "resonance" ? { ...c, completed: true } : c))
+        );
+      }
     } else if (activeMod === "pendulum") {
       const next = stepPendulumRK4(
         pendStateRef.current,
@@ -206,6 +269,25 @@ export const SimuLabWorkspace: React.FC = () => {
         if (arr.length > 180) arr.shift();
         return arr;
       });
+
+      // Audio tick when pendulum crosses vertical zero
+      if (Math.abs(tipTh) < 0.08 && Math.abs(tipOm) > 0.4) {
+        physicsAudio.triggerTick(380 + n * 30);
+      }
+
+      // Evaluate Challenges for Pendulum
+      const pP = pendParamsRef.current;
+      const angDiff = computePendulumAngularDifferenceDeg(next, n);
+      if (n >= 2 && pP.ghostEnabled && angDiff >= 60) {
+        setChallenges((prev) =>
+          prev.map((c) => (c.id === "chaos" ? { ...c, completed: true } : c))
+        );
+      }
+      if (pP.g <= 1.7) {
+        setChallenges((prev) =>
+          prev.map((c) => (c.id === "space" ? { ...c, completed: true } : c))
+        );
+      }
     }
   }, []);
 
@@ -587,6 +669,28 @@ export const SimuLabWorkspace: React.FC = () => {
     pendParams.count,
   ]);
 
+  const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    physicsAudio.setMuted(nextMuted);
+  };
+
+  const handleSelectChallenge = (id: string) => {
+    if (id === "critical") {
+      handleSelectModule("oscillator");
+      handleSelectOscPreset("critical");
+    } else if (id === "resonance") {
+      handleSelectModule("oscillator");
+      handleSelectOscPreset("resonance");
+    } else if (id === "chaos") {
+      handleSelectModule("pendulum");
+      handleSelectPendPreset("double");
+    } else if (id === "space") {
+      handleSelectModule("pendulum");
+      handleSelectPendPreset("moon");
+    }
+  };
+
   const t = translations[lang];
 
   return (
@@ -604,6 +708,11 @@ export const SimuLabWorkspace: React.FC = () => {
         lang={lang}
         onChangeLang={setLang}
         onOpenGuide={() => setShowGuideModal(true)}
+        isMuted={isMuted}
+        onToggleMute={handleToggleMute}
+        onOpenChallenges={() => setShowChallengesModal(true)}
+        completedChallengesCount={challenges.filter((c) => c.completed).length}
+        totalChallengesCount={challenges.length}
       />
 
       {/* 2-Column High-Craft Studio Layout: Hero Canvas + Precision Inspector */}
@@ -701,6 +810,14 @@ export const SimuLabWorkspace: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Interactive Lab Missions / Challenges Modal */}
+      <LabChallengesModal
+        isOpen={showChallengesModal}
+        onClose={() => setShowChallengesModal(false)}
+        challenges={challenges}
+        onSelectChallenge={handleSelectChallenge}
+      />
     </div>
   );
 };
