@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import {
   ModuleId,
   OscillatorParams,
@@ -19,18 +20,25 @@ import {
 import { Language, translations } from "@/i18n/translations";
 import { TopToolbar } from "./TopToolbar";
 import { CourseGuidePanel } from "./CourseGuidePanel";
-import { PhysicsViewport, ViewOverlays } from "./PhysicsViewport";
+import type { ViewOverlays } from "./PhysicsViewport";
 import { InspectorPanel } from "./InspectorPanel";
 import { Sparkles, X, CheckCircle2 } from "lucide-react";
 
+const PhysicsViewport = dynamic(
+  () => import("./PhysicsViewport").then((mod) => mod.PhysicsViewport),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full bg-[#0a0d14] flex flex-col items-center justify-center gap-3 font-mono text-zinc-400">
+        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+        <span className="text-xs tracking-wider uppercase">SimuLab 3D Engine Yükleniyor...</span>
+      </div>
+    ),
+  }
+);
+
 export const SimuLabWorkspace: React.FC = () => {
-  const [moduleId, setModuleId] = useState<ModuleId>(() => {
-    if (typeof window !== "undefined") {
-      const p = new URLSearchParams(window.location.search).get("mod");
-      if (p === "pendulum") return "pendulum";
-    }
-    return "oscillator";
-  });
+  const [moduleId, setModuleId] = useState<ModuleId>("oscillator");
   const [lang, setLang] = useState<Language>("tr");
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [timeScale, setTimeScale] = useState<number>(1.0);

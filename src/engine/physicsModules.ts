@@ -107,16 +107,21 @@ export function createInitialOscillatorState(
   x0: number = 2.0,
   v0: number = 0
 ): OscillatorState {
-  const fSpring = -params.stiffness * x0;
+  const massScale = Math.max(0.7, Math.min(1.4, Math.cbrt(params.mass / 2.0)));
+  const halfWidth = 0.825 * massScale;
+  const compressionLimit = -7.05 + 1.45 + halfWidth;
+  const clampedX0 = Math.max(compressionLimit, Math.min(6.5, x0));
+
+  const fSpring = -params.stiffness * clampedX0;
   const fDamper = -params.damping * v0;
   const fDrive = params.driveAmp * Math.cos(0);
   const fNet = fSpring + fDamper + fDrive;
   const a = fNet / params.mass;
-  const initialEnergy = 0.5 * params.mass * v0 * v0 + 0.5 * params.stiffness * x0 * x0;
+  const initialEnergy = 0.5 * params.mass * v0 * v0 + 0.5 * params.stiffness * clampedX0 * clampedX0;
 
   return {
     t: 0,
-    x: x0,
+    x: clampedX0,
     v: v0,
     a,
     fNet,
@@ -125,7 +130,7 @@ export function createInitialOscillatorState(
     fDrive,
     thermalEnergy: 0,
     initialEnergy,
-    trail: [{ t: 0, x: x0, v: v0 }],
+    trail: [{ t: 0, x: clampedX0, v: v0 }],
   };
 }
 
@@ -135,6 +140,11 @@ export function stepOscillatorRK4(
   dt: number
 ): OscillatorState {
   const y0 = [state.x, state.v, state.thermalEnergy];
+  const massScale = Math.max(0.7, Math.min(1.4, Math.cbrt(params.mass / 2.0)));
+  const halfWidth = 0.825 * massScale;
+  // Wall front at -7.25, rubber bumper face at -7.05. Solid coil spring length: 1.45m
+  const compressionLimit = -7.05 + 1.45 + halfWidth;
+  const extensionLimit = 6.5;
 
   const deriv = (t: number, y: number[]): number[] => {
     const x = y[0];
@@ -143,12 +153,20 @@ export function stepOscillatorRK4(
     const fSpring = -params.stiffness * x;
     const fDamper = -params.damping * v;
 
-    // Elastic bumper stop at solid compression limit (wall is at x = -7.5)
+    // Elastic bumper stop at solid compression limit (prevents wall collision)
     let fBumper = 0;
-    const compressionLimit = -6.2;
     if (x < compressionLimit) {
       const penetration = compressionLimit - x;
-      fBumper = 600 * penetration;
+      fBumper = 8000 * penetration + 15000 * penetration * penetration;
+      if (v < 0) {
+        fBumper += 120 * (-v);
+      }
+    } else if (x > extensionLimit) {
+      const overextension = x - extensionLimit;
+      fBumper = -(8000 * overextension + 15000 * overextension * overextension);
+      if (v > 0) {
+        fBumper -= 120 * v;
+      }
     }
 
     const a = (fDrive + fSpring + fDamper + fBumper) / params.mass;
@@ -157,8 +175,21 @@ export function stepOscillatorRK4(
   };
 
   const res = rk4Integrate(state.t, y0, dt, deriv, 1 / 240);
-  const [x, v, thermalEnergy] = res.y;
+  let [x, v, thermalEnergy] = res.y;
   const t = res.t;
+
+  // Strict kinematic boundary: never allow mass block to penetrate into the wall
+  if (x < compressionLimit) {
+    x = compressionLimit;
+    if (v < 0) {
+      v = -0.45 * v; // Elastic bounce off compressed spring solid stop
+    }
+  } else if (x > extensionLimit) {
+    x = extensionLimit;
+    if (v > 0) {
+      v = -0.45 * v;
+    }
+  }
 
   const fSpring = -params.stiffness * x;
   const fDamper = -params.damping * v;

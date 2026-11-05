@@ -193,6 +193,8 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
   onPendDragBobRef.current = onPendDragBob;
   const oscStateRef = useRef(oscState);
   oscStateRef.current = oscState;
+  const oscParamsRef = useRef(oscParams);
+  oscParamsRef.current = oscParams;
   const pendStateRef = useRef(pendState);
   pendStateRef.current = pendState;
   const pendParamsRef = useRef(pendParams);
@@ -408,15 +410,54 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
 
     // Wall Mount at x = -7.5
     const wallBase = new THREE.Mesh(
-      new THREE.BoxGeometry(0.5, 3.6, 3.6),
+      new THREE.BoxGeometry(0.5, 3.8, 3.8),
       new THREE.MeshStandardMaterial({
         color: 0x1e242d,
-        metalness: 0.65,
+        metalness: 0.7,
         roughness: 0.35,
       })
     );
     wallBase.position.set(-7.5, 0, 0);
     oscGroup.add(wallBase);
+
+    // Wall mounting flange plate
+    const wallFlange = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.85, 0.85, 0.12, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        metalness: 0.85,
+        roughness: 0.25,
+      })
+    );
+    wallFlange.rotation.z = Math.PI / 2;
+    wallFlange.position.set(-7.22, 0, 0);
+    oscGroup.add(wallFlange);
+
+    // Industrial Rubber Bumper Pad (Prevents mass block from contacting the wall)
+    const rubberBumper = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.55, 0.55, 0.22, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        metalness: 0.1,
+        roughness: 0.85,
+      })
+    );
+    rubberBumper.rotation.z = Math.PI / 2;
+    rubberBumper.position.set(-7.08, 0, 0);
+    oscGroup.add(rubberBumper);
+
+    // Heavy-duty spring mounting shackle ring on wall
+    const shackleRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.22, 0.05, 12, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        metalness: 0.9,
+        roughness: 0.2,
+      })
+    );
+    shackleRing.rotation.y = Math.PI / 2;
+    shackleRing.position.set(-6.96, 0, 0);
+    oscGroup.add(shackleRing);
 
     // 4 Hex Bolts on Wall
     const boltMat = new THREE.MeshStandardMaterial({
@@ -425,10 +466,10 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
       roughness: 0.2,
     });
     [
-      [-1.25, -1.25],
-      [-1.25, 1.25],
-      [1.25, -1.25],
-      [1.25, 1.25],
+      [-1.3, -1.3],
+      [-1.3, 1.3],
+      [1.3, -1.3],
+      [1.3, 1.3],
     ].forEach(([by, bz]) => {
       const bolt = new THREE.Mesh(
         new THREE.CylinderGeometry(0.13, 0.13, 0.18, 6),
@@ -451,6 +492,19 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     rail.rotation.z = Math.PI / 2;
     rail.position.set(0.5, 0, 0);
     oscGroup.add(rail);
+
+    // Right End Rail Cap / Stopper at x = 8.5
+    const railCap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.22, 0.22, 0.25, 16),
+      new THREE.MeshStandardMaterial({
+        color: 0x475569,
+        metalness: 0.8,
+        roughness: 0.3,
+      })
+    );
+    railCap.rotation.z = Math.PI / 2;
+    railCap.position.set(8.5, 0, 0);
+    oscGroup.add(railCap);
 
     // Equilibrium marker ring at x = 0
     const eqRing = new THREE.Mesh(
@@ -496,13 +550,26 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     sleeve.rotation.z = Math.PI / 2;
     massMesh.add(sleeve);
 
+    // Spring connector eyelet bracket on left face of mass block
+    const massBracket = new THREE.Mesh(
+      new THREE.TorusGeometry(0.2, 0.045, 12, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        metalness: 0.9,
+        roughness: 0.2,
+      })
+    );
+    massBracket.rotation.y = Math.PI / 2;
+    massBracket.position.set(-0.83, 0, 0);
+    massMesh.add(massBracket);
+
     // Mass Label Sprite on Block
     const massSprite = createTextSprite("2.0 kg", "#fbbf24", "#0f172a", 44);
     massSprite.position.set(0, 0, 0.72);
     massMesh.add(massSprite);
 
     // 3D Spring Tube
-    const initialCurve = new HelixCurve(-7.2, 1.2, 0.42, 15);
+    const initialCurve = new HelixCurve(-7.05, 1.2, 0.42, 15);
     const springGeom = new THREE.TubeGeometry(initialCurve, 160, 0.055, 10, false);
     const springMat = new THREE.MeshStandardMaterial({
       color: 0xcfd8dc,
@@ -670,7 +737,12 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
               denom;
             xProj = ray.origin.x + sStar * ray.direction.x;
           }
-          const clampedX = Math.max(-5.5, Math.min(6.5, xProj));
+          const mScale = Math.max(0.7, Math.min(1.4, Math.cbrt((oscParamsRef.current.mass || 2.0) / 2.0)));
+          const hWidth = 0.825 * mScale;
+          // Wall bumper is at -7.05, solid spring height is 1.45m.
+          // Mass center cannot go further left than:
+          const minMassX = -7.05 + 1.45 + hWidth;
+          const clampedX = Math.max(minMassX, Math.min(6.5, xProj));
           onOscDragRef.current(clampedX);
         } else if (activeDrag.startsWith("pend-bob:")) {
           const bobIndex = parseInt(activeDrag.split(":")[1], 10);
@@ -841,8 +913,11 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
 
     if (springMesh) {
       // Re-generate tube geometry along dynamic helix
-      const startX = -7.2;
-      const endX = blockX - 0.825 * (massMesh?.scale.x || 1.0);
+      const startX = -7.05;
+      const s = massMesh?.scale.x || 1.0;
+      const halfW = 0.825 * s;
+      // Physical minimum spring length is 1.40m (solid tightly compressed coils)
+      const endX = Math.max(startX + 1.40, blockX - halfW);
       springMesh.geometry.dispose();
       springMesh.geometry = new THREE.TubeGeometry(
         new HelixCurve(startX, endX, 0.42, 15),
