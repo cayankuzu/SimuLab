@@ -608,25 +608,67 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     scene.add(pendGroup);
     pendulumGroupRef.current = pendGroup;
 
-    // Top Ceiling Bracket at y = 2.4
-    const ceilingBase = new THREE.Mesh(
-      new THREE.BoxGeometry(2.6, 0.35, 1.3),
+    // Precision Industrial Cantilever Stand (Rear-mounted to give 360° unobstructed rotation)
+    const standBase = new THREE.Mesh(
+      new THREE.BoxGeometry(2.4, 0.22, 1.6),
       new THREE.MeshStandardMaterial({
-        color: 0x242d38,
-        metalness: 0.7,
+        color: 0x181c22,
+        metalness: 0.8,
         roughness: 0.3,
       })
     );
-    ceilingBase.position.set(0, 2.4, 0);
-    pendGroup.add(ceilingBase);
+    standBase.position.set(0, -4.39, -1.1);
+    pendGroup.add(standBase);
 
-    const pivotBearing = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.18, 0.18, 0.9, 20),
-      boltMat
+    // Vertical Steel Column (Rising from floor to pivot height)
+    const standColumn = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.14, 6.7, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x2d3748,
+        metalness: 0.85,
+        roughness: 0.25,
+      })
     );
-    pivotBearing.rotation.x = Math.PI / 2;
-    pivotBearing.position.set(0, 2.2, 0);
-    pendGroup.add(pivotBearing);
+    standColumn.position.set(0, -1.05, -1.1);
+    pendGroup.add(standColumn);
+
+    // Cantilever Boom Arm extending forward from rear column to pivot
+    const cantileverArm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.24, 0.32, 1.15),
+      new THREE.MeshStandardMaterial({
+        color: 0x1e2632,
+        metalness: 0.75,
+        roughness: 0.3,
+      })
+    );
+    cantileverArm.position.set(0, 2.2, -0.62);
+    pendGroup.add(cantileverArm);
+
+    // Rotary Bearing Housing Hub
+    const bearingHub = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.24, 0.24, 0.32, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        metalness: 0.9,
+        roughness: 0.2,
+      })
+    );
+    bearingHub.rotation.x = Math.PI / 2;
+    bearingHub.position.set(0, 2.2, -0.15);
+    pendGroup.add(bearingHub);
+
+    // Brass Rotary Axle Pin at (0, 2.2, 0)
+    const shaftPin = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.08, 0.26, 20),
+      new THREE.MeshStandardMaterial({
+        color: 0xf59e0b,
+        metalness: 0.95,
+        roughness: 0.15,
+      })
+    );
+    shaftPin.rotation.x = Math.PI / 2;
+    shaftPin.position.set(0, 2.2, 0.02);
+    pendGroup.add(shaftPin);
 
     // Pendulum Trail Line (3D Neon ribbon)
     const maxTrailPts = 200;

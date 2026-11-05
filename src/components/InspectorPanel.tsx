@@ -19,8 +19,11 @@ import {
 import { Language, translations } from "@/i18n/translations";
 import { MathFormula } from "./MathFormula";
 import { PhaseSpacePlot } from "./PhaseSpacePlot";
+import { OscilloscopePlot } from "./OscilloscopePlot";
+import { ResonanceCurve } from "./ResonanceCurve";
 import { EnergyWidget } from "./EnergyWidget";
-import { Sliders, Activity, BookOpen, Sparkles, CheckCircle2 } from "lucide-react";
+import { exportTelemetryCSV } from "@/utils/exportTelemetry";
+import { Sliders, Activity, BookOpen, Sparkles, CheckCircle2, Download } from "lucide-react";
 
 interface InspectorPanelProps {
   moduleId: ModuleId;
@@ -119,6 +122,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   energyHistory,
 }) => {
   const [activeTab, setActiveTab] = useState<"controls" | "telemetry" | "theory">("controls");
+  const [plotMode, setPlotMode] = useState<"oscilloscope" | "phase">("oscilloscope");
   const t = translations[lang];
   const oscDerived = computeOscillatorDerived(oscParams);
 
@@ -444,25 +448,118 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               </p>
             </div>
 
-            {/* Phase Space Plot */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-mono text-zinc-300">
-                  {moduleId === "oscillator" ? "Faz Uzayı (x vs v)" : `Faz Uzayı (θ_${n} vs ω_${n})`}
-                </span>
-                <span className="text-[10px] font-mono text-zinc-500">Osilatör İzi</span>
+            {/* Scope / Phase Switcher + CSV Download */}
+            <div className="flex items-center justify-between gap-1 pt-1">
+              <div className="flex items-center gap-1 bg-[#12151b] p-0.5 rounded-lg border border-white/[0.08]">
+                <button
+                  onClick={() => setPlotMode("oscilloscope")}
+                  className={`px-2 py-1 rounded text-[11px] font-mono transition cursor-pointer ${
+                    plotMode === "oscilloscope"
+                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/40"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  📈 Osiloskop
+                </button>
+                <button
+                  onClick={() => setPlotMode("phase")}
+                  className={`px-2 py-1 rounded text-[11px] font-mono transition cursor-pointer ${
+                    plotMode === "phase"
+                      ? "bg-amber-400/20 text-amber-300 font-bold border border-amber-400/40"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  🔄 Faz Uzayı
+                </button>
               </div>
-              <PhaseSpacePlot
-                points={phaseHistory}
-                ghostPoints={
-                  moduleId === "pendulum" && n >= 2 && pendParams.ghostEnabled
-                    ? ghostPhaseHistory
-                    : undefined
+
+              <button
+                onClick={() =>
+                  exportTelemetryCSV(
+                    moduleId,
+                    phaseHistory,
+                    energyHistory,
+                    oscParams,
+                    pendParams
+                  )
                 }
-                xLabel={moduleId === "oscillator" ? "x (m)" : `θ_${n}`}
-                yLabel={moduleId === "oscillator" ? "v (m/s)" : `ω_${n}`}
-              />
+                title="Canlı simülasyon telemetri verilerini CSV olarak indir"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono bg-[#161920] hover:bg-[#20242e] text-zinc-200 border border-white/[0.1] hover:border-amber-400/50 transition cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+                <span>CSV İndir</span>
+              </button>
             </div>
+
+            {/* Active Telemetry Plot */}
+            {plotMode === "oscilloscope" ? (
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-mono text-zinc-300">
+                    {moduleId === "oscillator"
+                      ? "Zaman Dalga Grafiği: x(t) & v(t)"
+                      : `Zaman Dalga Grafiği: θ_${n}(t) & ω_${n}(t)`}
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+                    CANLI DALGA
+                  </span>
+                </div>
+                <OscilloscopePlot
+                  samples={phaseHistory.map((pt) => ({
+                    t: pt.t ?? 0,
+                    val1: pt.q,
+                    val2: pt.p,
+                  }))}
+                  label1={moduleId === "oscillator" ? "Konum x" : `Uç Açı θ_${n}`}
+                  label2={moduleId === "oscillator" ? "Hız v" : `Açısal Hız ω_${n}`}
+                  unit1={moduleId === "oscillator" ? "m" : "rad"}
+                  unit2={moduleId === "oscillator" ? "m/s" : "rad/s"}
+                />
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-mono text-zinc-300">
+                    {moduleId === "oscillator"
+                      ? "Faz Uzayı (x vs v)"
+                      : `Faz Uzayı (θ_${n} vs ω_${n})`}
+                  </span>
+                  <span className="text-[10px] font-mono text-zinc-500">Portre İzi</span>
+                </div>
+                <PhaseSpacePlot
+                  points={phaseHistory}
+                  ghostPoints={
+                    moduleId === "pendulum" && n >= 2 && pendParams.ghostEnabled
+                      ? ghostPhaseHistory
+                      : undefined
+                  }
+                  xLabel={moduleId === "oscillator" ? "x (m)" : `θ_${n}`}
+                  yLabel={moduleId === "oscillator" ? "v (m/s)" : `ω_${n}`}
+                />
+              </div>
+            )}
+
+            {/* Live Resonance Peak Response Curve (Spring Oscillator Only) */}
+            {moduleId === "oscillator" && (
+              <div className="space-y-1.5 pt-1">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-mono text-zinc-300">
+                    Rezonans Frekans Tepkisi A(ω)
+                  </span>
+                  <span className="text-[10px] font-mono text-amber-400">
+                    ω₀ = {Math.sqrt(oscParams.stiffness / Math.max(0.1, oscParams.mass)).toFixed(2)} rad/s
+                  </span>
+                </div>
+                <ResonanceCurve
+                  mass={oscParams.mass}
+                  stiffness={oscParams.stiffness}
+                  damping={oscParams.damping}
+                  driveAmp={oscParams.driveAmp}
+                  driveFreq={oscParams.driveFreq}
+                />
+              </div>
+            )}
 
             {/* Energy Conservation Breakdown */}
             <div className="space-y-1.5 pt-1">
@@ -524,6 +621,28 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           <div className="space-y-3 text-xs leading-relaxed">
             {moduleId === "oscillator" ? (
               <>
+                {/* Live Analytical Readouts Grid */}
+                <div className="grid grid-cols-3 gap-1.5 p-2 rounded-lg bg-[#14161a] border border-white/[0.06] font-mono text-center">
+                  <div className="p-1.5 rounded bg-black/30">
+                    <div className="text-[10px] text-zinc-500">Doğal Periyot T₀</div>
+                    <div className="text-xs font-bold text-amber-300">
+                      {(2 * Math.PI / Math.sqrt(oscParams.stiffness / Math.max(0.1, oscParams.mass))).toFixed(2)} s
+                    </div>
+                  </div>
+                  <div className="p-1.5 rounded bg-black/30">
+                    <div className="text-[10px] text-zinc-500">Açısal Hız ω₀</div>
+                    <div className="text-xs font-bold text-sky-300">
+                      {Math.sqrt(oscParams.stiffness / Math.max(0.1, oscParams.mass)).toFixed(2)} rad/s
+                    </div>
+                  </div>
+                  <div className="p-1.5 rounded bg-black/30">
+                    <div className="text-[10px] text-zinc-500">Sönüm Oranı ζ</div>
+                    <div className="text-xs font-bold text-emerald-300">
+                      {(oscParams.damping / (2 * Math.sqrt(oscParams.stiffness * oscParams.mass))).toFixed(3)}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="p-3 rounded-lg bg-[#14161a] border border-white/[0.06] space-y-2">
                   <div className="font-bold text-amber-300 text-sm">
                     Yay Neden Sallanır?
@@ -544,6 +663,30 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               </>
             ) : (
               <>
+                {/* Live Analytical Readouts Grid for Pendulum */}
+                <div className="grid grid-cols-3 gap-1.5 p-2 rounded-lg bg-[#14161a] border border-white/[0.06] font-mono text-center">
+                  <div className="p-1.5 rounded bg-black/30">
+                    <div className="text-[10px] text-zinc-500">Galileo T₁</div>
+                    <div className="text-xs font-bold text-amber-300">
+                      {pendParams.g > 0
+                        ? `${(2 * Math.PI * Math.sqrt((pendParams.lengths[0] || 1) / pendParams.g)).toFixed(2)} s`
+                        : "∞ (0-G)"}
+                    </div>
+                  </div>
+                  <div className="p-1.5 rounded bg-black/30">
+                    <div className="text-[10px] text-zinc-500">Toplam Boy ΣL</div>
+                    <div className="text-xs font-bold text-sky-300">
+                      {pendParams.lengths.slice(0, n).reduce((a, b) => a + b, 0).toFixed(2)} m
+                    </div>
+                  </div>
+                  <div className="p-1.5 rounded bg-black/30">
+                    <div className="text-[10px] text-zinc-500">Kaos Ayrışması</div>
+                    <div className={`text-xs font-bold ${angDiffDeg > 15 ? "text-rose-400 animate-pulse" : "text-emerald-300"}`}>
+                      {n >= 2 && pendParams.ghostEnabled ? `${angDiffDeg.toFixed(1)}°` : "Kapalı"}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="p-3 rounded-lg bg-[#14161a] border border-white/[0.06] space-y-2">
                   <div className="font-bold text-amber-300 text-sm">
                     {n === 1
