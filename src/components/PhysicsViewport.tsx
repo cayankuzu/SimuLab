@@ -227,7 +227,7 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     // 2. Camera - Default Angled 3D Isometric View
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     const isPend = moduleIdRef.current === "pendulum";
-    camera.position.set(isPend ? 5.5 : 7.2, isPend ? 3.2 : 5.2, isPend ? 14.5 : 12.0);
+    camera.position.set(isPend ? 5.5 : 8.2, isPend ? 3.2 : 5.6, isPend ? 14.5 : 14.8);
     cameraRef.current = camera;
 
     // 3. Renderer (appended dynamically)
@@ -406,16 +406,16 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     scene.add(oscGroup);
     oscillatorGroupRef.current = oscGroup;
 
-    // Wall Mount at x = -5.0
+    // Wall Mount at x = -7.5
     const wallBase = new THREE.Mesh(
-      new THREE.BoxGeometry(0.5, 3.4, 3.4),
+      new THREE.BoxGeometry(0.5, 3.6, 3.6),
       new THREE.MeshStandardMaterial({
         color: 0x1e242d,
         metalness: 0.65,
         roughness: 0.35,
       })
     );
-    wallBase.position.set(-5.0, 0, 0);
+    wallBase.position.set(-7.5, 0, 0);
     oscGroup.add(wallBase);
 
     // 4 Hex Bolts on Wall
@@ -425,23 +425,23 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
       roughness: 0.2,
     });
     [
-      [-1.15, -1.15],
-      [-1.15, 1.15],
-      [1.15, -1.15],
-      [1.15, 1.15],
+      [-1.25, -1.25],
+      [-1.25, 1.25],
+      [1.25, -1.25],
+      [1.25, 1.25],
     ].forEach(([by, bz]) => {
       const bolt = new THREE.Mesh(
         new THREE.CylinderGeometry(0.13, 0.13, 0.18, 6),
         boltMat
       );
       bolt.rotation.z = Math.PI / 2;
-      bolt.position.set(-4.72, by, bz);
+      bolt.position.set(-7.22, by, bz);
       oscGroup.add(bolt);
     });
 
     // Horizontal Guide Rail (Chrome rod along X)
     const rail = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.045, 0.045, 11.5, 16),
+      new THREE.CylinderGeometry(0.045, 0.045, 17.5, 16),
       new THREE.MeshStandardMaterial({
         color: 0xcfd8dc,
         metalness: 0.95,
@@ -502,8 +502,8 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     massMesh.add(massSprite);
 
     // 3D Spring Tube
-    const initialCurve = new HelixCurve(-4.75, 1.2, 0.42, 13);
-    const springGeom = new THREE.TubeGeometry(initialCurve, 140, 0.065, 10, false);
+    const initialCurve = new HelixCurve(-7.2, 1.2, 0.42, 15);
+    const springGeom = new THREE.TubeGeometry(initialCurve, 160, 0.055, 10, false);
     const springMat = new THREE.MeshStandardMaterial({
       color: 0xcfd8dc,
       metalness: 0.9,
@@ -670,7 +670,7 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
               denom;
             xProj = ray.origin.x + sStar * ray.direction.x;
           }
-          const clampedX = Math.max(-3.5, Math.min(3.5, xProj));
+          const clampedX = Math.max(-5.5, Math.min(6.5, xProj));
           onOscDragRef.current(clampedX);
         } else if (activeDrag.startsWith("pend-bob:")) {
           const bobIndex = parseInt(activeDrag.split(":")[1], 10);
@@ -812,7 +812,7 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
     const controls = controlsRef.current;
     if (camera && controls) {
       if (moduleId === "oscillator") {
-        targetCamPosRef.current = new THREE.Vector3(7.2, 5.2, 12.0);
+        targetCamPosRef.current = new THREE.Vector3(8.2, 5.6, 14.8);
         targetCamLookRef.current = new THREE.Vector3(0, 0, 0);
       } else {
         targetCamPosRef.current = new THREE.Vector3(5.5, 3.2, 14.5);
@@ -841,13 +841,13 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
 
     if (springMesh) {
       // Re-generate tube geometry along dynamic helix
-      const startX = -4.75;
-      const endX = blockX - 0.78 * (massMesh?.scale.x || 1.0);
+      const startX = -7.2;
+      const endX = blockX - 0.825 * (massMesh?.scale.x || 1.0);
       springMesh.geometry.dispose();
       springMesh.geometry = new THREE.TubeGeometry(
-        new HelixCurve(startX, endX, 0.42, 13),
-        140,
-        0.065,
+        new HelixCurve(startX, endX, 0.42, 15),
+        160,
+        0.055,
         10,
         false
       );
@@ -860,7 +860,7 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
       velArrow.setDirection(new THREE.Vector3(dir, 0, 0));
       velArrow.position.set(blockX, 1.1, 0);
       velArrow.setLength(
-        Math.min(3.5, Math.max(0.4, Math.abs(oscState.v) * 0.45)),
+        Math.min(4.0, Math.max(0.4, Math.abs(oscState.v) * 0.28)),
         0.35,
         0.18
       );
@@ -877,7 +877,7 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
       forceArrow.setDirection(new THREE.Vector3(fDir, 0, 0));
       forceArrow.position.set(blockX, -1.1, 0);
       forceArrow.setLength(
-        Math.min(3.8, Math.max(0.4, Math.abs(netForce) * 0.06)),
+        Math.min(4.2, Math.max(0.4, Math.abs(netForce) * 0.045)),
         0.35,
         0.18
       );
@@ -1173,7 +1173,7 @@ export const PhysicsViewport: React.FC<PhysicsViewportProps> = ({
 
   const handleResetCamera = () => {
     if (moduleId === "oscillator") {
-      targetCamPosRef.current = new THREE.Vector3(7.2, 5.2, 12.0);
+      targetCamPosRef.current = new THREE.Vector3(8.2, 5.6, 14.8);
       targetCamLookRef.current = new THREE.Vector3(0, 0, 0);
     } else {
       targetCamPosRef.current = new THREE.Vector3(5.5, 3.2, 14.5);

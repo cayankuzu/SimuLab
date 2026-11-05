@@ -142,7 +142,16 @@ export function stepOscillatorRK4(
     const fDrive = params.driveAmp * Math.cos(params.driveFreq * t);
     const fSpring = -params.stiffness * x;
     const fDamper = -params.damping * v;
-    const a = (fDrive + fSpring + fDamper) / params.mass;
+
+    // Elastic bumper stop at solid compression limit (wall is at x = -7.5)
+    let fBumper = 0;
+    const compressionLimit = -6.2;
+    if (x < compressionLimit) {
+      const penetration = compressionLimit - x;
+      fBumper = 600 * penetration;
+    }
+
+    const a = (fDrive + fSpring + fDamper + fBumper) / params.mass;
     const dThermal = params.damping * v * v;
     return [v, a, dThermal];
   };
