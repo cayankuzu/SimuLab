@@ -24,7 +24,13 @@ import { InspectorPanel } from "./InspectorPanel";
 import { Sparkles, X, CheckCircle2 } from "lucide-react";
 
 export const SimuLabWorkspace: React.FC = () => {
-  const [moduleId, setModuleId] = useState<ModuleId>("oscillator");
+  const [moduleId, setModuleId] = useState<ModuleId>(() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search).get("mod");
+      if (p === "pendulum") return "pendulum";
+    }
+    return "oscillator";
+  });
   const [lang, setLang] = useState<Language>("tr");
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [timeScale, setTimeScale] = useState<number>(1.0);
@@ -36,7 +42,18 @@ export const SimuLabWorkspace: React.FC = () => {
     forceVec: true,
     trail: true,
     grid: true,
+    axes3D: true,
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const mod = params.get("mod");
+      if (mod === "pendulum" || mod === "oscillator") {
+        setModuleId(mod);
+      }
+    }
+  }, []);
 
   // ==========================================
   // MODULE 1 STATE: HARMONIC OSCILLATOR
