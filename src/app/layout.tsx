@@ -1,22 +1,78 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
+
+const description =
+  "Doğrulanmış sayısal çözücülerle çalışan etkileşimli 3B fizik laboratuvarı: sönümlü-sürülen osilatör, N-bağlantılı sarkaç, enerji defteri, Lyapunov üsteli ve Poincaré kesiti. An interactive, verified computational-physics laboratory for oscillations and deterministic chaos.";
+
+/**
+ * Public address of the deployment, used to make the preview image of shared
+ * links absolute. Set NEXT_PUBLIC_SITE_URL when hosting; Vercel supplies its
+ * own variable.
+ */
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
-  title: "SimuLab — RK4 Physics Sandbox & Inspector",
-  description:
-    "Interactive Computational Physics Laboratory with 4th-Order Runge-Kutta (RK4) Differential Equation Solver, Phase Space Telemetry, and Direct Manipulation.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "SimuLab — Salınım ve Kaos Laboratuvarı",
+    template: "%s · SimuLab",
+  },
+  description,
+  applicationName: "SimuLab",
+  keywords: [
+    "hesaplamalı fizik",
+    "harmonik osilatör",
+    "rezonans",
+    "çift sarkaç",
+    "kaos",
+    "Lyapunov üsteli",
+    "Runge-Kutta",
+    "computational physics",
+    "double pendulum",
+  ],
+  openGraph: {
+    title: "SimuLab — Salınım ve Kaos Laboratuvarı",
+    description,
+    type: "website",
+    images: [
+      {
+        url: "/preview-pendulum.jpg",
+        width: 800,
+        height: 500,
+        alt: "SimuLab: çift sarkaç, ikiz yörünge, Lyapunov üsteli kestirimi ve Poincaré kesiti",
+      },
+    ],
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  themeColor: "#090b0e",
+  colorScheme: "dark",
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="tr" className="dark">
-      <body className="antialiased bg-[#0f0f0e] text-zinc-100">
-        {children}
-      </body>
+    <html lang="tr" className={`${plexSans.variable} ${plexMono.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }

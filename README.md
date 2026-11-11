@@ -1,40 +1,129 @@
-# SimuLab — RK4 Physics Studio & Inspector
+# SimuLab — Salınım ve Kaos Laboratuvarı
 
-**SimuLab**, klasik mekanik, doğrusal olmayan salınımlar, 1'den 6'ya çoklu sarkaç zincirleri ve kaos teorisini **Figma / Linear estetiğinde bir Precision Instrument & Inspector** arayüzüyle sunan interaktif hesaplamalı fizik laboratuvarıdır.
+Tarayıcıda çalışan, **doğrulanmış** bir hesaplamalı fizik laboratuvarı. Gördüğünüz her hareket, hareket denklemlerinin sayısal çözümüdür; her büyüklük sanal cihazlarla ölçülüp kuramla karşılaştırılabilir ve sayısal hata çalışma boyunca ekranda yazar.
 
-![SimuLab Preview](/public/preview.png)
+> English summary: an interactive, verified computational-physics laboratory (Next.js, React, three.js) for a damped driven oscillator and a planar N-link pendulum, with a fixed-step solver, an always-on energy ledger, Lyapunov-exponent estimation, Poincaré sections, measurement-based task sheets and a bilingual technical report. See [docs/TECHNICAL_REPORT.md](docs/TECHNICAL_REPORT.md).
 
-## 🔬 Temel Özellikler
+![Osilatör deneyi](public/preview-oscillator.jpg)
+![Sarkaç deneyi](public/preview-pendulum.jpg)
 
-1. **4. Dereceden Runge-Kutta (RK4) Sayısal Çözücü (`src/engine/rk4.ts`)**
-   - Basit Euler yerine $300\text{ Hz}$ mikro-adımlarla çözülen yüksek hassasiyetli 4. Dereceden Runge-Kutta diferansiyel denklem çözücüsü.
-   - Sönüm ve sürtünme kaynaklı termal kayıplar ($E_{\text{thermal}} = \int P_{\text{dissipated}}\,dt$) anlık hesaplanarak mekanik enerji dengesi canlı doğrulanır.
+## Deneyler
 
-2. **İnteraktif Modüller & Doğrudan Manipülasyon:**
-   - **Yay-Kütle Osilatörü (Harmonic Oscillator):** Doğal frekans ($\omega_0$), sönüm oranı ($\zeta$), sönümlü frekans ($\omega_d$) ve periyot analizleri. Eksik sönümlü spiral, kritik sönümlü doğrudan sönme ve aşırı sönümlü rejimlerin canlı gözlemi.
-   - **Çoklu Sarkaç & Kaos (1-6 Kütleli Sarkaç Zincirleri):** Tek sarkaçtan 6 kütleye kadar bağlanabilir sarkaç zinciri. Tam doğrusal olmayan hareket denklemleri, $\Delta\theta = 0.001\text{ rad}$ farkla ayrışan **Gölge Sarkaç (Ghost Pendulum)** ve Kelebek Etkisi / Lyapunov ayrışması.
+| | Osilatör | Sarkaç |
+| --- | --- | --- |
+| Model | $m\ddot x + c\dot x + kx = F_0\cos\varphi,\ \dot\varphi=\omega$; rijit durdurucular (Newton geri sekme katsayısı) | $N = 1\dots6$ noktasal kütle, kütlesiz rijit çubuklar; mafsallarda viskoz sönüm |
+| Çözüm | Sabit adımlı RK4 (varsayılan $h = 1$ ms); Euler, yarı örtük Euler, RK2 ve uyarlamalı Dormand–Prince 5(4) seçilebilir | Aynı çözücüler; kütle matrisi Cholesky ayrışımıyla çözülür |
+| Karşılaştırma | Kapalı biçimli çözüm aynı grafikte; genlik ve faz yanıtı eğrileri; sayısal frekans taraması | Eliptik integralle tam periyot; normal mod frekansları; Laguerre/Bessel spektrumu |
+| Kaos | — | İkiz yörünge, Benettin yöntemiyle en büyük Lyapunov üsteli, Poincaré kesiti, spektrum |
 
-3. **Canlı Telemetri & Bilimsel Grafikler:**
-   - **Faz Uzayı Osiloskopu (Phase Space Oscilloscope):** Konum ($x, \theta$) ile Hız ($\dot{x}, \omega$) arasındaki yörüngeyi anlık çizen, kapalı limit çevrimleri ve kaotik çekicileri canlı yorumlayan osiloskop.
-   - **Dinamik Enerji Korunumu Çubukları:** Kinetik ($E_k$), Potansiyel ($E_p$) ve Termal Isı ($E_{\text{thermal}}$) dengesi.
-   - **Vektör Katmanları:** Canlı hız ($\vec{v}$) ve net ivme/kuvvet ($\vec{F}_{\text{net}}$) vektörleri.
+Ortak araçlar: enerji defteri ($E_k + E_p + Q - W = E_0$ ve kalıntısı), ölçekli serbest cisim diyagramı, stroboskop, zaman serisi ve faz portresi, genlik spektrumu, ölçüme dayalı dokuz deney föyü, üstverili CSV dışa aktarımı, yeniden üretilebilir deney dosyası ve paylaşım bağlantısı, Türkçe/İngilizce arayüz.
 
-## 🛠️ Teknolojiler
+## Doğrulama
 
-- **Framework:** Next.js (App Router), React 19, TypeScript
-- **Stil & Tasarım:** Tailwind CSS, Lucide Icons, KaTeX
-- **Görselleştirme:** HTML5 2D Canvas (3D Volumetrik Gölgelendirme & Metalik Yansımalar)
-- **Fizik:** Özel 4. Dereceden Runge-Kutta (RK4) İntegratörü
+Çözücü, yanıtı bağımsız olarak bilinen problemlerle sınanır. Varsayılan çözücüyle (RK4, 1000 Hz) geliştirme makinesinde ölçülen değerlerden bazıları:
 
-## 🚀 Kurulum ve Çalıştırma
+| Deney | Ölçülen | Bağımsız başvuru |
+| --- | --- | --- |
+| RK4 gözlenen yakınsama mertebesi | 4,005 | 4 |
+| Sönümlü serbest yanıt, 20 s, en büyük konum hatası | $1{,}6\times10^{-10}$ m | kapalı biçimli çözüm |
+| Sürülen kararlı durum genliği, en büyük bağıl hata | $3{,}3\times10^{-8}$ | $A(\omega)$ |
+| Durdurucuya çarpma anı | $8{,}6\times10^{-13}$ s hata | analitik $t = \arccos(x_\min/x_0)/\omega_0$ |
+| Sürülen, sönümlü, 27 çarpışmalı 60 s: defter kalıntısı | $1{,}3\times10^{-12}$ | 0 |
+| Sarkaç periyodu, $\theta_0 = 10^\circ\dots170^\circ$ ve dönme, bağıl hata | $\le 2{,}4\times10^{-10}$ | $4\sqrt{L/g}\,K(\sin\tfrac{\theta_0}{2})$ |
+| Çift sarkaç, 60 s bağıl enerji sapması | $2{,}0\times10^{-9}$ | 0 |
+| Eşit bağlantılı zincir özdeğerleri | $8\times10^{-16}$ bağıl | Laguerre polinomunun sıfırları |
+| Lagrange ↔ Newton tutarlılığı (çubuğa dik kuvvet / gerilme) | $5\times10^{-15}$ | 0 |
+
+Hepsini kendi makinenizde yeniden üretebilirsiniz:
+
+```bash
+npm test
+```
+
+```bash
+npm run docs
+```
+
+İkinci komut [docs/VALIDATION.md](docs/VALIDATION.md) ile teknik raporu yeniden üretir. Aynı paket uygulamanın içinden de çalıştırılır: **Kuram ve kaynakça → Doğrulama**.
+
+## Belgeler
+
+- [docs/TEKNIK_RAPOR.md](docs/TEKNIK_RAPOR.md) — kuram, sayısal yöntemler, doğrulama, tasarım gerekçeleri, yaygın yanılgılar, sınırlılıklar ve kaynakça (Türkçe).
+- [docs/TECHNICAL_REPORT.md](docs/TECHNICAL_REPORT.md) — aynı raporun İngilizcesi.
+- [docs/VALIDATION.md](docs/VALIDATION.md) — on dört doğrulama deneyinin ölçülen değerleri.
+
+Rapor, uygulama içindeki kuram metniyle tek kaynaktan üretilir (`src/content/theory`); aynı metin uygulamada **Kuram ve kaynakça** (`K` tuşu) altında içindekiler, numaralı denklemler ve tıklanabilir atıflarla okunur. Kaynak veritabanındaki 184 kaydın her biri birincil kaynağından doğrulanmıştır (`src/content/references.ts`); metin bunların 147'sine atıf yapar. Kuram metni yalnızca olumlu sonuçları değil, modelin varsayımlarını, yapılmamış çalışmaları (fiziksel düzenekle geçerleme, kullanıcı çalışması) ve sık yinelenen yanılgıların kaynaklı düzeltmelerini de içerir.
+
+## Çalıştırma
+
+Node.js 22.12 ya da üstü gerekir.
 
 ```bash
 npm install
+```
+
+```bash
 npm run dev
 ```
 
 Üretim derlemesi:
+
 ```bash
 npm run build
+```
+
+```bash
 npm start
 ```
+
+Yayımlarken `NEXT_PUBLIC_SITE_URL` ortam değişkenine sitenin adresi verilirse paylaşım önizlemelerindeki görsel mutlak adresle sunulur (Vercel'de gerekmez).
+
+| Komut | İşlev |
+| --- | --- |
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run build` | Üretim derlemesi |
+| `npm test` | Birim sınamaları, doğrulama paketi ve içerik tutarlılığı (102 sınama) |
+| `npm run typecheck` | TypeScript tür denetimi |
+| `npm run lint` | ESLint |
+| `npm run check` | Tür denetimi, lint ve sınamalar |
+| `npm run docs` | Raporları ve doğrulama çizelgelerini yeniden üretir |
+
+## Yapı
+
+```
+src/
+  physics/   Çerçeveden bağımsız fizik: integratörler, osilatör, N-sarkaç, Lyapunov,
+             ölçüm cihazları, spektrum, özel fonksiyonlar, doğrulama deneyleri
+  sim/       Çalışma zamanı: sabit adımlı döngü, telemetri tamponları, ön ayarlar,
+             deney föyleri, CSV/JSON/bağlantı alışverişi
+  scene/     three.js sahnesi: düzenekler, ölçekli vektörler, doğrudan manipülasyon
+  ui/        React arayüzü: kabuk, denetçi, grafikler, kuram okuyucu, bileşen seti
+  content/   Kuram metni (TR/EN), föy içerikleri, atıf biçimleme ve doğrulanmış kaynakça
+  i18n/      Arayüz sözlükleri (Türkçe kaynak; İngilizce tür denetimli)
+  audio/     Sonifikasyon
+tests/       Birim sınamaları, çalışma zamanı sınamaları, doğrulama paketi, içerik tutarlılığı
+scripts/     Belge üreticileri
+docs/        Üretilen raporlar
+```
+
+Sürekli durum React dışında tutulur; sahne ve grafikler her karede çalışma zamanından doğrudan okur. Zaman adımı sabittir, bu yüzden aynı başlangıç koşulları ekran yenileme hızından bağımsız olarak aynı yörüngeyi verir.
+
+## Klavye
+
+| Tuş | İşlev | Tuş | İşlev |
+| --- | --- | --- | --- |
+| `Space` | Çalıştır / duraklat | `V` | Hız vektörü |
+| `.` | Bir kare ilerlet | `F` | Net kuvvet |
+| `R` | Başlangıç koşullarına dön | `B` | Serbest cisim diyagramı |
+| `1` / `2` | Osilatör / sarkaç | `T` | İz |
+| `D` | Grafik paneli | `S` | Stroboskop |
+| `K` | Kuram ve kaynakça | `G` | Izgara |
+| `M` | Ses | `?` | Kısayollar |
+
+## Sınırlılıklar
+
+- Model idealdir: noktasal kütleler, kütlesiz rijit çubuklar, düzlemsel hareket, kütlesiz ve doğrusal yay, hızla orantılı sönüm, sabit geri sekme katsayılı rijit durdurucular.
+- Doğrulama, denklemlerin doğru çözüldüğünü gösterir; ideal modelin gerçek bir düzenekle uyumunu sınamaz.
+- Açık, sabit adımlı yöntemlerde hata adım büyüklüğüne bağlıdır. Enerji defteri kalıntısı büyürse adım küçültülmeli ya da uyarlamalı yöntem seçilmelidir; durum çubuğu bunu renkle ve sayıyla bildirir.
+- Lyapunov üsteli ve öngörü ufku sonlu zaman kestirimleridir.
+- Laboratuvarın öğrenmeye etkisi ölçülmemiştir.

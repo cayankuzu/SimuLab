@@ -1,30 +1,46 @@
 {
   "name": "simulab",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "docs": "vitest run --config vitest.docs.config.mts"
   },
   "dependencies": {
-    "@types/three": "^0.187.0",
     "katex": "^0.16.11",
     "lucide-react": "^0.460.0",
     "next": "^15.1.0",
+    "radix-ui": "^1.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.187.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/katex": "^0.16.7",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.187.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
     "postcss": "^8.4.49",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vite": "^8.3.7",
+    "vitest": "^5.1.0"
+  },
+  "description": "Verified interactive computational-physics laboratory for oscillations and deterministic chaos",
+  "engines": {
+    "node": ">=22.12"
   }
 }
