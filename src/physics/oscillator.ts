@@ -61,7 +61,13 @@ export interface OscillatorTheory {
   logDecrement: number | null;
   /** Quality factor 1 / (2 zeta); null for c = 0. */
   qualityFactor: number | null;
-  /** Amplitude e-folding time 1 / gamma [s]; null for c = 0. */
+  /**
+   * Decay rate of the slowest free mode [1/s]: gamma for zeta <= 1 (the
+   * envelope rate) and gamma - sqrt(gamma^2 - omega0^2) for zeta > 1, where
+   * the slow exponential outlives the fast one by a factor of about 4 zeta^2.
+   */
+  transientRate: number;
+  /** e-folding time of the slowest free mode, 1 / transientRate [s]; null for c = 0. */
   decayTime: number | null;
   /** Static deflection F0 / k [m]. */
   staticDeflection: number;
@@ -97,6 +103,8 @@ export function oscillatorTheory(p: OscillatorParams): OscillatorTheory {
 
   const oscillatory = zeta < 1;
   const omegaD = oscillatory ? omega0 * Math.sqrt(1 - zeta * zeta) : null;
+  // Written as omega0^2 / (gamma + root) to avoid cancellation for strong damping.
+  const transientRate = zeta > 1 ? (omega0 * omega0) / (gamma + Math.sqrt(gamma * gamma - omega0 * omega0)) : gamma;
 
   const detune = omega0 * omega0 - w * w;
   const loss = 2 * gamma * w;
@@ -126,7 +134,8 @@ export function oscillatorTheory(p: OscillatorParams): OscillatorTheory {
     periodD: omegaD && omegaD > 0 ? (2 * Math.PI) / omegaD : null,
     logDecrement: oscillatory && zeta > 0 ? (2 * Math.PI * zeta) / Math.sqrt(1 - zeta * zeta) : null,
     qualityFactor: zeta > 0 ? 1 / (2 * zeta) : null,
-    decayTime: gamma > 0 ? 1 / gamma : null,
+    transientRate,
+    decayTime: transientRate > 0 ? 1 / transientRate : null,
     staticDeflection: f0 / k,
     steadyAmplitude,
     phaseLag,
@@ -242,6 +251,44 @@ export function exactOscillatorState(
   return out;
 }
 
+/**
+ * Time after which the free response released from rest stays within `band`
+ * times its initial displacement, taken from the closed-form solution (the
+ * theoretical counterpart of StepResponseMeter). Valid for every damping
+ * ratio; null without damping. For zeta = 1 and a 2 % band it equals
+ * 5.834 / omega0.
+ */
+export function settlingTimeFromRest(p: OscillatorParams, band = 0.02): number | null {
+  if (!(band > 0 && band < 1)) return null;
+  const free: OscillatorParams = { ...p, driveAmplitude: 0 };
+  const theory = oscillatorTheory(free);
+  if (!(theory.transientRate > 0)) return null;
+  const state: ExactState = { x: 0, v: 0 };
+  const magnitude = (t: number) => Math.abs(exactOscillatorState(free, 1, 0, 0, t, state).x);
+
+  let lo = 0;
+  let hi: number;
+  if (theory.zeta < 1 && theory.periodD !== null) {
+    // |x| <= exp(-gamma t) / sqrt(1 - zeta^2) bounds the last exit from the band.
+    const bound = Math.log(1 / (band * Math.sqrt(1 - theory.zeta * theory.zeta))) / theory.gamma;
+    const stride = theory.periodD / 256;
+    let t = bound;
+    while (t > 0 && magnitude(t) <= band) t -= stride;
+    lo = Math.max(0, t);
+    hi = t + stride;
+  } else {
+    // No oscillation: a single crossing, bracketed by doubling.
+    hi = 1 / theory.omega0;
+    for (let i = 0; i < 200 && magnitude(hi) > band; i++) hi *= 2;
+  }
+  for (let i = 0; i < 60; i++) {
+    const mid = 0.5 * (lo + hi);
+    if (magnitude(mid) > band) lo = mid;
+    else hi = mid;
+  }
+  return 0.5 * (lo + hi);
+}
+
 /** Builds dy/dt for the state [x, v, phi, Q_damper, W_drive]. */
 export function oscillatorDerivative(p: OscillatorParams): Derivative {
   const { mass: m, stiffness: k, damping: c, driveAmplitude: f0, driveFrequency: w } = p;
@@ -308,6 +355,11 @@ export class OscillatorSystem {
   private readonly trial = new Float64Array(OSC.SIZE);
   /** Total derivative evaluations since the last reset (performance telemetry). */
   evaluations = 0;
+  /** Low-order bits lost by the clock so far (compensated summation). */
+  private clockLost = 0;
+  /** The drive phase is phiBase + omega (t - tBase): anchored, not accumulated. */
+  private phiBase = 0;
+  private tBase = 0;
 
   constructor(
     public params: OscillatorParams,
@@ -343,7 +395,26 @@ export class OscillatorSystem {
     this.lastImpactTime = Number.NEGATIVE_INFINITY;
     this.lastImpactSpeed = 0;
     this.evaluations = 0;
+    this.clockLost = 0;
+    this.phiBase = phi0;
+    this.tBase = 0;
     this.rebaseLedger();
+  }
+
+  /**
+   * Advances the clock by dt and sets the drive phase from it. Adding h a
+   * million times loses about 1e-8 s, and a phase integrated as a running sum
+   * drifts the same way; both errors are larger than the truncation error of
+   * RK4 and would dominate the comparison with the closed-form solution. The
+   * clock therefore uses compensated (Kahan) summation and the phase is
+   * anchored to it.
+   */
+  private tick(dt: number): void {
+    const increment = dt - this.clockLost;
+    const next = this.t + increment;
+    this.clockLost = next - this.t - increment;
+    this.t = next;
+    this.y[OSC.PHI] = this.phiBase + this.params.driveFrequency * (this.t - this.tBase);
   }
 
   /**
@@ -352,6 +423,9 @@ export class OscillatorSystem {
    * keep the residual a pure measure of numerical error.
    */
   setParams(next: OscillatorParams): void {
+    // Keep the phase continuous when the drive frequency changes.
+    this.phiBase = this.y[OSC.PHI];
+    this.tBase = this.t;
     this.params = next;
     this.f = oscillatorDerivative(next);
     this.rebaseLedger();
@@ -378,15 +452,23 @@ export class OscillatorSystem {
     return f0 * Math.cos(this.y[OSC.PHI]) - k * this.y[OSC.X];
   }
 
-  /** Advances the system by exactly h seconds with the supplied integrator. */
+  /**
+   * Advances the system by exactly h seconds with the supplied integrator.
+   *
+   * The integrator is given a local time origin of 0, not the clock. The
+   * right-hand side does not depend on t (the drive enters through the phase,
+   * which is part of the state), so nothing changes for the fixed-step
+   * methods. An adaptive method, however, integrates up to t + h and ends with
+   * the step (t + h) - t_c: from the clock that difference carries the round-off
+   * of t + h, and the state would drift away from the compensated clock (tick).
+   */
   step(advancer: Advancer, h: number): void {
     let remaining = h;
 
     for (let pass = 0; pass <= MAX_IMPACTS_PER_STEP && remaining > 0; pass++) {
       if (this.contact !== 0) {
         // Resting contact: only the drive phase evolves.
-        this.y[OSC.PHI] += this.params.driveFrequency * remaining;
-        this.t += remaining;
+        this.tick(remaining);
         const force = this.staticForce();
         if ((this.contact === -1 && force > 0) || (this.contact === 1 && force < 0)) this.contact = 0;
         return;
@@ -394,10 +476,10 @@ export class OscillatorSystem {
 
       const { y, start, trial } = this;
       start.set(y);
-      this.evaluations += advancer.advance(this.f, this.t, y, remaining);
+      this.evaluations += advancer.advance(this.f, 0, y, remaining);
       const side: Contact = y[OSC.X] < this.xMin ? -1 : y[OSC.X] > this.xMax ? 1 : 0;
       if (side === 0) {
-        this.t += remaining;
+        this.tick(remaining);
         return;
       }
 
@@ -409,15 +491,15 @@ export class OscillatorSystem {
       for (let i = 0; i < BISECTION_ITERATIONS; i++) {
         const mid = 0.5 * (lo + hi);
         trial.set(start);
-        this.evaluations += advancer.advance(this.f, this.t, trial, mid * remaining);
+        this.evaluations += advancer.advance(this.f, 0, trial, mid * remaining);
         const outside = side === -1 ? trial[OSC.X] < bound : trial[OSC.X] > bound;
         if (outside) hi = mid;
         else lo = mid;
       }
       y.set(start);
-      if (lo > 0) this.evaluations += advancer.advance(this.f, this.t, y, lo * remaining);
+      if (lo > 0) this.evaluations += advancer.advance(this.f, 0, y, lo * remaining);
       advancer.reset();
-      this.t += lo * remaining;
+      this.tick(lo * remaining);
       remaining *= 1 - lo;
       y[OSC.X] = bound;
       this.collide(side);
@@ -426,8 +508,7 @@ export class OscillatorSystem {
     if (remaining > 0) {
       // Chattering (Zeno) guard: more impacts than allowed within one step.
       this.settle(this.y[OSC.X] <= this.xMin ? -1 : 1);
-      this.y[OSC.PHI] += this.params.driveFrequency * remaining;
-      this.t += remaining;
+      this.tick(remaining);
     }
   }
 

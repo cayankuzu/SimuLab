@@ -6,7 +6,7 @@
 
 ## Özet
 
-Bu rapor, tarayıcıda çalışan üç boyutlu bir fizik laboratuvarı olan SimuLab'ın kuramsal temelini, sayısal yöntemlerini ve doğrulama sonuçlarını belgeler. Laboratuvar iki deney düzeneği içerir: rijit durdurucuları olan, sönümlü ve harmonik olarak sürülen bir yay–kütle osilatörü ile N = 1…6 bağlantılı düzlemsel bir sarkaç zinciri. Hareket denklemleri sabit adımlı açık Runge–Kutta yöntemleriyle çözülür (varsayılan: klasik dördüncü mertebe yöntem, h = 1 ms). Adım dizisi ekran yenileme hızından bağımsızdır; bu nedenle kaotik yörüngeler de aynı başlangıç koşullarından aynen yeniden üretilir. Her terimi ayrı ayrı integre edilen bir enerji defteri (kinetik ve potansiyel enerji, sönüm ısısı, çarpışma ısısı, sürücünün yaptığı iş) sayısal hatayı çalışma sırasında sürekli görünür kılar. On dört doğrulama deneyi, çözücüyü kapalı biçimli çözümlerle, korunum yasalarıyla ve bağımsız türetimlerle karşılaştırır: klasik Runge–Kutta yöntemi için gözlenen yakınsama mertebesi 4,005'tir; sönümlü serbest yanıtta 20 s boyunca en büyük konum hatası 1,6×10⁻¹⁰ m'dir; sonlu genlikli sarkacın ölçülen periyodu eliptik integral çözümünden bağıl olarak 3×10⁻¹⁰'dan az sapar; sürtünmesiz çift sarkaçta 60 s'lik bağıl enerji sapması 2×10⁻⁹'dur. Kaos nicel olarak incelenir: Benettin yöntemiyle kestirilen en büyük Lyapunov üsteli, ikiz yörüngenin ayrılması, Poincaré kesiti ve genlik spektrumu birlikte sunulur. Ölçüme dayalı dokuz deney föyü; periyot, sönüm oranı, rezonans genliği gibi büyüklüklerin sanal cihazlarla ölçülmesini ve kuramsal değerle karşılaştırılmasını ister. Rapor, ders kitaplarında sık rastlanan bazı yanılgıları kaynak göstererek düzeltir ve modelin varsayımlarını ve sınırlılıklarını açıkça belirtir.
+Bu rapor, tarayıcıda çalışan üç boyutlu bir fizik laboratuvarı olan SimuLab'ın kuramsal temelini, sayısal yöntemlerini ve doğrulama sonuçlarını belgeler. Laboratuvar iki deney düzeneği içerir: rijit durdurucuları olan, sönümlü ve harmonik olarak sürülen bir yay–kütle osilatörü ile N = 1…6 bağlantılı düzlemsel bir sarkaç zinciri. Hareket denklemleri sabit adımlı açık Runge–Kutta yöntemleriyle çözülür (varsayılan: klasik dördüncü mertebe yöntem, h = 1 ms). Adım dizisi ekran yenileme hızından bağımsızdır; bu nedenle kaotik yörüngeler de aynı başlangıç koşullarından aynen yeniden üretilir. Her terimi ayrı ayrı integre edilen bir enerji defteri (kinetik ve potansiyel enerji, sönüm ısısı, çarpışma ısısı, sürücünün yaptığı iş) sayısal hatayı çalışma sırasında sürekli görünür kılar. On dört doğrulama deneyi, çözücüyü kapalı biçimli çözümlerle, korunum yasalarıyla ve bağımsız türetimlerle karşılaştırır: klasik Runge–Kutta yöntemi için gözlenen yakınsama mertebesi 4,005'tir; serbest yanıtta, dört sönüm rejiminde 20 s boyunca en büyük konum hatası 1,6×10⁻¹⁰ m'dir; sonlu genlikli sarkacın ölçülen periyodu eliptik integral çözümünden bağıl olarak 3×10⁻¹⁰'dan az sapar; sürtünmesiz çift sarkaçta 60 s'lik bağıl enerji sapması 2×10⁻⁹'dur. Kaos nicel olarak incelenir: Benettin yöntemiyle kestirilen en büyük Lyapunov üsteli, ikiz yörüngenin ayrılması, Poincaré kesiti ve genlik spektrumu birlikte sunulur. Ölçüme dayalı dokuz deney föyü; periyot, sönüm oranı, rezonans genliği gibi büyüklüklerin sanal cihazlarla ölçülmesini ve kuramsal değerle karşılaştırılmasını ister. Rapor, ders kitaplarında sık rastlanan bazı yanılgıları kaynak göstererek düzeltir ve modelin varsayımlarını ve sınırlılıklarını açıkça belirtir.
 
 **Anahtar sözcükler:** hesaplamalı fizik; harmonik osilatör; rezonans; çoklu sarkaç; deterministik kaos; Lyapunov üsteli; Runge–Kutta yöntemleri; doğrulama ve geçerleme; fizik eğitimi.
 
@@ -132,7 +132,7 @@ Sanal laboratuvarların öğrenmeye etkisi konusundaki kanıt karışıktır. Bi
 
 ### Gösterim ve birimler
 
-Bütün büyüklükler SI birimleriyle verilir; simgeler ISO 80000 ile uyumludur [[22](#ref-22), [23](#ref-23), [24](#ref-24)]. Zamana göre türev nokta ile gösterilir. Açılar aşağı düşeyden, saat yönünün tersine ölçülür ve radyan cinsindendir; arayüz kolaylık için derece de gösterir. Arayüzde sayılar ondalık nokta ile yazılır; böylece ekranda okunan bir değer sayı alanına aynen yazılabilir ve dışa aktarılan veriyle birebir aynıdır. Bu metinde ise Türkçe yazım gereği ondalık virgül kullanılır.
+Bütün büyüklükler SI birimleriyle verilir; simgeler ISO 80000 ile uyumludur [[22](#ref-22), [23](#ref-23), [24](#ref-24)]. Zamana göre türev nokta ile gösterilir. Açılar aşağı düşeyden, saat yönünün tersine ölçülür ve radyan cinsindendir; arayüz kolaylık için derece de gösterir. Arayüzdeki sayısal göstergeler ve sayı alanlarının iletileri ondalık nokta kullanır; böylece ekranda okunan bir değer sayı alanına aynen yazılabilir ve dışa aktarılan veriyle birebir aynıdır. Arayüzün açıklama metinlerinde ve bu metinde ise Türkçe yazım gereği ondalık virgül kullanılır.
 
 *Çizelge 1.2. Başlıca simgeler.*
 
@@ -160,13 +160,13 @@ Bütün büyüklükler SI birimleriyle verilir; simgeler ISO 80000 ile uyumludur
 
 ### Model ve hareket denklemi
 
-Kütlesi $`m`$ olan taşıyıcı sürtünmesiz bir ray üzerinde hareket eder, sabiti $`k`$ olan doğrusal bir yayla duvara bağlıdır, hızıyla orantılı bir sönüm kuvveti ve harmonik bir sürücü kuvvet etkisindedir. Denge konumundan ölçülen yer değiştirme $`x`$ için
+Kütlesi $`m`$ olan araba sürtünmesiz bir ray üzerinde hareket eder, sabiti $`k`$ olan doğrusal bir yayla duvara bağlıdır, hızıyla orantılı bir sönüm kuvveti ve harmonik bir sürücü kuvvet etkisindedir. Denge konumundan ölçülen yer değiştirme $`x`$ için
 
 ```math
 m\ddot{x} + c\dot{x} + kx = F_0\cos\varphi, \qquad \dot{\varphi} = \omega \tag{2.1}
 ```
 
-Sürücünün fazı $`\varphi`$ ayrı bir durum değişkeni olarak integre edilir. Böylece frekans çalışma sırasında değiştirildiğinde kuvvet süreksizlik göstermez; gerçek bir işaret üreteci de faz süreklidir. Hızla orantılı sönüm, düzenekte bir girdap akımı freni olarak gösterilmiştir: iletken bir şeridin mıknatıs kutupları arasındaki hareketi düşük hızlarda $`F = -c\dot{x}`$ biçiminde bir kuvvet doğurur [[25](#ref-25), [26](#ref-26)]. Denklem iki parametreyle boyutsuzlaştırılır:
+Sürücünün fazı $`\varphi`$ ayrı bir durum değişkenidir. Böylece frekans çalışma sırasında değiştirildiğinde kuvvet süreksizlik göstermez; gerçek bir işaret üreteci de faz süreklidir. İki parametre değişikliği arasında $`\dot{\varphi} = \omega`$ sabit olduğundan faz adım adım biriktirilmez: her adımın sonunda $`\varphi_b + \omega\,(t - t_b)`$ değerine eşitlenir; burada $`t_b`$ ve $`\varphi_b`$, deneyin başındaki ya da son parametre değişikliği anındaki zaman ve fazdır (Bölüm 4). Hızla orantılı sönüm, düzenekte bir girdap akımı freni olarak gösterilmiştir: iletken bir şeridin mıknatıs kutupları arasındaki hareketi düşük hızlarda $`F = -c\dot{x}`$ biçiminde bir kuvvet doğurur [[25](#ref-25), [26](#ref-26)]. Denklem iki parametreyle boyutsuzlaştırılır:
 
 ```math
 \omega_0 = \sqrt{\frac{k}{m}}, \qquad \zeta = \frac{c}{2\sqrt{km}}, \qquad \gamma = \frac{c}{2m} = \zeta\omega_0 \tag{2.2}
@@ -198,7 +198,7 @@ Kritik sönümde ($`\zeta = 1`$) ve aşırı sönümde ($`\zeta > 1`$, $`s = \om
 x(t) = \left[x_0 + (v_0 + \omega_0 x_0)\,t\right]e^{-\omega_0 t}, \qquad x(t) = e^{-\gamma t}\left[x_0\cosh st + \frac{v_0 + \gamma x_0}{s}\sinh st\right] \tag{2.4}
 ```
 
-Uygulama bu kapalı biçimli çözümü sayısal çözümle birlikte hesaplar ve aradaki en büyük farkı gösterir; fark, durduruculara çarpma olmadığı sürece doğrudan çözücünün hatasıdır. Zayıf sönümde ardışık iki tepe arasındaki oran sabittir. Bu oranın doğal logaritması **logaritmik azalma**, salınımın keskinliğini ölçen büyüklük **kalite faktörü** adını alır:
+Uygulama bu kapalı biçimli çözümü sayısal çözümle birlikte hesaplar ve aradaki en büyük farkı gösterir; fark, durduruculara çarpma olmadığı sürece doğrudan çözücünün hatasıdır. “Sönümsüz” hazır deneyinde ($`m = 2`$ kg, $`k = 24`$ N/m, $`x_0 = 2`$ m) bu fark 60 s sonunda varsayılan 1 ms'lik adımla $`4{,}9 \times 10^{-10}`$ m, bunun yarısı kadar adımla $`3{,}1 \times 10^{-11}`$ m'dir: dördüncü mertebe bir yöntemin vermesi gereken 16 katlık oran. Zayıf sönümde ardışık iki tepe arasındaki oran sabittir. Bu oranın doğal logaritması **logaritmik azalma**, salınımın keskinliğini ölçen büyüklük **kalite faktörü** adını alır:
 
 ```math
 \Lambda = \ln\frac{x_k}{x_{k+1}} = \gamma T_d = \frac{2\pi\zeta}{\sqrt{1-\zeta^2}}, \qquad Q = \frac{\omega_0 m}{c} = \frac{1}{2\zeta} \tag{2.5}
@@ -210,7 +210,7 @@ Durgun bırakılan kütlenin dengeyi ilk aşışı, başlangıç yer değiştirm
 
 ### Sürülen kararlı durum ve rezonans
 
-Sönüm varken geçici çözüm $`e^{-\gamma t}`$ ile söner ve geriye sürücüyle aynı frekansta, ona göre $`\delta`$ kadar geciken bir salınım kalır: $`x(t) = A\cos(\omega t - \delta)`$. Genlik ve faz gecikmesi [[27](#ref-27), [28](#ref-28), [30](#ref-30)]
+Sönüm varken geçici çözüm söner: $`\zeta \le 1`$ için $`\gamma`$ hızıyla, $`\zeta > 1`$ için ise yavaş sönen teriminin $`\gamma - \sqrt{\gamma^2 - \omega_0^2}`$ hızıyla. Geriye sürücüyle aynı frekansta, ona göre $`\delta`$ kadar geciken bir salınım kalır: $`x(t) = A\cos(\omega t - \delta)`$. Genlik ve faz gecikmesi [[27](#ref-27), [28](#ref-28), [30](#ref-30)]
 
 ```math
 A(\omega) = \frac{F_0/m}{\sqrt{(\omega_0^2-\omega^2)^2 + (2\gamma\omega)^2}}, \qquad \tan\delta = \frac{c\,\omega}{k - m\omega^2}, \quad 0 \le \delta \le \pi \tag{2.6}
@@ -232,13 +232,13 @@ Sönüm yokken ($`c = 0`$) kararlı durum oluşmaz. Tam rezonansta genlik zamanl
 
 > **Not — Ölçülen yanıt eğrisi**
 >
-> Frekans sekmesindeki eğri (2.6) bağıntısıdır; üzerindeki noktalar ise sanal cihazların kararlı durumda ölçtüğü genliklerdir. “Frekans taraması” aynı ölçümü bir frekans dizisi için otomatik yapar. Beş frekansta ölçülen genliğin kuramdan bağıl sapması en çok $`3{,}3 \times 10^{-8}`$ değerindedir (Bölüm 7).
+> Frekans sekmesindeki eğri (2.6) bağıntısıdır; üzerindeki noktalar ise sanal cihazların ölçtüğü genliklerdir. Sürmekte olan deney her salınımda bir nokta ekler; geçici rejim söndükçe bu noktalar eğrinin üzerine oturur. “Frekans taraması” ölçümü kararlı durumda, $`0{,}3\,\omega_0`$ ile $`2\,\omega_0`$ arasındaki 25 frekansta yapar: her frekans için denklem, geçici rejimin en yavaş sönen terimi $`e^{-12}`$ katına inene kadar ayrıca çözülür (RK4, $`h = 2`$ ms). Tarama $`\zeta \ge 0{,}01`$ için sunulur; daha küçük sönümde kararlı duruma ulaşmak uygulanamayacak kadar uzun sürer. Doğrulama deneyinde, beş frekansta, ölçülen genliğin kuramdan bağıl sapması en çok $`3{,}3 \times 10^{-8}`$ değerindedir (Bölüm 7).
 
 <a id="osilator-durdurucu"></a>
 
 ### Mekanik durdurucular ve çarpma
 
-Taşıyıcının hareketi iki yönde sınırlıdır. Duvar tarafında sınırı yayın **katı boyu** belirler: sarımlar birbirine değdiğinde yay daha fazla kısalamaz. Uçları düz bırakılmış bir basma yayında katı boy $`L_s = d\,(N_t + 1)`$ ile verilir [[31](#ref-31)]; $`N_t = 14`$ sarım ve $`L_s = 1{,}45`$ m için tel çapı $`d = 0{,}097`$ m olur. Yayın sabit ucu $`x = -7{,}05`$ m, taşıyıcının yarı boyu 0,85 m olduğundan taşıyıcının merkezi $`x_\mathrm{min} = -7{,}05 + 1{,}45 + 0{,}85 = -4{,}75`$ m konumunun ötesine geçemez. Öbür yönde ray sonundaki durdurucu $`x_\mathrm{max} = 6{,}50`$ m sınırını koyar. Sahnedeki bütün parçalar bu ölçülerle çizilir; hiçbir parça bir başkasının içinden geçmez.
+Arabanın hareketi iki yönde sınırlıdır. Duvar tarafında sınırı yayın **katı boyu** belirler: sarımlar birbirine değdiğinde yay daha fazla kısalamaz. Uçları düz bırakılmış bir basma yayında katı boy $`L_s = d\,(N_t + 1)`$ ile verilir [[31](#ref-31)]; $`N_t = 14`$ sarım ve $`L_s = 1{,}45`$ m için tel çapı $`d = 0{,}097`$ m olur. Yayın sabit ucu $`x = -7{,}05`$ m, arabanın yarı boyu 0,85 m olduğundan arabanın merkezi $`x_\mathrm{min} = -7{,}05 + 1{,}45 + 0{,}85 = -4{,}75`$ m konumunun ötesine geçemez. Öbür yönde ray sonundaki durdurucu $`x_\mathrm{max} = 6{,}50`$ m sınırını koyar. Sahnedeki bütün parçalar bu ölçülerle çizilir; hiçbir parça bir başkasının içinden geçmez.
 
 Durdurucu, tek yönlü rijit bir kısıt olarak modellenir. Çarpma anında Newton'un kinematik geri sıçrama yasası uygulanır [[32](#ref-32)]:
 
@@ -246,7 +246,7 @@ Durdurucu, tek yönlü rijit bir kısıt olarak modellenir. Çarpma anında Newt
 v^{+} = -e\,v^{-}, \qquad \Delta Q_e = \tfrac12 m\,(v^{-})^2\,(1-e^2) \tag{2.9}
 ```
 
-Yitirilen kinetik enerji çarpma ısısı olarak deftere yazılır. Uygulanan net kuvvet taşıyıcıyı durdurucuya bastırmayı sürdürüyorsa taşıyıcı orada durur ve kuvvet yön değiştirince ayrılır. Çarpma anı zaman adımının içinde ikiye bölme yöntemiyle bulunur (Bölüm 4); kapalı biçimli çözümle karşılaştırıldığında çarpma anındaki hata $`10^{-12}`$ s mertebesindedir.
+Yitirilen kinetik enerji çarpışma ısısı olarak deftere yazılır. Uygulanan net kuvvet arabayı durdurucuya bastırmayı sürdürüyorsa araba orada durur ve kuvvet yön değiştirince ayrılır. Çarpma anı zaman adımının içinde ikiye bölme yöntemiyle bulunur (Bölüm 4); kapalı biçimli çözümle karşılaştırıldığında çarpma anındaki hata $`10^{-12}`$ s mertebesindedir.
 
 > **Sınırlılık — e = 0,45 bir model parametresidir**
 >
@@ -262,7 +262,7 @@ Yitirilen kinetik enerji çarpma ısısı olarak deftere yazılır. Uygulanan ne
 \underbrace{\tfrac12 m\dot{x}^2}_{E_k} + \underbrace{\tfrac12 kx^2}_{E_p} + \underbrace{\int_0^t c\,\dot{x}^2\,dt'}_{Q_c} + Q_e - \underbrace{\int_0^t F_0\cos\varphi\;\dot{x}\,dt'}_{W} = E_0 \tag{2.10}
 ```
 
-$`Q_c`$ ve $`W`$ durum vektörünün parçasıdır ve hareketle aynı yöntemle, aynı adımda integre edilir; $`Q_e`$ çarpmalarda (2.9) ile artar. Sol taraf ile $`E_0`$ arasındaki fark, yani **artık** $`\Delta E`$, tam bir çözümde sıfırdır; sıfırdan farklı her değer sayısal hatadır. Artık, durum çubuğunda ve Enerji sekmesinde sürekli gösterilir; bağıl değeri hesaplanırken payda olarak $`|E_0|`$, anlık mekanik enerji ve $`Q + |W|`$ büyüklüklerinin en büyüğü alınır. Sönüm, sürücü ve 27 çarpmanın birlikte bulunduğu 60 saniyelik bir doğrulama deneyinde bağıl artık $`1{,}3 \times 10^{-12}`$ değerini aşmaz.
+$`Q_c`$ ve $`W`$ durum vektörünün parçasıdır ve hareketle aynı yöntemle, aynı adımda integre edilir; $`Q_e`$ çarpmalarda (2.9) ile artar. Sol taraf ile $`E_0`$ arasındaki fark, yani **kalıntı** $`\Delta E`$, tam bir çözümde sıfırdır; sıfırdan farklı her değer sayısal hatadır. Kalıntı, durum çubuğunda ve Enerji sekmesinde sürekli gösterilir; bağıl değeri hesaplanırken payda olarak $`|E_0|`$, anlık mekanik enerji ve $`Q + |W|`$ büyüklüklerinin en büyüğü alınır. Sönüm, sürücü ve 27 çarpmanın birlikte bulunduğu 60 saniyelik bir doğrulama deneyinde bağıl kalıntı $`1{,}3 \times 10^{-12}`$ değerini aşmaz.
 
 <a id="sarkac"></a>
 
@@ -305,7 +305,7 @@ Euler–Lagrange denklemleri her $`i`$ için
 \sum_{j=1}^{N}\mu_{\max(i,j)}L_iL_j\left[\cos(\theta_i-\theta_j)\,\ddot\theta_j + \sin(\theta_i-\theta_j)\,\dot\theta_j^{\,2}\right] + \mu_i\,g\,L_i\sin\theta_i = Q_i \tag{3.2}
 ```
 
-biçimindedir; $`Q_i`$ korunumsuz genelleştirilmiş kuvvettir. İvmelerin katsayı matrisi $`A_{ij} = \mu_{\max(i,j)}L_iL_j\cos(\theta_i-\theta_j)`$ simetrik ve pozitif tanımlıdır, çünkü $`T = \tfrac12\dot{\boldsymbol\theta}^{\mathsf T}\mathbf{A}\,\dot{\boldsymbol\theta}`$ her sıfırdan farklı hız için pozitiftir. Bu yüzden ivmeler her adımda Cholesky ayrışımıyla çözülür [[43](#ref-43)]; ayrışımın başarısız olması modelde bir hata olduğunu gösterir. $`N = 1`$ için denklem bilinen $`\ddot\theta = -(g/L)\sin\theta`$ biçimine iner. Aynı Lagrange fonksiyonu çoklu sarkaç için hakemli yayınlarda da verilmiştir [[37](#ref-37), [44](#ref-44), [45](#ref-45)].
+biçimindedir; $`Q_i`$ korunumsuz genelleştirilmiş kuvvettir. İvmelerin katsayı matrisi $`A_{ij} = \mu_{\max(i,j)}L_iL_j\cos(\theta_i-\theta_j)`$ simetrik ve pozitif tanımlıdır, çünkü $`T = \tfrac12\dot{\boldsymbol\theta}^{\mathsf T}\mathbf{A}\,\dot{\boldsymbol\theta}`$ her sıfırdan farklı hız için pozitiftir. Bu yüzden ivmeler her adımda Cholesky ayrışımıyla çözülür [[43](#ref-43)]; sonlu bir durumda ayrışımın başarısız olması modelde bir hata olduğunu gösterir. Sonlu bir sayı olmayan bir değer içeren durum da ayrıştırılamaz; model o zaman sonlu olmayan sonucu aynen iletir ve çalışma zamanı deneyi durdurur (Bölüm 4). $`N = 1`$ için denklem bilinen $`\ddot\theta = -(g/L)\sin\theta`$ biçimine iner. Aynı Lagrange fonksiyonu çoklu sarkaç için hakemli yayınlarda da verilmiştir [[37](#ref-37), [44](#ref-44), [45](#ref-45)].
 
 <a id="sarkac-surtunme"></a>
 
@@ -431,15 +431,19 @@ biçimindedir: yöntem enerjiyi çok yavaş **yitirir** ve sanal eksen üzerinde
 
 > **Sınırlılık — Açık Runge–Kutta yöntemleri simplektik değildir**
 >
-> Hiçbir açık Runge–Kutta yöntemi Hamilton sistemlerinin faz uzayı yapısını tam olarak korumaz [[69](#ref-69), [67](#ref-67)]. Buradaki simplektik Euler de yalnızca ayrılabilir Hamilton fonksiyonları için simplektiktir; sarkaç zincirinin kütle matrisi açılara bağlı olduğundan bu özellik zincirde geçerli değildir. Sönüm, sürücü ve çarpma içeren genel durumda sistem zaten Hamilton sistemi değildir. Bu çalışmada enerji korunumu varsayılmaz, ölçülür: enerji defterinin artığı her an ekrandadır.
+> Hiçbir açık Runge–Kutta yöntemi Hamilton sistemlerinin faz uzayı yapısını tam olarak korumaz [[69](#ref-69), [67](#ref-67)]. Buradaki simplektik Euler de yalnızca ayrılabilir Hamilton fonksiyonları için simplektiktir; sarkaç zincirinin kütle matrisi açılara bağlı olduğundan bu özellik zincirde geçerli değildir. Sönüm, sürücü ve çarpma içeren genel durumda sistem zaten Hamilton sistemi değildir. Bu çalışmada enerji korunumu varsayılmaz, ölçülür: enerji defterinin kalıntısı her an ekrandadır.
 
 <a id="sayisal-dongu"></a>
 
 ### Sabit adımlı döngü ve yeniden üretilebilirlik
 
-Her canlandırma karesinin duvar saati süresi, zaman ölçeğiyle çarpılarak bir bütçeye eklenir. Bütçe tam olarak $`h = 1/f_s`$ büyüklüğünde adımlarla harcanır; artan kısım sonraki kareye devreder [[70](#ref-70)]. Adım frekansı $`f_s`$ 60 Hz ile 2000 Hz arasında seçilebilir, varsayılan değer 1000 Hz'tir. Tek bir karenin katkısı 0,1 saniyeyle ve kare başına adım sayısı 800 ile sınırlıdır; bu sınır aşılırsa benzetim zamanı duvar saatinin gerisinde kalır, ama adım büyüklüğü hiçbir zaman değişmez. Telemetri 100 Hz ile örneklenir.
+Her canlandırma karesinin duvar saati süresi, zaman ölçeğiyle çarpılarak bir bütçeye eklenir. Bütçe tam olarak $`h = 1/f_s`$ büyüklüğünde adımlarla harcanır; artan kısım sonraki kareye devreder [[70](#ref-70)]. Adım frekansı $`f_s`$ 60, 120, 300, 600, 1000 ya da 2000 Hz olarak seçilebilir; varsayılan değer 1000 Hz'tir. Tek bir kare bütçeye en çok 0,1 s'lik duvar saati süresi ekler; bu, 2000 Hz'te ve en büyük zaman ölçeği olan 2'de 400 adım eder. Daha uzun süren kare 0,1 saniyeye kırpılır: artan bölüm benzetime aktarılmaz, benzetim zamanı duvar saatinin gerisinde kalır ve durum çubuğu son başlatmadan beri bu tür kareleri sayar (“Geciken kare”). Sekme arka plandan döndüğünde kare süresinin ölçümü yeniden başlar; arka planda geçen süre bu yüzden ne benzetime aktarılır ne de sayılır. Adım büyüklüğü hiçbir zaman değişmez. Telemetri, 300 Hz ve üzerindeki adım frekanslarında 10 ms'de bir, 60 Hz ve 120 Hz'te ise her adımda kaydedilir.
 
-Bu düzende durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $`h`$ değerine bağlıdır. Otomatik sınamalar bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarındaki durumların bit düzeyinde eşit olduğu görülür. Deney dosyası ve paylaşım bağlantısı yalnızca bu girdileri taşır; alıcı aynı yörüngeyi yeniden üretir.
+Bu düzende durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $`h`$ değerine bağlıdır. Otomatik sınamalar bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarındaki durumların bit düzeyinde eşit olduğu görülür. Deney dosyası ve paylaşım bağlantısı yalnızca bu girdileri taşır; alıcı aynı yörüngeyi yeniden üretir. Aynı nedenle yöntemin ya da adım frekansının değiştirilmesi sürmekte olan deneyi devam ettirmez: iki deney de başlangıç koşullarından yeniden başlar; böylece bir kayıt, o kaydın enerji defteri ve hata istatistikleri her zaman tek bir yönteme ve tek bir adıma aittir.
+
+Benzetim zamanı adımların toplamıdır ve bu toplamın kendi yuvarlama hatası vardır. $`h = 1`$ ms değerini olağan kayan noktalı aritmetikle 600 000 kez toplamak $`7 \times 10^{-9}`$ s yitirir. Arabanın 6,9 m/s hıza ulaştığı “Sönümsüz” hazır deneyinde yalnızca bu kayıp, Bölüm 2'deki kapalı biçimli başvuru çözümünü, arabanın en hızlı olduğu yerde yaklaşık $`5 \times 10^{-8}`$ m kaydırırdı; bu, RK4 yönteminin aynı 600 s içindeki hatasının on katıdır. Osilatörün saati bu yüzden dengelemeli (Kahan) toplamayla ilerletilir; sürücünün fazı da biriktirilmek yerine saatten hesaplanır. Sarkacın denklemleri zamanı açık olarak içermez; saati olağan bir toplamdır ve yuvarlama hatası yalnızca kaydın zaman damgalarına yansır.
+
+Çalışma zamanı her adımdan sonra çözümün sonlu aralıkta kalıp kalmadığını denetler. Sarkaçta bu, bütün açıların ve açısal hızların mutlak değerce $`10^7`$'nin (rad ve rad/s) altında olması demektir; denetim asıl yörüngeyi, gösterildiği sürece ikiz yörüngeyi ve Lyapunov kestiriminin gölge yörüngesini kapsar. Osilatörde konumun sonlu, hızın $`10^6`$ m/s'nin altında olması aranır. Denetim sağlanmazsa o adımdan önceki durum geri konur, deney durdurulur ve arayüz çözümün ıraksadığını bildirir; fizik çekirdeğinde oluşan bir istisna (exception) da deneyi aynı biçimde durdurur. Düşük mertebeli bir yöntem iri bir adımla böyle sonlanabilir: altı bağlantılı hazır zincir 60 Hz'te açık Euler yöntemiyle çözüldüğünde 12 s sonra durdurulur. Durdurma iki deney için de geçerlidir; deneylerden biri yeniden başlatıldığında ya da bir çözücü seçildiğinde kalkar ve her iki işlem ıraksayan deneyi de yeniden başlatır.
 
 > **Sınırlılık — Yeniden üretilebilirliğin sınırı**
 >
@@ -449,7 +453,7 @@ Bu düzende durum dizisi yalnızca başlangıç koşullarına, parametrelere, y�
 
 ### Çarpma anının bulunması
 
-Durdurucular hareket denklemini parçalı yapar; çarpma anı adımın içinde bulunmazsa hata adım büyüklüğüyle doğru orantılı olur ve yöntemin mertebesi yitirilir. Bir adımın sonunda taşıyıcı sınırın dışına çıkmışsa, adımın $`s \in [0,1]`$ kesri üzerinde ikiye bölme yapılır: adımın başındaki durumdan $`s\,h`$ kadar ilerlenir ve taşıyıcının hâlâ içeride kaldığı en büyük $`s`$ aranır. 52 yineleme, çift duyarlığın bütün basamaklarını tüketir. Sonra durum bu ana kadar ilerletilir, (2.9) uygulanır ve adımın kalan kısmı çözülür. Bir adımda altıdan fazla çarpma olursa (taşıyıcının durdurucu üzerinde giderek küçülen sıçramaları) taşıyıcı durdurucuda durgun kabul edilir ve kalan kinetik enerji ısıya yazılır.
+Durdurucular hareket denklemini parçalı yapar; çarpma anı adımın içinde bulunmazsa hata adım büyüklüğüyle doğru orantılı olur ve yöntemin mertebesi yitirilir. Bir adımın sonunda araba sınırın dışına çıkmışsa, adımın $`s \in [0,1]`$ kesri üzerinde ikiye bölme yapılır: adımın başındaki durumdan $`s\,h`$ kadar ilerlenir ve arabanın hâlâ içeride kaldığı en büyük $`s`$ aranır. 52 yineleme, çift duyarlığın bütün basamaklarını tüketir. Sonra durum bu ana kadar ilerletilir, (2.9) uygulanır ve adımın kalan kısmı çözülür. Bir adımda altıdan fazla çarpma olursa (arabanın durdurucu üzerinde giderek küçülen sıçramaları) araba durdurucuda durgun kabul edilir ve kalan kinetik enerji ısıya yazılır.
 
 Doğrulama deneyinde çarpma anı kapalı biçimli değerden $`9 \times 10^{-13}`$ s, çarpma hızı bağıl olarak $`3 \times 10^{-14}`$ sapar.
 
@@ -459,7 +463,7 @@ Doğrulama deneyinde çarpma anı kapalı biçimli değerden $`9 \times 10^{-13}
 
 Dormand–Prince çifti aynı türev değerlendirmelerinden beşinci mertebe bir çözüm ile dördüncü mertebe bir karşılaştırma çözümü üretir; ikisinin farkı yerel hatanın kestirimidir [[73](#ref-73), [61](#ref-61)]. MATLAB'ın ode45 çözücüsü de bu çifte dayanır [[74](#ref-74)]. Uygulamada sabit dış adım $`h`$ korunur; yöntem bu adımı, kestirilen hata $`10^{-10}`$ bağıl ve $`10^{-12}`$ mutlak toleransın altında kalacak biçimde kendi iç adımlarına böler. Böylece adım dizisi yine kare süresinden bağımsızdır.
 
-Sabit adımlı RK4 varsayılan parametrelerde yeterlidir: çift sarkaçta 60 saniyelik bağıl enerji sapması $`2 \times 10^{-9}`$, altı bağlantılı zincirde $`3 \times 10^{-7}`$ değerindedir. İzin verilen aralığın en zor köşesinde ise (üç ağır ve uzun bağlantı, üç hafif ve kısa bağlantıyı sürükler; açısal hızlar 140 rad/s değerini aşar) sabit adımın sapması $`1{,}5 \times 10^{-3}`$ düzeyine çıkar; Dormand–Prince aynı deneyde $`4 \times 10^{-9}`$ verir. Durum çubuğu, bağıl artık $`10^{-5}`$ değerini aştığında uyarlamalı yönteme geçmeyi önerir.
+Sabit adımlı RK4 varsayılan parametrelerde yeterlidir: çift sarkaçta 60 saniyelik bağıl enerji sapması $`2 \times 10^{-9}`$, altı bağlantılı zincirde $`3 \times 10^{-7}`$ değerindedir. İzin verilen aralığın en zor köşesinde ise (üç ağır ve uzun bağlantı, üç hafif ve kısa bağlantıyı sürükler; açısal hızlar 140 rad/s değerini aşar) sabit adımın sapması $`1{,}5 \times 10^{-3}`$ düzeyine çıkar; Dormand–Prince aynı deneyde $`4 \times 10^{-9}`$ verir. Sabit adımlı bir yöntemle çözülen deneyde bağıl kalıntı $`10^{-5}`$ değerine ulaştığında durum çubuğu uyarlamalı yöntemle yeniden başlatmayı önerir; öneri kabul edildiğinde, her çözücü değişikliğinde olduğu gibi, iki deney de baştan başlar.
 
 <a id="sayisal-cebir"></a>
 
@@ -496,7 +500,7 @@ ile tanımlanan $`\lambda`$ **en büyük Lyapunov üsteli**dir; varlığı ve he
 
 ### Lyapunov üstelinin kestirimi
 
-Üstel, Benettin, Galgani ve Strelcyn'in iki yörüngeli yöntemiyle kestirilir [[83](#ref-83), [84](#ref-84)]. Asıl yörüngenin yanında, faz uzayında ondan $`d_0 = 10^{-8}`$ uzaklıkta bir gölge yörünge aynı yöntemle ve aynı adımla çözülür. Her $`\tau = 0{,}01`$ s sonunda ayrılık $`d_k`$ ölçülür ve gölge, ayrılığın o andaki doğrultusu korunarak yeniden $`d_0`$ uzaklığına çekilir. Akan kestirim
+Üstel, Benettin, Galgani ve Strelcyn'in iki yörüngeli yöntemiyle kestirilir [[83](#ref-83), [84](#ref-84)]. Asıl yörüngenin yanında, faz uzayında ondan $`d_0 = 10^{-8}`$ uzaklıkta bir gölge yörünge aynı yöntemle ve aynı adımla çözülür. Her $`\tau`$ aralığının sonunda ayrılık $`d_k`$ ölçülür ve gölge, ayrılığın o andaki doğrultusu korunarak yeniden $`d_0`$ uzaklığına çekilir; $`\tau`$, 300 Hz ve üzerindeki adım frekanslarında 0,01 s, 60 Hz ve 120 Hz'te ise bir adımdır. Akan kestirim
 
 ```math
 \lambda(t) = \frac{1}{t}\sum_{k=1}^{t/\tau}\ln\frac{d_k}{d_0} \tag{5.2}
@@ -518,7 +522,7 @@ Başlangıç durumu $`\delta_0`$ belirsizlikle biliniyorsa ve $`a`$ büyüklüğ
 t_\mathrm{u} \approx \frac{1}{\lambda}\,\ln\frac{a}{\delta_0} \tag{5.3}
 ```
 
-Bağımlılık logaritmiktir: başlangıç belirsizliğini bin kat küçültmek ufku yalnızca $`\ln 1000/\lambda \approx 6{,}9/\lambda`$ kadar uzatır. Bağıntı bir büyüklük mertebesi kestirimidir; yerel büyüme hızı yörünge boyunca değiştiğinden gözlenen ayrılma süresi bundan birkaç kat farklı olabilir. Uygulama kestirilen ufku ve ikizin gerçekten 1 rad ayrıldığı anı yan yana verir.
+Bağımlılık logaritmiktir: başlangıç belirsizliğini bin kat küçültmek ufku yalnızca $`\ln 1000/\lambda \approx 6{,}9/\lambda`$ kadar uzatır. Bağıntı bir büyüklük mertebesi kestirimidir; yerel büyüme hızı yörünge boyunca değiştiğinden gözlenen ayrılma süresi bundan birkaç kat farklı olabilir. Uygulama kestirilen ufku, ikizin bırakıldığı andan 1 rad ayrıldığı ana kadar gerçekten geçen süreyle yan yana verir.
 
 > **Not — Hava tahmini**
 >
@@ -562,11 +566,11 @@ Kaotik bir yörüngede sayısal hata da fiziksel ayrılık gibi üstel büyür. 
 
 Bir benzetimde kuramsal değeri ekrana yazmak kolaydır, ama bu bir doğrulama değildir. Buradaki cihazlar yalnızca örneklenmiş çözümü görür ve bir deneycinin kronometreyle, cetvelle ve osiloskopla yapacağı ölçümü yapar:
 
-- **Periyot ölçer.** İşaretin aynı yöndeki ardışık sıfır geçişleri arasındaki süreyi ölçer; geçiş anı iki örnek arasında doğrusal ara değerlemeyle bulunur. Son on iki aralığın ortalaması ve standart sapması gösterilir. Sarkaçta $`\sin\theta`$ izlenir ve yalnızca alt noktadaki geçişler sayılır; böylece tepeden aşan sarkacın dönme periyodu da ölçülür.
+- **Periyot ölçer.** İşaretin aynı yöndeki ardışık sıfır geçişleri arasındaki süreyi ölçer; geçiş anı iki örnek arasında doğrusal ara değerlemeyle bulunur. Yukarı ve aşağı yönlü geçişler ayrı ayrı izlenir; bu yüzden bir salınımın her periyodu iki aralık verir (dönen sarkacın her turu bir aralık). Son on iki aralığın ortalaması ve standart sapması gösterilir. Sarkaçta $`\sin\theta`$ izlenir ve yalnızca alt noktadaki geçişler sayılır; böylece tepeden aşan sarkacın dönme periyodu da ölçülür.
 - **Tepe dedektörü.** Uç değerler en büyük örnek aranarak değil, hızın sıfır geçişinden bulunur; bu, örnekleme aralığından çok daha ince bir zaman çözünürlüğü verir. Genlik, son tepe ile son çukurun farkının yarısıdır.
 - **Logaritmik azalma.** Ardışık pozitif tepelerden (2.5) ile hesaplanır; sönüm oranı $`\zeta = \Lambda/\sqrt{4\pi^2 + \Lambda^2}`$ bağıntısından elde edilir.
-- **Kararlı durum ölçütü.** İki koşul birlikte aranır: ardışık iki salınımın tepeden tepeye genlikleri arasındaki bağıl fark %1'in altında olmalı ve son değişiklikten (yeniden başlatma, parametre değişikliği, çarpma) bu yana geçici rejimin %1'ine inmesine yetecek süre, $`\ln 100/\gamma`$, geçmiş olmalıdır. Birinci koşul tek başına yetmez: yavaş sönen bir geçici rejim genliği salınım başına yalnızca kendi büyüklüğünün $`e^{\gamma T} - 1`$ katı kadar değiştirir, dolayısıyla gözlenen değişimin birkaç katı büyüklükte olabilir. Faz gecikmesi, yer değiştirmenin son tepesi anındaki sürücü fazıdır.
-- **Basamak yanıtı ölçer.** Durgun bırakılan kütlenin aşımını ve $`|x|`$ değerinin başlangıç yer değiştirmesinin %2'si içinde kalmaya başladığı anı ölçer.
+- **Kararlı durum ölçütü.** Üç koşul birlikte aranır. Bir salınımdan ötekine tepeden tepeye genlik %1'den az değişmeli ve salınım merkezi, yani son tepe ile son çukurun orta noktası, genliğin %1'inden az kaymalıdır. Ayrıca son değişiklikten (yeniden başlatma, parametre değişikliği, çarpma) bu yana, geçici rejimin en yavaş sönen teriminin %1'ine inmesine yeten $`\ln 100/r`$ süresi geçmiş olmalıdır; burada $`\zeta \le 1`$ için $`r = \gamma`$, $`\zeta > 1`$ için $`r = \gamma - \sqrt{\gamma^2 - \omega_0^2}`$ alınır. Birinci koşul tek başına yetmez: yavaş sönen bir geçici rejim genliği salınım başına yalnızca kendi büyüklüğünün $`e^{rT} - 1`$ katı kadar değiştirir, dolayısıyla gözlenen değişimin birkaç katı büyüklükte olabilir. Salınmayan bir geçici terim, örneğin aşırı sönümlü sistemin yavaş sönen üsteli, tepeden tepeye genliği hiç değiştirmez; yalnızca merkezi kaydırır ve bunu ikinci koşul yakalar. Sönüm yokken bekleme süresi sonsuzdur ve kararlı durum bildirilmez. Faz gecikmesi, yer değiştirmenin son tepesi anındaki sürücü fazıdır.
+- **Basamak yanıtı ölçer.** Durgun bırakılan kütle için aşımı, yani dengenin ötesindeki en uç örneğin başlangıç yer değiştirmesine oranını, ve yerleşme süresini, yani $`|x|`$ değerinin başlangıç yer değiştirmesinin %2'si içinde kalmaya başladığı anı ölçer. Bu banda giriş anı, bandın dışındaki son örnek ile içindeki ilk örnek arasında doğrusal ara değerlemeyle bulunur; değer, yanıt bu sürenin dörtte biri kadar ve en az 0,25 s bandın içinde kaldıktan sonra gösterilir. Yanında verilen kuramsal değer, eldeki sönüm oranı için (2.3) ve (2.4) kapalı biçimli çözümlerinin yerleşme süresidir ve ikiye bölme yöntemiyle bulunur; $`\zeta = 1`$ için $`5{,}834/\omega_0`$ değerine eşittir. Bırakıştan sonra bir parametre değiştirilirse ölçüm sona erer ve bir sonraki bırakışla yeniden başlar.
 
 Ölçümler sekmesi her büyüklük için kuramsal değeri, ölçülen değeri ve aradaki sapmayı yan yana verir. Deney föylerinin tamamlanma ölçütleri de bu cihazların okumalarına bağlıdır; bir kaydırıcıyı doğru konuma getirmek föyü tamamlamaz, ölçümün yapılması gerekir.
 
@@ -574,7 +578,7 @@ Bir benzetimde kuramsal değeri ekrana yazmak kolaydır, ama bu bir doğrulama d
 
 ### Genlik spektrumu
 
-Kaydedilen işaretin son 4096 örneği (100 Hz örnekleme ile 41 s) Hann penceresiyle çarpılır ve hızlı Fourier dönüşümüyle çözümlenir [[98](#ref-98), [99](#ref-99)]. Frekans çözünürlüğü $`100/4096 = 0{,}024`$ Hz'tir. Pencerenin tutarlı kazancı 0,5 ve eşdeğer gürültü bant genişliği 1,5 kutudur [[100](#ref-100)]; genlik ekseni buna göre ölçeklenir. Bir sinüsün frekansı genellikle iki kutunun arasına düşer; tepe frekansı ve genliği, Hann penceresi altında tek bir sinüs için tam olan iki kutulu ara değerlemeyle düzeltilir [[101](#ref-101)]. Doğrulama deneyinde 1,2345 Hz frekanslı bir sinüsün frekansı $`5 \times 10^{-9}`$ Hz, genliği bağıl olarak $`10^{-8}`$ hatayla geri elde edilir.
+Kaydedilen işaretin en yeni örnekleri Hann penceresiyle çarpılır ve hızlı Fourier dönüşümüyle çözümlenir [[98](#ref-98), [99](#ref-99)]. Çözümlenen kayıt $`N`$ örnekten oluşur; $`N`$, son başlatmadan beri kaydedilen telemetrinin doldurabildiği, ikinin en büyük kuvvetidir: en az 256 (100 Hz'lik telemetriyle 2,56 s), en çok 4096 (41 s). Kayıt hiçbir zaman sıfırlarla uzatılmaz; bu yüzden frekans çözünürlüğü kaydın kendi çözünürlüğüdür, $`f_s/N`$: 100 Hz'te en kısa kayıt için 0,39 Hz, en uzun kayıt için $`100/4096 = 0{,}024`$ Hz. Örnekleme frekansı $`f_s`$ kaydın zaman damgalarından alınır; 100 Hz'tir, yalnızca 60 Hz ve 120 Hz adım frekanslarında adım frekansına eşittir. Pencerenin tutarlı kazancı 0,5 ve eşdeğer gürültü bant genişliği 1,5 kutudur [[100](#ref-100)]; genlik ekseni tutarlı kazanca göre ölçeklenir, böylece frekansı bir kutuya tam denk gelen bir sinüs kendi genliğiyle okunur. Bir sinüsün frekansı genellikle iki kutunun arasına düşer; tepe frekansı ve genliği o zaman en büyük iki kutudan, Hann penceresi için verilen ara değerleme bağıntısıyla elde edilir [[101](#ref-101)]. Bağıntı sabit genlikli bir çizgi ve aralarında kayıt süresinin tersi kadar fark bulunan kutular varsayar; kaydın sıfırlarla uzatılmamasının nedeni budur. Çizgi sıfır frekansa yakın olduğunda, negatif frekanstaki görüntüsü bağıntıyı bozar: 20 000 tek sinüsle yapılan bir denemede frekans okuması, tepe sıfır frekansın üstündeki ikinci kutudayken en kötü durumda %8, dördüncü kutudan başlayarak ise en çok %0,05 hata vermiştir. Grafik bu yüzden baskın tepeyi yalnızca spektrumun en güçlü kutusu $`4 f_s/N`$ frekansında ya da daha yukarıdaysa bildirir. Doğrulama deneyinde, 4096 örnekle ve çizgi 51. kutunun yakınındayken, 1,2345 Hz frekanslı bir sinüsün frekansı $`5 \times 10^{-9}`$ Hz, genliği bağıl olarak $`10^{-8}`$ hatayla geri elde edilir.
 
 Spektrum, zaman grafiğinde seçilemeyen ayrımı gösterir: düzenli bir hareketin spektrumu birkaç keskin çizgiden (normal mod frekansları ve bunların birleşimleri) oluşur, kaotik bir hareketinki ise geniş bantlıdır. Grafikte kuramsal frekanslar işaretlenir.
 
@@ -582,13 +586,13 @@ Spektrum, zaman grafiğinde seçilemeyen ayrımı gösterir: düzenli bir hareke
 
 ### Grafikler ve renkler
 
-Zaman grafiği, faz portresi, enerji defteri, yanıt eğrisi, spektrum, ayrılma grafiği ve Poincaré kesiti aynı telemetriyi farklı sorulara yanıt verecek biçimde gösterir. Ayrılma grafiğinin düşey ekseni logaritmiktir; üstel büyüme orada eğimi $`\lambda`$ olan bir doğrudur. Her fiziksel büyüklük bütün görünümlerde aynı rengi taşır: sahnedeki vektör, grafikteki eğri, göstergedeki sayı. Renkler, renk görme farklılıklarında da ayırt edilebilen Okabe–Ito paletinden seçilmiştir [[102](#ref-102), [103](#ref-103)]; hiçbir bilgi yalnızca renkle verilmez.
+Zaman grafiği, faz portresi, enerji defteri, yanıt eğrisi, spektrum, ayrılma grafiği ve Poincaré kesiti aynı telemetriyi farklı sorulara yanıt verecek biçimde gösterir. Ayrılma grafiğinin düşey ekseni logaritmiktir; üstel büyüme orada eğimi $`\lambda`$ olan bir doğrudur. Her fiziksel büyüklük bütün görünümlerde aynı rengi taşır: sahnedeki vektör, grafikteki eğri, göstergedeki sayı. Renkler, renk görme farklılıklarında da ayırt edilebilen Okabe–Ito paletinden seçilmiştir [[102](#ref-102), [103](#ref-103)]; hiçbir nicelik yalnızca rengiyle tanıtılmaz.
 
 <a id="olcum-veri"></a>
 
 ### Veri dışa aktarma
 
-Telemetri CSV dosyası olarak indirilebilir. Sütun adları birimi taşır (örneğin $`t`$ için “t_s”, açı için “theta1_rad”); başlık satırları parametreleri, başlangıç koşullarını, yöntemi ve adımı kaydeder. İki yazım sunulur: ondalık noktalı ve virgülle ayrılmış biçim (Python, MATLAB, R) ile ondalık virgüllü ve noktalı virgülle ayrılmış biçim (Türkçe ayarlı hesap tabloları). Deney tanımı ayrıca JSON dosyası ya da bağlantı olarak paylaşılabilir; veriler hiçbir sunucuya gönderilmez.
+Telemetri CSV dosyası olarak indirilebilir. Sütun adları birimi taşır (örneğin $`t`$ için “t_s”, açı için “theta1_rad”); başlık satırları parametreleri, başlangıç koşullarını, yöntemi, adımı ve örnekleme aralığını kaydeder. Çözücü değişikliği yeni bir deney başlattığından, bir dosyadaki her satır başlıkta adı geçen yöntemle ve adımla hesaplanmıştır. Parametreler ise dışa aktarma anındaki değerleriyle yazılır: deney sürerken değiştirilen bir parametre ayrı bir olay olarak kaydedilmez ve değişiklikten önceki satırlar önceki değere aittir. Başlık satırları “#” ile başlar, alan ayırıcısını ve tırnak işaretini içermez; dosyayı CSV biçiminin kurallarına göre okuyan bir program bu yüzden her birini tek bir alan olarak alır ve altlarındaki çizelge bozulmaz. İki yazım sunulur: ondalık noktalı ve virgülle ayrılmış biçim (Python, MATLAB, R) ile ondalık virgüllü ve noktalı virgülle ayrılmış biçim (Türkçe ayarlı hesap tabloları). Deney tanımı ayrıca JSON dosyası ya da bağlantı olarak paylaşılabilir; veriler hiçbir sunucuya gönderilmez.
 
 <a id="olcum-ses"></a>
 
@@ -626,9 +630,9 @@ Bu çalışma birincisini yapar. Kod doğrulaması için gözlenen yakınsama me
 | Serbest yanıt, dört rejim, 20 s | En büyük konum hatası | $`1{,}6 \times 10^{-10}`$ m | $`10^{-9}`$ m |
 | Kararlı durum, beş frekans | Genliğin bağıl hatası | $`3{,}3 \times 10^{-8}`$ | $`10^{-5}`$ |
 | Kararlı durum, beş frekans | Faz gecikmesinin hatası | $`3{,}3 \times 10^{-8}`$ rad | $`10^{-3}`$ rad |
-| Kritik sönüm | %2 yerleşme süresinin bağıl hatası | $`3{,}3 \times 10^{-4}`$ | $`2 \times 10^{-3}`$ |
+| Kritik sönüm | %2 yerleşme süresinin bağıl hatası | $`1{,}5 \times 10^{-7}`$ | $`2 \times 10^{-3}`$ |
 | Durdurucuya çarpma | Çarpma anının hatası | $`8{,}6 \times 10^{-13}`$ s | $`10^{-8}`$ s |
-| Enerji defteri, 27 çarpma, 60 s | En büyük bağıl artık | $`1{,}3 \times 10^{-12}`$ | $`10^{-8}`$ |
+| Enerji defteri, 27 çarpma, 60 s | En büyük bağıl kalıntı | $`1{,}3 \times 10^{-12}`$ | $`10^{-8}`$ |
 | Sarkaç periyodu, 10°–170° ve dönme | Bağıl hata | $`2{,}3 \times 10^{-10}`$ | $`10^{-7}`$ |
 | Enerji sapması, 60 s | $`N = 1;\ 2;\ 3;\ 6`$ | $`4{,}7 \times 10^{-13}`$; $`2{,}0 \times 10^{-9}`$; $`2{,}4 \times 10^{-8}`$; $`3{,}3 \times 10^{-7}`$ | $`10^{-6}`$ |
 | Özfrekanslar | Laguerre sıfırlarından bağıl sapma | $`8{,}5 \times 10^{-16}`$ | $`10^{-10}`$ |
@@ -644,7 +648,7 @@ Bu değerler geliştirme makinesinde ölçülmüştür. Doğrulama sekmesindeki 
 
 ### Sonuçların yorumu
 
-- **Toleranslar bilerek geniştir.** Ölçülen hatalar toleransların birkaç büyüklük mertebesi altındadır. Toleranslar, deneylerin farklı çalışma ortamlarında da geçmesi ve gerçek bir kod hatasını (mertebenin düşmesi, yanlış bir katsayı) yine de yakalaması için seçilmiştir.
+- **Toleranslar ölçülen hatalardan geniştir, ama her ölçütte aynı oranda değil.** Güvenlik payı, yani toleransın ölçülen hataya (alt sınır ölçütlerinde ölçülen değerin sınıra) oranı, 67 ölçütün 47'sinde iki büyüklük mertebesi ya da daha fazla, 12'sinde bir ile iki mertebe arasında, 8'inde ise on katın altındadır. Bu sekiz ölçütten Çizelge 7.1'de yer alanlar sönümsüz serbest yanıt (6 kat), altı bağlantılı zincirin enerji sapması (3 kat) ve iki Lyapunov sınırıdır (3 ve 2 kat). Ötekiler Dormand–Prince yönteminin gözlenen mertebesi (4 kat), parametre aralığının en zor köşesinde sabit adımın sapması (6 kat), adım yarıya indirildiğinde Lyapunov kestirimindeki değişim (4 kat) ve altı bağlantılı zincirin asılı iple karşılaştırılmasıdır (1,3 kat); bu sonuncusunda ölçülen fark sayısal bir hata değil, altı bağlantı ile sürekli ortam arasındaki fiziksel farktır. Toleranslar, deneylerin farklı çalışma ortamlarında da geçmesi ve gerçek bir kod hatasını (mertebenin düşmesi, yanlış bir katsayı) yine de yakalaması için seçilmiştir; güvenlik payı dar olan ölçütlerin başka bir ortamda geçip geçmediği sınanmamıştır (Bölüm 9).
 - **Enerji sapması bağlantı sayısıyla büyür.** Daha çok bağlantı daha yüksek açısal hızlar ve daha sert bir doğrusal olmayan bağlaşım demektir; aynı adımla altı bağlantılı zincirin sapması çift sarkacınkinin yaklaşık 160 katıdır, ama hâlâ $`10^{-6}`$ değerinin altındadır.
 - **Adım büyüklüğü belirleyicidir.** Çift sarkaçta adım 1 ms yerine 3,3 ms seçildiğinde sapma $`2{,}0 \times 10^{-9}`$ değerinden $`5{,}3 \times 10^{-7}`$ değerine çıkar. Açık Euler aynı deneyde, aynı adımla enerji defterinde %24'lük bir sapma üretir; bu satır pakette bilerek bir **alt sınır** ölçütü olarak durur.
 - **Yöntemin mertebesi kaotik yörüngede de gözlenir.** Üç bağlantılı zincirde RK4 ile hata denetimli başvuru çözümü arasındaki fark, adım dört kat küçültüldüğünde 256,6 kat küçülür; dördüncü mertebe bir yöntem için beklenen değer $`4^4 = 256`$ olur.
@@ -666,7 +670,7 @@ Bu değerler geliştirme makinesinde ölçülmüştür. Doğrulama sekmesindeki 
 
 > **Yaygın yanılgı — “Rezonans tam doğal frekansta olur”**
 >
-> Soğurulan güç ve hız genliği için doğrudur. Yer değiştirme genliği ise $`\omega_0\sqrt{1-2\zeta^2}`$ değerinde, yani doğal frekansın altında en büyüktür ve $`\zeta \ge 1/\sqrt{2}`$ için hiç tepe yapmaz (Bölüm 2). Zayıf sönümde fark küçüktür, ama ölçülebilir: “Rezonans tepesini bul” föyü tam olarak bunu ölçtürür.
+> Soğurulan güç ve hız genliği için doğrudur. Yer değiştirme genliği ise $`\omega_0\sqrt{1-2\zeta^2}`$ değerinde, yani doğal frekansın altında en büyüktür ve $`\zeta \ge 1/\sqrt{2}`$ için hiç tepe yapmaz (Bölüm 2). Zayıf sönümde fark küçüktür: $`\zeta = 0{,}1`$ için tepe $`\omega_0`$ değerinin %1 altındadır ve tam $`\omega_0`$ değerindeki genlik tepe değerinin %99,5'idir. “Rezonans tepesini bul” föyü bu yüzden $`\zeta = 0{,}25`$ ile kurulur; bu sönümde tepe $`\omega_0`$ değerinin %6,5 altındadır ve $`\omega_0`$ değerindeki genlik tepe değerinin %96,8'inde kalır. Föy, kararlı durumda ölçülen genliğin tepe değerinin en az %98'i olmasını ister; dolayısıyla doğal frekansta değil, onun altında tamamlanır.
 
 > **Yaygın yanılgı — “Köprüler uygun adım yürüyen askerler yüzünden yıkılır”**
 >
@@ -735,16 +739,17 @@ Bu değerler geliştirme makinesinde ölçülmüştür. Doğrulama sekmesindeki 
 - **Yalnızca viskoz sürtünme.** Kuru sürtünme ve hava direnci yoktur; sönüm kuvveti her hızda hızla doğru orantılıdır. Girdap akımı freni için bu, yalnızca düşük hızlarda geçerli bir yaklaşıklıktır [[25](#ref-25), [26](#ref-26)].
 - **Doğrusal, kütlesiz yay.** Yay kuvveti katı boya kadar tam doğrusaldır ve yayın kendi kütlesi yoktur. Çizilen yay ölçekli bir tasarım değildir: aynı geometri çelik telden yapılsaydı $`k = Gd^4/(8D^3N_a)`$ bağıntısı yaklaşık $`10^5`$ N/m verirdi [[31](#ref-31), [124](#ref-124)]. Düzeneğin metre ölçeğindeki boyutları görünürlük için seçilmiştir.
 - **Rijit durdurucular, sabit geri sıçrama katsayısı.** Çarpma anlıktır; temas süresi, hıza bağlı geri sıçrama ve tamponun biçim değiştirmesi modellenmemiştir.
-- **İdeal sürücü.** Sürücü, taşıyıcının hareketinden etkilenmeyen ideal bir kuvvet kaynağıdır.
+- **İdeal sürücü.** Sürücü, arabanın hareketinden etkilenmeyen ideal bir kuvvet kaynağıdır.
 
 <a id="sinirlar-sayisal"></a>
 
 ### Sayısal sonuçlar
 
-- **Enerji sapması birikir.** RK4 simplektik değildir; sapma zamanla büyür. Verilen değerler 60 saniyelik deneylere aittir; saatler süren bir çalıştırmada artık izlenmeli, gerekirse adım küçültülmeli ya da uyarlamalı yönteme geçilmelidir.
+- **Enerji sapması birikir.** RK4 simplektik değildir; sapma zamanla büyür. Verilen değerler 60 saniyelik deneylere aittir; saatler süren bir çalıştırmada kalıntı izlenmeli, gerekirse adım küçültülmeli ya da uyarlamalı yönteme geçilmelidir. Her iki değişiklik de deneyi baştan başlatır (Bölüm 4).
+- **Çözüm ıraksayabilir.** Düşük mertebeli bir yöntem ve iri bir adımla sarkaç zincirinin çözümü sonlu aralıktan çıkabilir. Deney o zaman durdurulur (Bölüm 4); hiçbir şey değiştirilmeden aynı çözücüyle yeniden başlatılırsa aynı anda yine durdurulur.
 - **Kaotik yörüngeler ufkun ötesinde tek tek anlamlı değildir.** Bölüm 5'te açıklandığı gibi, birkaç on saniyeden sonra gösterilen durum tam çözümün durumu değildir; anlamlı olan istatistiksel ve geometrik özelliklerdir.
 - **Lyapunov üsteli sonlu süreli bir kestirimdir** ve yörüngeye bağlıdır; bir düzeneğin “üsteli” olarak tek bir sayı verilemez.
-- **Gerçek zaman güvencesi yoktur.** Yavaş bir aygıtta ya da çok yüksek adım frekansında benzetim zamanı duvar saatinin gerisinde kalabilir; durum çubuğu bunu bildirir. Fiziksel sonuç etkilenmez.
+- **Gerçek zaman güvencesi yoktur.** Yavaş bir aygıt ya da yüksek bir adım frekansı bir karenin 0,1 saniyeden uzun sürmesine yol açtığında, karenin 0,1 saniyeyi aşan bölümü benzetime aktarılmaz ve benzetim zamanı duvar saatinin gerisinde kalır; durum çubuğu son başlatmadan beri bu kareleri sayar. Adım dizisi aynı kaldığı için fiziksel sonuç etkilenmez.
 - **Çalışma ortamları arası yinelenebilirlik sınanmamıştır** (Bölüm 4).
 
 <a id="sinirlar-gecerleme"></a>
@@ -776,7 +781,7 @@ Bu değerler geliştirme makinesinde ölçülmüştür. Doğrulama sekmesindeki 
 
 Kod üç katmana ayrılmıştır ve bağımlılıklar yalnızca aşağıya doğrudur. **Fizik çekirdeği** (src/physics) hiçbir çerçeveye bağlı değildir: integratörler, iki deneyin modelleri, Lyapunov kestirimi, ölçüm cihazları, spektrum çözümleyici ve doğrulama deneyleri saf fonksiyonlar ve küçük sınıflardır; tarayıcı olmadan sınanabilirler. **Çalışma zamanı** (src/sim) durumu taşır: sabit adımlı döngüyü yürütür, telemetriyi halka tamponlara yazar, sanal cihazları besler ve deney tanımını dosyaya ya da bağlantıya dönüştürür. **Gözlemciler** çalışma zamanını yalnızca okur: üç boyutlu sahne (src/scene), grafikler (src/ui/plots) ve React bileşenleri (src/ui).
 
-Sürekli durum (konumlar, hızlar, enerji terimleri) React durumunda tutulmaz. Sahne ve grafikler her canlandırma karesinde çalışma zamanından doğrudan okuyarak çizer; sayısal göstergeler ise saniyede en çok on kez yenilenir. Böylece fizik adımı, çizim ve arayüz birbirinin maliyetinden bağımsızdır. Parametreler, çalışma durumu ve başlangıç koşulları gibi kesikli durum, değişmez (immutable) bir nesne olarak yayımlanır ve bileşenler yalnızca kullandıkları dilime abone olur.
+Sürekli durum (konumlar, hızlar, enerji terimleri) React durumunda tutulmaz. Sahne ve grafikler her canlandırma karesinde çalışma zamanından doğrudan okuyarak çizer; sayısal göstergeler ise saniyede en çok on iki kez yenilenir. Böylece fizik adımı, çizim ve arayüz birbirinin maliyetinden bağımsızdır. Parametreler, çalışma durumu ve başlangıç koşulları gibi kesikli durum, değişmez (immutable) bir nesne olarak yayımlanır ve bileşenler yalnızca kullandıkları dilime abone olur.
 
 Sıcak yolda bellek ayrılmaz: integratörler çalışma dizilerini kendileri tutar, yayın sarmal geometrisi her karede aynı tamponun içinde analitik olarak güncellenir, vektör okları ve stroboskop görüntüleri önceden ayrılmış örneklerdir. Sahne yalnızca durum, kamera, katmanlar ya da görünüm boyutu değiştiğinde yeniden çizilir.
 
@@ -784,7 +789,7 @@ Sıcak yolda bellek ayrılmaz: integratörler çalışma dizilerini kendileri tu
 
 ### Sabit adımlı döngü
 
-Her canlandırma karesinin duvar saati süresi bir bütçeye eklenir; bütçe, tam olarak $`h = 1/f_s`$ büyüklüğünde adımlarla harcanır ve artan kısım bir sonraki kareye devreder [[70](#ref-70)]. Kare başına adım sayısı sınırlıdır; sekme arka plandayken biriken süre atılır. Bu düzenle durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $`h`$ değerine bağlıdır. Sınama paketi bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarında durumların bit düzeyinde eşit olduğu doğrulanır.
+Her canlandırma karesinin duvar saati süresi bir bütçeye eklenir; bütçe, tam olarak $`h = 1/f_s`$ büyüklüğünde adımlarla harcanır ve artan kısım bir sonraki kareye devreder [[70](#ref-70)]. Bir kare bütçeye en çok 0,1 s'lik duvar saati süresi ekler; kare başına adım sayısı böylece sınırlıdır (en yüksek adım frekansında ve zaman ölçeğinde 400). Daha uzun süren kare bu uzunluğa kırpılır ve durum çubuğunda sayılır; sekmenin arka planda geçirdiği süre ise atılır. Bu düzenle durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $`h`$ değerine bağlıdır. Sınama paketi bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarında durumların bit düzeyinde eşit olduğu doğrulanır.
 
 > **Not — Neden önemli**
 >
@@ -795,8 +800,8 @@ Her canlandırma karesinin duvar saati süresi bir bütçeye eklenir; bütçe, t
 ### Kalite güvencesi
 
 - TypeScript katı kipte derlenir; statik çözümleme (ESLint) uyarısız geçer.
-- 102 otomatik sınama vardır: doğrusal cebir, özel fonksiyonlar, integratörler, her iki model, ölçüm cihazları, çalışma zamanı, veri alışverişi ve on dört doğrulama deneyi. Deney föylerinin her biri için, föyün gerçekten ölçümle tamamlanabildiğini ve yanlış ayarla tamamlanamadığını gösteren bir sınama bulunur. İçerik de sınanır: kuram metninin iki dilde aynı yapıda olması, her atfın kaynakçada bulunması, her formülün dizilebilmesi ve föy ile doğrulama metinlerinin koddaki ölçüt ve satır sayılarıyla uyuşması.
-- Dışarıdan gelen veri (deney dosyası, paylaşım bağlantısı) tür ve aralık bakımından doğrulanır; geçersiz girdi reddedilir, aralık dışı sayılar sınırlanır.
+- 153 otomatik sınama vardır: doğrusal cebir, özel fonksiyonlar, integratörler, her iki model, ölçüm cihazları, çalışma zamanı, veri alışverişi ve on dört doğrulama deneyi; arayüz renklerinin karşıtlık oranları (ve bu bölümün onların verdiği değerleri doğru aktardığı), sayı girişinin okunması, saklanan tercihlerin doğrulanması ve spektrum göstergesinin kayıt ve tepe kuralları da sınanır. Her deney föyü için sınamalar, föyün öngörülen ölçümle tamamlandığını ve yanlış bir ayarla açık kaldığını gösterir. İçerik de sınanır: kuram metninin iki dilde aynı yapıda olması, her atfın kaynakçada bulunması, her formülün dizilebilmesi ve föy ile doğrulama metinlerinin koddaki ölçüt ve satır sayılarıyla uyuşması.
+- Dışarıdan gelen veri (deney dosyası, paylaşım bağlantısı) kullanılmadan önce doğrulanır. Yapısı yanlış olan ya da bilinmeyen bir yöntem, sunulan altı değerden başka bir adım frekansı ya da sonlu bir sayı olmayan bir değer içeren veri bütünüyle reddedilir. Aralığının dışındaki bir parametre en yakın sınıra çekilir; başlangıç koşullarına sayı alanlarının sınırları uygulanır: konum iki durdurucunun arasında, hız ±30 m/s, açılar ±1800°, açısal hızlar ±40 rad/s içinde kalır. Sınırı aşan bir açı tam turlar atılarak (−180°, 180°] aralığına indirgenir; böylece zincirin biçimi korunur. İşaretçiyle tutulan bir zincir de bırakıldığında aynı biçimde saklanır. Tarayıcının yerel deposunda saklanan tercihler de aynı biçimde doğrulanır: arayüzün kullanamayacağı bir değerin yerine varsayılanı alınır.
 - Sürekli tümleştirme her değişiklikte tür denetimi, statik çözümleme, sınamalar ve üretim derlemesini çalıştırır.
 
 <a id="mimari-karsilastirma"></a>
@@ -816,9 +821,9 @@ Aşağıdaki çizelgede soldaki sayılar önceki kodun değiştirilmeden çalı�
 | Durdurucuya çarpma | Sekme kare hızına bağlı: $`x(3\,\mathrm{s}) = 2{,}19`$ m (60 Hz), $`4{,}05`$ m (120 Hz) | Olay konumlama; çarpışma anındaki hata $`9\times10^{-13}`$ s |
 | Enerji muhasebesi (sürülen, durduruculu deney) | Çarpışma kayıpları ve sürücü işi kayıt dışı; gösterilen “toplam” 60 s'de 0,49 J'den 4414 J'ye çıkar | Beş terimli defter; 27 çarpışmada bağıl kalıntı $`1{,}3\times10^{-12}`$ |
 | Sarkaçta ısı | $`E_0 - E_\mathrm{mek}`$ olarak tanımlı; $`g`$ değişince 4,78 J'den 66,63 J'ye sıçrar | Ayrı durum değişkeni olarak integre edilir; parametre değişiminde defter yeniden tabanlanır |
-| Dışa aktarılan CSV | Satırların %99,6'sında enerji başka bir ana ait; 4,3 s'lik kayıt | Her satır tek bir an; 600 s'ye kadar kayıt; tam üstveri |
+| Dışa aktarılan CSV | Satırların %99,6'sında enerji başka bir ana ait; 4,3 s'lik kayıt | Her satır tek bir an; 60 000 satıra kadar kayıt (varsayılan adım frekansında 600 s); parametreleri, başlangıç koşullarını, yöntemi ve adımı veren başlık |
 | Yay geometrisi | Karede yeniden oluşturulur: 1031 KiB bellek, 0,57 ms | Aynı tamponda güncellenir; bellek ayrılmaz |
-| Otomatik sınama | Yok | 102 sınama, 14'ü doğrulama deneyi |
+| Otomatik sınama | Yok | 153 sınama, 14'ü doğrulama deneyi |
 | Erişilebilirlik | ARIA özniteliği, klavye denetimi ve iletişim kutusu anlamı yok | Bütün denetimler klavyeyle kullanılır; görünür odak; etiketli denetimler |
 | İngilizce arayüz | 68 çeviri anahtarının 19'u kullanılıyor | İki dil tam; anahtar eşliği derleme zamanında denetlenir |
 
@@ -832,23 +837,23 @@ Aşağıdaki çizelgede soldaki sayılar önceki kodun değiştirilmeden çalı�
 
 ### Yerleşim: parametre, sahne ve grafik aynı anda
 
-Bir laboratuvar tezgâhında bir düğme çevrilirken osiloskoba bakılır. Bu nedenle üç bölge aynı anda görünür tutulur: ortada deney düzeneği, altında grafik paneli, sağında parametre paneli. Bir parametre değiştirildiğinde etkisi hem sahnede hem grafikte hem de ölçüm çizelgesinde aynı anda izlenir; birini görmek için ötekini kapatmak gerekmez. Sayısal durum, alt kenardaki durum çubuğunda sürekli görünür: çözücü, adım, enerji defteri kalıntısı ve (osilatörde) analitik çözümden sapma.
+Bir laboratuvar tezgâhında bir düğme çevrilirken osiloskoba bakılır. Bu nedenle üç bölge aynı anda görünür tutulur: ortada deney düzeneği, altında grafik paneli, sağında parametre paneli. Bir parametre değiştirildiğinde etkisi sahnede ve grafiklerde aynı anda izlenir; ölçüm çizelgesi ile deney föyleri sağdaki panelin öteki sekmeleridir. 1024 pikselden dar bir pencerede bu panel, sahnenin üzerinde açılan bir yan panele dönüşür. Alt kenardaki durum çubuğu sayısal durumu gösterir: enerji defteri kalıntısı her genişlikte, (osilatörde) analitik çözümden sapma 1024 pikselden, çözücü, adım ve mertebe ise 1280 pikselden başlayarak görünür; daha dar bir pencerede üst çubuktaki çözücü düğmesi yöntemi ve 640 pikselden başlayarak adım frekansını yazmayı sürdürür. Durum çubuğu geciken kareleri bildirirken ya da uyarlamalı çözücüyü önerirken bu bildirimler göstergelerin önüne geçer.
 
-Geri bildirim süreleri için yerleşik eşikler gözetilir: yaklaşık 0,1 s altındaki tepki anlık algılanır, 1 s düşünce akışını bozmadan fark edilir, 10 s dikkatin korunabildiği sınırdır [[127](#ref-127), [128](#ref-128), [129](#ref-129)]. Parametre değişikliği aynı karede uygulanır; uzun süren tek işlem olan frekans taraması ve doğrulama paketi ilerleme göstererek parçalar hâlinde yürütülür ve iptal edilebilir.
+Geri bildirim süreleri için yerleşik eşikler gözetilir: yaklaşık 0,1 s altındaki tepki anlık algılanır, 1 s düşünce akışını bozmadan fark edilir, 10 s dikkatin korunabildiği sınırdır [[127](#ref-127), [128](#ref-128), [129](#ref-129)]. Parametre değişikliği aynı karede uygulanır; uzun süren iki işlem, frekans taraması ve doğrulama paketi, ilerleme göstererek parçalar hâlinde yürütülür; tarama iptal edilebilir.
 
 <a id="arayuz-manipulasyon"></a>
 
 ### Doğrudan manipülasyon
 
-Cisimler işaretçiyle tutulur, sürüklenir ve bırakılır; ilgilenilen nesne sürekli görünürdür, eylem fizikseldir ve sonucu anında geri alınabilir [[130](#ref-130), [131](#ref-131)]. Araba tek serbestlik derecelidir: işaretçi ışınının ray eksenine en yakın noktası alınır, böylece eşleme her kamera açısında tutarlıdır. Sarkaç bağlantısı, kendi dönme düzlemiyle kesişim noktasına yöneltilir. Bırakma anındaki hız, son 90 ms'deki işaretçi hareketinden kestirilir ve cisme aktarılır; işaretçi durdurulup bırakılırsa cisim durgun bırakılır.
+Cisimler işaretçiyle tutulur, sürüklenir ve bırakılır; ilgilenilen nesne sürekli görünürdür, eylem fizikseldir ve sonucu anında geri alınabilir [[130](#ref-130), [131](#ref-131)]. Araba tek serbestlik derecelidir: işaretçi ışınının ray eksenine en yakın noktası alınır, böylece eşleme her kamera açısında tutarlıdır. Sarkaç bağlantısı, işaretçi ışınının bağlantının kendi dönme düzlemini kestiği noktaya yöneltilir. Bırakma anındaki hız, son 90 ms'deki işaretçi hareketinden kestirilir ve cisme aktarılır; işaretçi durdurulup bırakılırsa cisim durgun bırakılır.
 
-Sürükleme tek giriş yolu değildir. Aynı başlangıç koşulları parametre panelindeki sayı alanlarından klavyeyle ve kesin değerle girilebilir; bu hem erişilebilirlik hem de yinelenebilirlik gereğidir. “Sıfırla” komutu varsayılan değerlere değil, yürütülmekte olan deneyin başlangıç koşullarına döner.
+Sürükleme tek giriş yolu değildir. Aynı başlangıç koşulları parametre panelindeki sayı alanlarından klavyeyle ve kesin değerle girilebilir; bu hem erişilebilirlik hem de yinelenebilirlik gereğidir. “Başlangıç koşullarına dön” komutu (R tuşu) varsayılan değerlere değil, yürütülmekte olan deneyin başlangıç koşullarına döner.
 
 <a id="arayuz-renk"></a>
 
 ### Nicelik–renk eşlemesi
 
-Bir fiziksel nicelik her yerde aynı renkle gösterilir: konum ve açı gök mavisi, hız mavimsi yeşil, net kuvvet turuncu, yay kuvveti sarı, sönüm kuvveti kırmızımsı mor, sürücü kuvveti ve ağırlık kızıl turuncudur; kinetik enerji hızın, potansiyel enerji konumun rengini taşır. Renkler Okabe–Ito paletinden alınmıştır [[102](#ref-102), [103](#ref-103)]. Kuzey Avrupa kökenli erkeklerin %8'e varan bölümünde ve kadınların %0,5'inde yaygın kırmızı–yeşil renk görme farklılığı bulunduğundan [[103](#ref-103)] bu seçim süsleme değil okunabilirlik koşuludur; bilimsel görsellerde renk seçiminin veriyi çarpıtabildiği de belgelenmiştir [[132](#ref-132)]. Hiçbir bilgi yalnızca renkle verilmez: her vektörün simgesi ve sayısal değeri, her eğrinin etiketi vardır.
+Bir fiziksel nicelik her yerde aynı renkle gösterilir: konum ve açı gök mavisi, hız mavimsi yeşil, net kuvvet turuncu, yay kuvveti sarı, sönüm kuvveti kırmızımsı mor, sürücü kuvveti ve ağırlık kızıl turuncudur; kinetik enerji hızın, potansiyel enerji konumun rengini taşır. Birden çok bağlantılı bir zincirde ise her bağlantının sahnede, grafiklerde ve çizelgelerde koruduğu kendi rengi vardır (birinci bağlantı gök mavisi, ötekiler sırasıyla turuncu, mavimsi yeşil, sarı, mavi ve kızıl turuncu). Renkler Okabe–Ito paletinden alınmıştır [[102](#ref-102), [103](#ref-103)]. Kuzey Avrupa kökenli erkeklerin %8'e varan bölümünde ve kadınların %0,5'inde yaygın kırmızı–yeşil renk görme farklılığı bulunduğundan [[103](#ref-103)] bu seçim süsleme değil okunabilirlik koşuludur; bilimsel görsellerde renk seçiminin veriyi çarpıtabildiği de belgelenmiştir [[132](#ref-132)]. Hiçbir nicelik yalnızca rengiyle tanıtılmaz: her vektörün simgesi ve sayısal değeri, her eğrinin etiketi vardır.
 
 <a id="arayuz-vektor"></a>
 
@@ -862,28 +867,37 @@ Düzenekler ölçü araçlarıyla birlikte çizilir: osilatörde tezgâh kenarı
 
 ### Grafikler
 
-Her grafikte birimli ve sayısal eksenler, 1–2–5 aralıklı bölmeler ve silik bir ızgara vardır; süsleme yoktur [[133](#ref-133)]. Nicel karşılaştırmalar, algısal olarak en doğru okunan kodlamayla, ortak bir ölçek üzerindeki konumla yapılır [[134](#ref-134)]. Eksen sınırları veriyi titremeden izler: veri aralığın dışına çıkınca hemen genişler, daralınca yavaşça toplanır. Açılar $`(-\pi, \pi]`$ aralığına sarılır ve eğri sarma noktasında kesilir; böylece yanıltıcı düşey çizgiler oluşmaz. Zaman ekseni kare sayısına değil benzetim zamanına bağlıdır; telemetri çözücü hızından bağımsız olarak yaklaşık 100 Hz'te örneklenir.
+Her grafikte birimli ve sayısal eksenler, 1–2–5 aralıklı bölmeler ve silik bir ızgara vardır; süsleme yoktur [[133](#ref-133)]. Nicel karşılaştırmalar, algısal olarak en doğru okunan kodlamayla, ortak bir ölçek üzerindeki konumla yapılır [[134](#ref-134)]. Eksen sınırları veriyi titremeden izler: veri aralığın dışına çıkınca hemen genişler, daralınca yavaşça toplanır. Açılar $`(-\pi, \pi]`$ aralığına sarılır ve eğri sarma noktasında kesilir; böylece yanıltıcı düşey çizgiler oluşmaz. Zaman ekseni kare sayısına değil benzetim zamanına bağlıdır; telemetri 300 Hz ve üzerindeki adım frekanslarında 100 Hz'te, 60 Hz ve 120 Hz'te ise her adımda kaydedilir.
 
 <a id="arayuz-erisilebilirlik"></a>
 
 ### Erişilebilirlik
 
-Hedef, WCAG 2.2'nin AA düzeyidir [[135](#ref-135)]. Bu belgeden alınan ve tasarımı doğrudan belirleyen ölçütler şunlardır:
+Hedef, WCAG 2.2'nin AA düzeyidir [[135](#ref-135)]. Bu belgeden alınan ve tasarımı en doğrudan belirleyen ölçütler, arayüzün bunları karşılamak için yaptıklarıyla birlikte aşağıda sıralanmıştır. Karşıtlık oranları renk değerlerinden, o belgedeki bağıntıyla hesaplanmıştır; otomatik sınamalar aynı hesabı yineler, 4,5:1 ile 3:1 eşiklerinin adı geçen yüzeylerde sağlandığını ve aşağıda verilen değerlerin renk değerlerinden çıkan değerler olduğunu denetler.
 
-- **1.4.3 Karşıtlık (en az):** metin için en az 4,5:1. Kullanılan en soluk metin renginin panel zeminiyle karşıtlığı 6:1'in üzerindedir.
-- **1.4.11 Metin dışı karşıtlık:** denetim sınırları ve grafik öğeleri için en az 3:1.
-- **1.4.1 Renk kullanımı:** bilgi yalnızca renkle iletilmez; durumlar simge ve sözcükle birlikte verilir.
-- **2.1.1 Klavye:** bütün işlevler klavyeyle kullanılabilir; sürüklemenin karşılığı sayı alanlarıdır.
-- **2.4.7 Görünür odak:** tek ve tutarlı bir odak göstergesi.
-- **2.5.8 Hedef boyutu (en az):** etkileşimli hedefler en az 24×24 CSS pikseli.
+- **1.1.1 Metin dışı içerik:** dizilen her formül iki kez üretilir: görsel dizgi olarak ve yardımcı teknolojilerin okuduğu MathML olarak. Sahnenin ve grafiklerin metin açıklaması vardır; bunlarda ölçülen büyüklükler Ölçümler sekmesinde metin olarak listelenir.
+- **1.4.3 Karşıtlık (en az):** metin için en az 4,5:1. Üç ana metin rengi her yüzeyde en az 5,17:1 verir. Etiketlerde ve birimlerde kullanılan en soluk metin rengi panel zemininde 5,50:1, göründüğü her yüzeyde en az 4,76:1 verir; en küçük değer, üzerine gelinen bir öğenin zeminindedir. Seçili öğelerin ve ipuçlarının zemini olan en açık yüzeyde bu renk yalnızca 4,21:1 verirdi; orada kullanılmaz.
+- **1.4.11 Metin dışı karşıtlık:** bir denetimi ya da durumunu tanıtan öğeler için en az 3:1. Bu işi yalnızca bir çerçevenin ya da bir işaretin gördüğü yerlerde, her yüzeyde en az 3,06:1 (panel zemininde 4,01:1) veren tek bir renk kullanılır: sayı alanlarının, anahtarın ve föylerdeki seçenek halkalarının çerçevesi, kaydırıcıların yolu, bölmeli denetimlerde seçili öğenin çerçevesi ve grafik panelinin tutamağındaki çizgi. Odak halkası en az 6,43:1, kaydırma çubuklarının tutamağı en az 3,10:1 verir. Basılı durumdaki bir aç-kapa düğmesi, vurgu renginde ve hem kendi renkli dolgusuna hem çevresindeki yüzeye karşı en az 3,59:1 veren bir çerçeve taşır. Bölgeleri ayıran ve düğmeleri çevreleyen ince çizgiler bilerek 3:1'in altında tutulmuştur (1,1:1 ile 1,6:1 arasında); bunlar süslemedir, bir düğmeyi etiketi tanıtır.
+- **1.4.1 Renk kullanımı:** aşağıdaki durumlar yalnızca renkle değil, ikinci bir işaretle de belirtilir. Çalışma durumu renkli noktanın yanında sözcükle yazılır; varsayılan dışı bir çözücü, çözücü düğmesinin rengiyle birlikte simgesini de değiştirir; bölmeli denetimde seçili öğe ile basılı durumdaki bir aç-kapa düğmesi (sahne katmanları, ses) çerçeve taşır; kuram okuyucusunun içindekiler listesinde bulunulan başlık, ön kenarında bir çizgi taşır; reddedilen bir girdi hata rengindeki çerçeveye ek olarak simgeli bir iletiyle bildirilir; doğrulama sonuçları ile tamamlanan föyler bir onay ya da çarpı işaretiyle ve ekran okuyucular için bir metinle belirtilir.
+- **2.1.1 Klavye:** bütün denetimlere klavyeyle ulaşılabilir ve hepsi klavyeyle kullanılabilir; grafik panelinin tutamağı da bunlardandır. Vektörlerin çizildiği sarkaç kütlesi, vektör ölçeğinin yanındaki seçiciyle belirlenir; kütleye tıklamak da aynı işi görür. Sahne odaktayken ok tuşları kamerayı 3°'lik adımlarla döndürür, Shift ile birlikte kaydırır; bakış yönleri ve yakınlaştırma için düğmeler vardır. İşaretçi gerektiren tek işlev bir cismin tutulup fırlatılmasıdır; karşılığı, başlangıç koşullarının sayı alanlarıdır.
+- **2.1.4 Karakter tuşu kısayolları:** tek tuşlu kısayollar kısayollar penceresinden kapatılabilir; boşluk tuşu çalışmayı sürdürür. Bir iletişim kutusu, menü ya da liste açıkken, bir alana yazı yazılırken ve bir cisim tutulurken kısayollar işlem yapmaz.
+- **2.4.7 Görünür odak:** odaktaki denetim vurgu renginde 2 piksellik bir çerçeve taşır; sayı alanı odağı vurgu rengindeki kenarlığıyla, menü ise vurgulanan satırıyla gösterir.
+- **2.4.11 Odağın örtülmemesi (en az):** başlığı yerinde sabit kalan iki kaydırılabilir panel en az bu başlığın yüksekliği kadar pay bırakır; böylece odak aldığı için görünüme getirilen bir denetim başlığın altında kalmaz.
+- **2.5.7 Sürükleme hareketleri:** sürükleyerek yapılan her ayar sürüklemeden de yapılabilir: grafik panelinin yüksekliği, tıklandıkça dört yükseklik (180, 288, 404 ve 520 piksel) arasında sırayla geçen tutamağıyla; bir kaydırıcı, yoluna tıklanarak ya da sayı alanından; kamera, bakış düğmeleri ve ok tuşlarıyla; bir cismin konumu, başlangıç koşullarının sayı alanlarından ayarlanır.
+- **2.5.8 Hedef boyutu (en az):** denetimler her iki yönde en az 24 CSS pikseli olacak biçimde boyutlandırılmıştır. En küçükleri 24 piksel yüksekliğindedir: küçük bölmeli denetimlerin öğeleri, anahtar (40×24), gök cisimlerinin yerçekimini seçen düğmeler, grafik panelinin tutamağı, durum çubuğundaki öneri ve kaynakça listesindeki bağlantılar. Metin içindeki atıf numaraları, ölçütün cümle içindeki hedefler için tanıdığı ayrıcalığa dayanır.
+- **3.3.1 Hata tanımlama:** sayı alanı, sayı olmayan bir metni kabul etmez: metin alanda kalır, alan işaretlenir ve izin verilen aralığı bildiren bir ileti görünür; ileti ekran okuyuculara da duyurulur. Aralığın dışındaki bir sayı en yakın sınıra çekilir: alan kullanılan değeri gösterir, ekran okuyuculara da duyurulan kısa bir not aralığı ve kullanılan sınırı bildirir.
 
-İletişim kutuları odağı içeride tutar, Escape ile kapanır ve odağı tetikleyen denetime geri verir. Belge dili arayüz diliyle birlikte değişir. İşletim sisteminde hareket azaltma tercihi açıksa arayüz geçişleri kapatılır; benzetimin kendisi içerik olduğu için sürer ve her an duraklatılabilir.
+İletişim kutuları odağı içeride tutar, Escape ile kapanır ve odağı kendilerini açan denetime geri verir. Saat, canlı duyurusu kapalı bir zamanlayıcı olarak sunulur; böylece süren bir deney ekran okuyucuyu kesintiye uğratmaz. Belge dili arayüz diliyle birlikte değişir. 1024 pikselin altında üst çubuk, denetimleri kesmek yerine alt satırlara geçirir. Üst çubukta ancak 1536 pikselden başlayarak yer bulan zaman ölçeği parametre panelinin başında da ayarlanır; 1'den farklı olduğu sürece sahnedeki ölçek anahtarında, sahnenin her boyutunda yazılı olarak görünür. İşletim sisteminde hareket azaltma tercihi açıksa arayüz geçişleri algılanamayacak kadar kısaltılır, kamera yeni bir bakışa süzülerek değil doğrudan geçer ve döndürme denetiminin eylemsizliği kalkar; deneyin hareketi içeriğin kendisi olduğu için sürer ve her an duraklatılabilir.
+
+> **Sınırlılık — Bu önlemlerin kapsamadıkları**
+>
+> Bir denetim ve dört gösterge yalnızca daha geniş pencerelerde bulunur: zaman grafiğindeki “Analitik çözümü göster” anahtarı ile üst çubuktaki saat 768 pikselden, durum çubuğunda kare hızı 640 pikselden (geciken kareler bildirilirken 768 pikselden), kare başına fizik süresi 1280 pikselden ve kayıtlı örnek sayısı 1536 pikselden başlayarak görünür. Daha dar bir pencerede, ya da pencereyi CSS pikseli cinsinden o kadar daraltan bir yakınlaştırma düzeyinde, bunlara ulaşılamaz. 640 pikselden dar bir pencerede durum çubuğu, bir bildirim gösterdiği sürece, çalışma durumunu yalnızca noktanın rengiyle verir; o durumda çalıştırma düğmesi durumu simgesiyle gösterir, ıraksamayı ise sahnenin üstündeki uyarı sözcükle bildirir. Bir cisim yalnızca işaretçiyle tutulup fırlatılabilir. Bu raporda ekran okuyucuyla ya da yardımcı teknolojiye gereksinim duyan kişilerle yapılmış bir sınama yoktur; yukarıdaki ifadeler kaynak koda ve hesaba dayanır.
 
 <a id="arayuz-ses"></a>
 
 ### Sonifikasyon
 
-Mekanik frekanslar (2 Hz'in altında) işitme aralığının çok altındadır; bu yüzden ses bir kayıt değil, parametre eşlemeli bir işitsel göstergedir [[104](#ref-104)]. Osilatörde ton yüksekliği konumu (3,5 m başına bir oktav), ses şiddeti hızı izler; durdurucuya çarpma, çarpma hızıyla orantılı kısa bir vuruşla duyulur. Sarkaçta birinci bağlantının düşeyden her geçişi, yöne göre farklı perdede bir tıkla işaretlenir: tek sarkaç saat gibi düzenli, kaotik zincir düzensiz duyulur. Ses yalnızca kullanıcı açtığında, benzetim yürürken ve sekme görünürken çalar.
+Mekanik frekanslar (en çok birkaç hertz) işitme aralığının çok altındadır; bu yüzden ses bir kayıt değil, parametre eşlemeli bir işitsel göstergedir [[104](#ref-104)]. Osilatörde ton yüksekliği konumu (3,5 m başına bir oktav), ses şiddeti hızı izler; durdurucuya çarpma, çarpma hızıyla orantılı kısa bir vuruşla duyulur. Sarkaçta birinci bağlantının düşeyden her geçişi, yöne göre farklı perdede bir tıkla işaretlenir: tek sarkaç saat gibi düzenli, kaotik zincir düzensiz duyulur. Ses yalnızca kullanıcı açtığında, benzetim yürürken ve sekme görünürken çalar.
 
 <a id="pedagoji"></a>
 
@@ -903,7 +917,7 @@ Bu bulgular benzetimin kendiliğinden öğrettiği anlamına gelmez. 62 giriş d
 
 ### Deney föylerinin kuruluşu
 
-Föyler tahmin et – gözle – açıkla düzenini izler [[140](#ref-140), [141](#ref-141)]: öğrenci önce föyün sorusuna verilen yanıtlardan birini seçerek bir öngörüde bulunur, sonra düzeneği kurar ve ölçer; föy tamamlandığında öngörüsü gözlemiyle karşılaştırılır ve ölçümü kuramla bağdaştıran, kaynak gösteren bir açıklama açılır. Ölçütler, öğrenci parametreleri değiştirirken arka planda sürekli değerlendirilir. Bir föyün tamamlanması bir sürgünün konumuna değil ölçüme bağlıdır: periyot sıfır geçişlerinden, sönüm ardışık tepe değerlerinden, aşım ve yerleşme süresi basamak yanıtından, öngörülebilirlik ikiz yörüngenin ayrılmasından ve Lyapunov kestiriminden okunur. Örneğin “kritik sönüm” föyü, sönüm oranının 1 olarak ayarlanmasıyla değil, ölçülen aşımın %0,5'in altında ve yerleşme süresinin kritik değerin %10'u içinde olmasıyla tamamlanır; yarı değerdeki sönüm aşım ölçütünde, iki katı sönüm süre ölçütünde başarısız olur.
+Föyler tahmin et – gözle – açıkla düzenini izler [[140](#ref-140), [141](#ref-141)]: öğrenci önce föyün sorusuna verilen yanıtlardan birini seçerek bir öngörüde bulunur, sonra düzeneği kurar ve ölçer; föy tamamlandığında öngörüsü gözlemiyle karşılaştırılır ve ölçümü kuramla bağdaştıran, kaynak gösteren bir açıklama açılır. Ölçütler, öğrenci parametreleri değiştirirken arka planda sürekli değerlendirilir. Bir föyün tamamlanması bir kaydırıcının konumuna değil ölçüme bağlıdır: periyot sıfır geçişlerinden, sönüm ardışık tepe değerlerinden, aşım ve yerleşme süresi basamak yanıtından, öngörülebilirlik ikiz yörüngenin ayrılmasından ve Lyapunov kestiriminden okunur. Örneğin “kritik sönüm” föyü, sönüm oranının 1 olarak ayarlanmasıyla değil, ölçülen aşımın en çok %0,5 ve ölçülen yerleşme süresinin kritik sönümdeki değerin en çok 1,1 katı olmasıyla tamamlanır; kritik sönümün yarısı aşım ölçütünde, iki katı ise süre ölçütünde başarısız olur. Bir parametre değiştirilmeden önce yapılmış ölçüm sayılmaz: basamak yanıtı bir sonraki bırakıştan başlayarak yeniden ölçülür.
 
 Aynı olgu birden çok gösterimle sunulur — hareketin kendisi, zaman serisi, faz portresi, enerji defteri, spektrum — ve gösterimler renk ve simge bakımından tutarlıdır; çoklu gösterimlerin öğrenmeye katkısı, aralarındaki bağın açık kurulmasına bağlıdır [[142](#ref-142)]. Bilişsel yükü sınırlamak için [[143](#ref-143), [144](#ref-144)] ayrıntılı türetimler ayrı bir okuyucuya alınmış, çalışma yüzeyinde yalnızca o anda gereken denetimler ve göstergeler bırakılmıştır.
 
@@ -948,25 +962,25 @@ $`m = 2`$ kg, $`k = 24{,}5`$ N/m, $`c = 0{,}55`$ N·s/m, $`F_0 = 1`$ N. Osilatö
 
 | Büyüklük | Ölçülen | Başvuru değeri | Hata | Tolerans | Sonuç |
 | --- | ---: | ---: | ---: | ---: | :---: |
-| $`A(0{,}5\,\omega_0)`$ | 0.05434726 m | 0.05434726 m | 9.43×10⁻¹⁰ | ≤ 1.00×10⁻⁵ | geçti |
+| $`A(0{,}5\,\omega_0)`$ | 0.05434726 m | 0.05434726 m | 9.48×10⁻¹⁰ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(0{,}5\,\omega_0)`$ | 0.05233312 rad | 0.05233312 rad | 4.15×10⁻⁹ | ≤ 0.001 | geçti |
 | $`A(0{,}9\,\omega_0)`$ | 0.2013308 m | 0.2013308 m | 2.43×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(0{,}9\,\omega_0)`$ | 0.3562965 rad | 0.3562964 rad | 1.09×10⁻⁸ | ≤ 0.001 | geçti |
-| $`A(\omega_0)`$ | 0.5194805 m | 0.5194805 m | 2.61×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
-| $`\delta(\omega_0)`$ | 1.570796 rad | 1.570796 rad | 8.93×10⁻⁹ | ≤ 0.001 | geçti |
+| $`A(\omega_0)`$ | 0.5194805 m | 0.5194805 m | 2.62×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
+| $`\delta(\omega_0)`$ | 1.570796 rad | 1.570796 rad | 8.74×10⁻⁹ | ≤ 0.001 | geçti |
 | $`A(1{,}1\,\omega_0)`$ | 0.1797363 m | 0.1797363 m | 3.30×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(1{,}1\,\omega_0)`$ | 2.751157 rad | 2.751157 rad | 1.63×10⁻⁹ | ≤ 0.001 | geçti |
-| $`A(1{,}5\,\omega_0)`$ | 0.03250888 m | 0.03250888 m | 1.04×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
+| $`A(1{,}5\,\omega_0)`$ | 0.03250888 m | 0.03250888 m | 1.05×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(1{,}5\,\omega_0)`$ | 3.047585 rad | 3.047585 rad | 3.28×10⁻⁸ | ≤ 0.001 | geçti |
 
 ### A.4 Basamak yanıtı: aşım ve yerleşme süresi
 
-$`m = 4`$ kg, $`k = 36`$ N/m, $`x_0 = 2`$ m. Kritik sönümde aşım olmamalı ve %2 yerleşme süresi $`5{,}834/\omega_0`$ değerine eşit olmalıdır; $`\zeta = 0{,}5`$ için aşım $`e^{-\pi\zeta/\sqrt{1-\zeta^2}}`$ değerini vermelidir. Yerleşme süresi 1 ms çözünürlükle ölçülür.
+$`m = 4`$ kg, $`k = 36`$ N/m, $`x_0 = 2`$ m. Kritik sönümde aşım olmamalı ve %2 yerleşme süresi $`5{,}834/\omega_0`$ değerine eşit olmalıdır; $`\zeta = 0{,}5`$ için aşım $`e^{-\pi\zeta/\sqrt{1-\zeta^2}}`$ değerini vermelidir. Basamak yanıtı ölçer her 1 ms'lik adımın sonunda bir örnek alır ve %2'lik banda giriş anını iki örnek arasında doğrusal ara değerlemeyle bulur.
 
 | Büyüklük | Ölçülen | Başvuru değeri | Hata | Tolerans | Sonuç |
 | --- | ---: | ---: | ---: | ---: | :---: |
 | Aşım, $`\zeta = 1`$ | 0 | — | — | ≤ 1.00×10⁻⁹ | geçti |
-| %2 yerleşme süresi, $`\zeta = 1`$ | 1.944 s | 1.944641 s | 3.29×10⁻⁴ | ≤ 0.002 | geçti |
+| %2 yerleşme süresi, $`\zeta = 1`$ | 1.944641 s | 1.944641 s | 1.47×10⁻⁷ | ≤ 0.002 | geçti |
 | Aşım, $`\zeta = 0{,}5`$ | 0.1630335 | 0.1630335 | 1.79×10⁻⁷ | ≤ 1.00×10⁻⁴ | geçti |
 
 ### A.5 Durdurucuya çarpma: an, hız ve enerji kaybı

@@ -2,8 +2,6 @@
 export const measurements = {
   columns: {
     quantity: "Büyüklük",
-    value: "Değer",
-    unit: "Birim",
     theory: "Kuram",
     measured: "Ölçülen",
     deviation: "Sapma",
@@ -30,8 +28,10 @@ export const measurements = {
         periodD: "Sönümlü periyot",
         logDecrement: "Logaritmik azalma",
         qualityFactor: "Kalite faktörü",
-        decayTime: "Sönüm zaman sabiti",
+        decayTime: "En yavaş geçici terimin zaman sabiti",
       },
+      decayNote:
+        "τ, en yavaş sönen geçici terimin zaman sabitidir: ζ ≤ 1 için 1/γ, ζ > 1 için 1/(γ − √(γ² − ω₀²)).",
       missing: "Çizgi (—): bu sönüm değerinde (c = 0 ya da ζ ≥ 1) tanımsız ya da sonsuz olan büyüklük.",
     },
 
@@ -54,24 +54,26 @@ export const measurements = {
         transient: "geçici rejim",
       },
       empty:
-        "Bu durumda kuramla karşılaştırılacak bir ölçüm yok: sürücü kapalı, hareket salınımlı değil ve araba durgun hâlden bırakılmadı.",
+        "Bu durumda kuramla karşılaştırılacak bir ölçüm yok: sürücü kapalı, hareket salınımlı değil ve bir bırakış ölçümü sürmüyor (araba durgun hâlden bırakılmadı ya da bırakıştan sonra bir parametre değişti).",
       impactNote:
         "Araba bu koşuda durdurucuya çarptı. Doğrusal kuram durdurucuları içermez; aşağıdaki sapmalar bu nedenle geçerli bir karşılaştırma değildir.",
       periodNote: (count: number) =>
-        `Periyot, x'in aynı yöndeki ardışık sıfır geçişleri arasındaki süredir. Son aralıkların ortalaması ve ± işaretiyle örneklem standart sapması verilir; şimdiye dek ${count} aralık ölçüldü.`,
+        `Periyot, x'in aynı yöndeki ardışık sıfır geçişleri arasındaki süredir; yukarı ve aşağı yönlü geçişler ayrı ayrı izlendiğinden her periyot iki aralık verir. Verilen değer en son aralıkların (en çok 12) ortalamasıdır; ± işaretinden sonra örneklem standart sapması gelir. Şimdiye dek ${count} aralık ölçüldü.`,
       decrementNote: "Λ, ardışık pozitif tepe değerlerinden ölçülür; sönüm oranı ondan türetilir:",
-      steadyNote: (limit: string, drift: string | null, wait: string | null) =>
-        `Kararlı durum için iki koşul aranır: ardışık iki salınımın tepeden tepeye genlikleri arasındaki bağıl fark < %${limit} olmalı ve son değişiklikten (yeniden başlatma, parametre değişikliği, çarpma) bu yana geçici rejimin %${limit} düzeyine inmesine yetecek süre, ln(100/${limit})/γ, geçmiş olmalıdır. ${
-          drift === null ? "Fark henüz ölçülemedi." : `Şu anki fark: %${drift}.`
+      steadyNote: (limit: string, drift: string | null, centre: string | null, wait: string | null) =>
+        `Kararlı durum için üç koşul aranır: ardışık iki salınımın tepeden tepeye genlikleri arasındaki bağıl fark < %${limit}; salınım merkezinin (son tepe ile son çukurun ortası) bir salınımdan ötekine kaymasının genliğe oranı < %${limit}; son değişiklikten (yeniden başlatma, parametre değişikliği, çarpma) bu yana geçen süre ≥ ln(100/${limit})·τ. Bu süre, en yavaş geçici terimin %${limit} düzeyine inmesine yeter; τ yukarıdaki çizelgedeki zaman sabitidir. ${
+          drift === null || centre === null
+            ? "Genlik farkı ve merkez kayması henüz ölçülemedi."
+            : `Şu anki genlik farkı: %${drift}; merkez kayması: %${centre}.`
         }${wait === null ? "" : wait === "0" ? " Bekleme süresi doldu." : ` Kalan bekleme süresi: ${wait} s.`}`,
       responseNote:
         "Ölçülen genlik, son tepe ile son çukur arasındaki farkın yarısıdır; ölçülen faz gecikmesi, x'in son tepesi anındaki sürücü fazıdır.",
       undampedNote:
-        "c = 0 iken geçici çözüm sönmez: ölçüt anlık olarak sağlansa bile kalıcı bir kararlı durum oluşmaz.",
+        "c = 0 iken geçici çözüm sönmez ve bekleme süresi sonsuzdur: ilk iki koşul anlık olarak sağlansa bile kararlı durum oluşmaz, gösterge “geçici rejim”de kalır.",
       stepNote: (x0: string, percent: string) =>
-        `Aşım ve yerleşme süresi son bırakıştan (x₀ = ${x0} m) beri ölçülür. Aşım, |x₀| değerinin yüzdesidir; yerleşme süresi, |x| ≤ %${percent}·|x₀| bandına kalıcı olarak girilen andır. Bırakıştan sonra bir parametre değiştirildiyse kuramla karşılaştırma geçerli değildir.`,
+        `Aşım ve yerleşme süresi son bırakıştan (x₀ = ${x0} m) başlayarak ölçülür. Aşım, dengenin öbür yanında ulaşılan en uç örneğin |x₀| değerine oranıdır. Yerleşme süresi, |x| ≤ %${percent}·|x₀| bandına kalıcı olarak girilen andır; bu an, bandın dışındaki son örnek ile içindeki ilk örnek arasında doğrusal ara değerlemeyle bulunur ve yanıt bantta bu sürenin dörtte biri kadar (en az 0,25 s) kaldıktan sonra gösterilir. Bir parametre değiştiğinde ölçüm sona erer; bir sonraki bırakışta yeniden başlar.`,
       stepTheoryNote:
-        "Kuramsal aşım ζ ≥ 1 için sıfırdır. Kuramsal yerleşme süresi yalnızca kritik sönüm (ζ = 1) için verilir:",
+        "Kuramsal aşım ζ < 1 için aşağıdaki bağıntıyla verilir, ζ ≥ 1 için sıfırdır. Kuramsal yerleşme süresi, geçerli sönüm oranında kapalı çözümün aynı banda kalıcı olarak girdiği andır ve bu çözüm üzerinde ikiye bölme yöntemiyle bulunur; ζ = 1 için aşağıdaki değere eşittir, c = 0 iken tanımsızdır.",
     },
 
     driven: {
@@ -140,7 +142,7 @@ export const measurements = {
       isochronism:
         "Eşzamanlılık, yani periyodun genlikten bağımsız olması, yalnızca küçük açılarda geçerlidir: genlik büyüdükçe T/T₀ oranı 1'den uzaklaşır.",
       measureNote: (count: number) =>
-        `Ölçülen periyot, sin θ'nın alt konumdaki aynı yönlü ardışık sıfır geçişleri arasındaki süredir. Son aralıkların ortalaması ve ± işaretiyle örneklem standart sapması verilir; şimdiye dek ${count} aralık ölçüldü. Ölçülen genlik, θ'nın son iki dönüm noktası arasındaki farkın yarısıdır.`,
+        `Ölçülen periyot, sin θ'nın alt konumdaki aynı yönlü ardışık sıfır geçişleri arasındaki süredir; salınımda her periyot iki aralık, dönmede her tur bir aralık verir. Verilen değer en son aralıkların (en çok 12) ortalamasıdır; ± işaretinden sonra örneklem standart sapması gelir. Şimdiye dek ${count} aralık ölçüldü. Ölçülen genlik, θ'nın son iki dönüm noktası arasındaki farkın yarısıdır.`,
       dampingNote:
         "Mafsal sönümü açıkken enerji azalır: kuramsal değerler anlık enerjiye, ölçülenler geçmiş salınımlara aittir; aradaki fark sönümden kaynaklanır.",
       zeroGravity:
@@ -152,7 +154,6 @@ export const measurements = {
       frequenciesCaption: "Normal modların frekansları ve periyotları",
       shapesCaption: "Mod biçimleri: en büyüğü 1 olacak biçimde ölçeklenmiş açı genlikleri",
       columns: {
-        mode: "Mod",
         omega: "Açısal frekans (rad/s)",
         frequency: "Frekans (Hz)",
         period: "Periyot (s)",
@@ -163,7 +164,7 @@ export const measurements = {
         `Bunlar, «${first}» ve «${second}» hazır deneylerinin uyardığı iki frekanstır.`,
       measured: "Ölçülen θ₁ periyodu",
       measuredNote: (count: number) =>
-        `sin θ₁'in alt konumdaki aynı yönlü ardışık sıfır geçişlerinden, ${count} aralık üzerinden ölçülür. Yalnızca tek bir mod uyarıldığında T_k ile karşılaştırılabilir; büyük bir ± değeri hareketin tek frekanslı olmadığını gösterir.`,
+        `sin θ₁'in alt konumdaki aynı yönlü ardışık sıfır geçişlerinden ölçülür: en son aralıkların (en çok 12) ortalamasıdır ve her periyot iki aralık verir; şimdiye dek ${count} aralık ölçüldü. Yalnızca tek bir mod uyarıldığında T_k ile karşılaştırılabilir; büyük bir ± değeri hareketin tek frekanslı olmadığını gösterir.`,
       zeroGravity: "g = 0 iken geri çağırıcı kuvvet yoktur; küçük salınım modları tanımlı değildir.",
     },
 
@@ -198,11 +199,11 @@ export const measurements = {
         lyapunovTime: "Lyapunov süresi (kestirim)",
         twinOffset: "İkizin başlangıç farkı",
         separation: "İkizle açısal ayrılma",
-        divergence: (threshold: string) => `Ayrılmanın ${threshold} rad'a ulaştığı an (gözlenen)`,
+        divergence: (threshold: string) => `Ayrılmanın ${threshold} rad'a ulaşma süresi (gözlenen)`,
         horizon: "Öngörü ufku (kestirim)",
       },
       note: (threshold: string) =>
-        `λ, Benettin yöntemiyle hesaplanan sonlu zaman kestirimidir: ortalama süresi uzadıkça yakınsar, düzenli harekette sıfıra doğru azalır. Öngörü ufku, δ₀ büyüklüğündeki bir başlangıç farkının a = ${threshold} rad'a büyümesi için geçecek sürenin kaba bir kestirimidir:`,
+        `λ, Benettin yöntemiyle hesaplanan sonlu zaman kestirimidir: ortalama süresi uzadıkça yakınsar, düzenli harekette sıfıra doğru azalır. Gözlenen süre, ikizin son bırakıldığı andan (yeniden başlatma ya da ikizin açılması) sayılır. Öngörü ufku, δ₀ büyüklüğündeki bir başlangıç farkının a = ${threshold} rad'a büyümesi için geçecek sürenin kaba bir kestirimidir:`,
       twinOff: "İkiz yörünge kapalı; ayrılma ölçülmüyor.",
     },
 

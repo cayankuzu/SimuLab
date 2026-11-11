@@ -5,12 +5,7 @@ export const plotsState: typeof source = {
   phase: {
     history: (seconds: number) => `The trajectory of the last ${seconds} seconds is drawn; older parts are fainter.`,
     stop: "stop",
-    stopsNote: "When a mechanical stop falls inside the visible range, its position is marked by a vertical dashed line.",
-    twinNote: "The dashed purple curve is the trajectory of the twin pendulum.",
     separatrix: "separatrix",
-    separatrixHint:
-      "Separatrix of the undamped pendulum: ω = ±2√(g/L) cos(θ/2). Trajectories inside it are librations, those outside are rotations.",
-    separatrixNote: "The dashed orange curve is the separatrix, which divides libration from rotation.",
   },
 
   energy: {

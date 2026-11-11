@@ -4,8 +4,6 @@ import type { measurements as source } from "../tr/measurements";
 export const measurements: typeof source = {
   columns: {
     quantity: "Quantity",
-    value: "Value",
-    unit: "Unit",
     theory: "Theory",
     measured: "Measured",
     deviation: "Deviation",
@@ -32,8 +30,10 @@ export const measurements: typeof source = {
         periodD: "Damped period",
         logDecrement: "Logarithmic decrement",
         qualityFactor: "Quality factor",
-        decayTime: "Decay time constant",
+        decayTime: "Time constant of the slowest transient term",
       },
+      decayNote:
+        "τ is the time constant of the slowest-decaying transient term: 1/γ for ζ ≤ 1 and 1/(γ − √(γ² − ω₀²)) for ζ > 1.",
       missing: "A dash (—) marks a quantity that is undefined or infinite at this damping (c = 0 or ζ ≥ 1).",
     },
 
@@ -56,24 +56,26 @@ export const measurements: typeof source = {
         transient: "transient",
       },
       empty:
-        "There is no measurement to compare with theory in this situation: the drive is off, the motion is not oscillatory and the carriage was not released from rest.",
+        "There is no measurement to compare with theory in this situation: the drive is off, the motion is not oscillatory and no step response is being measured (the carriage was not released from rest, or a parameter was changed after the release).",
       impactNote:
         "The carriage hit a stop during this run. The linear theory does not include the stops, so the deviations below are not a valid comparison.",
       periodNote: (count: number) =>
-        `The period is the time between successive zero crossings of x in the same direction. The mean of the latest intervals is given, with the sample standard deviation after the ± sign; ${count} intervals measured so far.`,
+        `The period is the time between successive zero crossings of x in the same direction; upward and downward crossings are followed separately, so every period yields two intervals. The value is the mean of the latest intervals (at most 12), with the sample standard deviation after the ± sign; ${count} intervals measured so far.`,
       decrementNote: "Λ is measured from successive positive peaks; the damping ratio follows from it:",
-      steadyNote: (limit: string, drift: string | null, wait: string | null) =>
-        `Steady state requires two conditions: the relative difference between the peak-to-peak amplitudes of two successive oscillations must be < ${limit} %, and the time the transient needs to decay to ${limit} %, ln(100/${limit})/γ, must have passed since the last change (restart, parameter change, impact). ${
-          drift === null ? "The difference cannot be measured yet." : `Current difference: ${drift} %.`
+      steadyNote: (limit: string, drift: string | null, centre: string | null, wait: string | null) =>
+        `Steady state requires three conditions: the relative difference between the peak-to-peak amplitudes of two successive oscillations is < ${limit} %; the shift of the centre of the oscillation (the mid-point between the latest peak and the latest trough) from one oscillation to the next is < ${limit} % of the amplitude; the time since the last change (restart, parameter change, impact) is ≥ ln(100/${limit})·τ. In that time the slowest transient term decays to ${limit} %; τ is the time constant in the table above. ${
+          drift === null || centre === null
+            ? "The amplitude difference and the shift of the centre cannot be measured yet."
+            : `Current amplitude difference: ${drift} %; shift of the centre: ${centre} %.`
         }${wait === null ? "" : wait === "0" ? " The waiting time has passed." : ` Remaining waiting time: ${wait} s.`}`,
       responseNote:
         "The measured amplitude is half the difference between the latest peak and the latest trough; the measured phase lag is the drive phase at the instant of the latest peak of x.",
       undampedNote:
-        "With c = 0 the transient never decays: even if the criterion is met momentarily, no lasting steady state forms.",
+        "With c = 0 the transient never decays and the waiting time is infinite: even if the first two conditions are met momentarily, no steady state forms and the indicator stays at “transient”.",
       stepNote: (x0: string, percent: string) =>
-        `Overshoot and settling time are measured since the last release (x₀ = ${x0} m). The overshoot is a percentage of |x₀|; the settling time is the instant after which |x| stays within ${percent} % of |x₀|. If a parameter was changed after the release, the comparison with theory is not valid.`,
+        `Overshoot and settling time are measured from the last release (x₀ = ${x0} m). The overshoot is the most extreme sample beyond equilibrium as a fraction of |x₀|. The settling time is the instant after which |x| stays within ${percent} % of |x₀|; it is located by linear interpolation between the last sample outside the band and the first one inside, and it is shown once the response has stayed inside for a quarter of that time (at least 0.25 s). A parameter change ends the measurement; it starts again with the next release.`,
       stepTheoryNote:
-        "The theoretical overshoot is zero for ζ ≥ 1. A theoretical settling time is given only for critical damping (ζ = 1):",
+        "The theoretical overshoot follows from the relation below for ζ < 1 and is zero for ζ ≥ 1. The theoretical settling time is the instant at which the closed-form solution for the current damping ratio enters the same band for good; it is found on that solution by bisection. For ζ = 1 it equals the value below; for c = 0 it is undefined.",
     },
 
     driven: {
@@ -142,7 +144,7 @@ export const measurements: typeof source = {
       isochronism:
         "Isochronism, the independence of the period from the amplitude, holds only for small angles: the ratio T/T₀ moves away from 1 as the amplitude grows.",
       measureNote: (count: number) =>
-        `The measured period is the time between successive same-direction zero crossings of sin θ at the bottom. The mean of the latest intervals is given, with the sample standard deviation after the ± sign; ${count} intervals measured so far. The measured amplitude is half the difference between the last two turning points of θ.`,
+        `The measured period is the time between successive same-direction zero crossings of sin θ at the bottom; libration yields two intervals per period, rotation one per turn. The value is the mean of the latest intervals (at most 12), with the sample standard deviation after the ± sign; ${count} intervals measured so far. The measured amplitude is half the difference between the last two turning points of θ.`,
       dampingNote:
         "With joint damping the energy decreases: the theoretical values belong to the instantaneous energy, the measured ones to past swings; the difference is due to the damping.",
       zeroGravity:
@@ -154,7 +156,6 @@ export const measurements: typeof source = {
       frequenciesCaption: "Frequencies and periods of the normal modes",
       shapesCaption: "Mode shapes: angle amplitudes scaled so that the largest is 1",
       columns: {
-        mode: "Mode",
         omega: "Angular frequency (rad/s)",
         frequency: "Frequency (Hz)",
         period: "Period (s)",
@@ -165,7 +166,7 @@ export const measurements: typeof source = {
         `These are the two frequencies excited by the ready-made experiments “${first}” and “${second}”.`,
       measured: "Measured period of θ₁",
       measuredNote: (count: number) =>
-        `Measured over ${count} intervals from successive same-direction zero crossings of sin θ₁ at the bottom. It can be compared with T_k only when a single mode is excited; a large ± value shows that the motion is not single-frequency.`,
+        `Measured from successive same-direction zero crossings of sin θ₁ at the bottom: the mean of the latest intervals (at most 12), two intervals per period; ${count} intervals measured so far. It can be compared with T_k only when a single mode is excited; a large ± value shows that the motion is not single-frequency.`,
       zeroGravity: "With g = 0 there is no restoring force; small-oscillation modes are not defined.",
     },
 
@@ -200,11 +201,11 @@ export const measurements: typeof source = {
         lyapunovTime: "Lyapunov time (estimate)",
         twinOffset: "Initial offset of the twin",
         separation: "Angular separation from the twin",
-        divergence: (threshold: string) => `Instant at which the separation reached ${threshold} rad (observed)`,
+        divergence: (threshold: string) => `Time for the separation to reach ${threshold} rad (observed)`,
         horizon: "Prediction horizon (estimate)",
       },
       note: (threshold: string) =>
-        `λ is a finite-time estimate computed with Benettin's method: it converges as the averaging time grows and decays towards zero for regular motion. The prediction horizon is a rough estimate of the time an initial difference δ₀ needs to grow to a = ${threshold} rad:`,
+        `λ is a finite-time estimate computed with Benettin's method: it converges as the averaging time grows and decays towards zero for regular motion. The observed time counts from the instant the twin was last released (a restart, or switching the twin on). The prediction horizon is a rough estimate of the time an initial difference δ₀ needs to grow to a = ${threshold} rad:`,
       twinOff: "The twin trajectory is off; the separation is not being measured.",
     },
 

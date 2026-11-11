@@ -1,6 +1,7 @@
 "use client";
 
 import { FlaskConical, Gauge, SlidersHorizontal } from "lucide-react";
+import { TASKS } from "@/sim/tasks";
 import { useT } from "@/i18n";
 import { MeasurementsPanel } from "../inspector/MeasurementsPanel";
 import { ParametersPanel } from "../inspector/ParametersPanel";
@@ -38,8 +39,21 @@ export function Inspector() {
           <Tab value="tasks">
             <FlaskConical className="size-3.5" />
             {t.parameters.tabs.tasks}
-            {completed > 0 ? <span className="num text-[11px] text-ink-3">{completed}</span> : null}
-            {taskActive ? <span aria-hidden className="size-1.5 rounded-full bg-accent" /> : null}
+            {/* The bare count and the dot are abbreviations for the eye; the name of the tab spells them out. */}
+            {completed > 0 ? (
+              <>
+                <span aria-hidden className="num text-[11px] text-ink-3">
+                  {completed}
+                </span>
+                <span className="sr-only">{t.tasks.progress(completed, TASKS.length)}</span>
+              </>
+            ) : null}
+            {taskActive ? (
+              <>
+                <span aria-hidden className="size-1.5 rounded-full bg-accent" />
+                <span className="sr-only"> — {t.tasks.status.active}</span>
+              </>
+            ) : null}
           </Tab>
         </TabList>
       </div>
@@ -49,7 +63,12 @@ export function Inspector() {
       <TabPanel value="measurements" className="relative min-h-0 flex-1 overflow-y-auto outline-none">
         <MeasurementsPanel />
       </TabPanel>
-      <TabPanel value="tasks" className="relative min-h-0 flex-1 overflow-y-auto outline-none">
+      {/*
+        An open task sheet has a bar that sticks to the top of this scroller: 41 px (6 + 28 + 6 px and
+        a 1 px border). The scroll padding keeps an element that receives the keyboard focus, and its
+        focus ring, clear of that bar (WCAG 2.4.11).
+      */}
+      <TabPanel value="tasks" className="relative min-h-0 flex-1 scroll-pt-12 overflow-y-auto outline-none">
         <TasksPanel />
       </TabPanel>
     </Tabs>

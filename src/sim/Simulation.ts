@@ -130,12 +130,30 @@ export const PEND_CH = {
 export const POINCARE_CH = { theta: 0, momentum: 1, count: 2 } as const;
 export const RESPONSE_CH = { omega: 0, amplitude: 1, phaseLag: 2, count: 3 } as const;
 
-/** Ten minutes of telemetry at 100 Hz. */
+/**
+ * Rows of telemetry kept per experiment: ten minutes at 100 Hz, the recording
+ * rate from a step rate of 300 Hz up. At 60 and 120 Hz every step is recorded,
+ * so the record then spans 1000 s and 500 s.
+ */
 const SERIES_CAPACITY = 60_000;
 const POINCARE_CAPACITY = 20_000;
-const MAX_FRAME_SECONDS = 0.1;
-const MAX_STEPS_PER_FRAME = 800;
+/**
+ * Longest wall-clock time a single frame may contribute. A longer frame is
+ * cut, so simulated time falls behind instead of the step count exploding; at
+ * most 0.1 s x time scale 2 x 2000 Hz = 400 steps are taken per frame. The
+ * status bar quotes this figure (status.droppedHint), and a test holds the two together.
+ */
+export const MAX_FRAME_SECONDS = 0.1;
 const LYAPUNOV_INTERVAL = 0.01;
+/** A state component beyond this magnitude (or NaN) counts as a diverged solution. */
+const STATE_LIMIT = 1e7;
+const SPEED_LIMIT = 1e6;
+/**
+ * Limits of the initial conditions. They apply to every way of setting them:
+ * the number fields, a throw with the pointer and imported experiment files
+ * or shared links.
+ */
+export const INITIAL_LIMITS = { speed: 30, angularSpeed: 40, angle: 10 * Math.PI } as const;
 /** Largest velocity a body can be given by throwing it with the pointer. */
 const MAX_THROW_SPEED = 12; // m/s for the carriage, rad/s for a pendulum link
 /** Twin separation [rad] at which the two pendulums count as "diverged". */
@@ -183,6 +201,41 @@ function padAngles(values: readonly number[] | undefined, fill = 0): number[] {
   return out;
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+/** Initial conditions of the oscillator limited to the rail and to the admissible speed; non-finite values become 0. */
+function sanitiseOscInitial(initial: { x?: number; v?: number } | undefined): { x: number; v: number } {
+  const x = typeof initial?.x === "number" && Number.isFinite(initial.x) ? initial.x : 0;
+  const v = typeof initial?.v === "number" && Number.isFinite(initial.v) ? initial.v : 0;
+  return {
+    x: clamp(x, OSC_GEOMETRY.xMin, OSC_GEOMETRY.xMax),
+    v: clamp(v, -INITIAL_LIMITS.speed, INITIAL_LIMITS.speed),
+  };
+}
+
+/**
+ * An angle within the limit as it is; beyond it reduced by whole turns into
+ * (-pi, pi]. A clamp would change the configuration (10 pi is the rod hanging
+ * straight down), whereas whole turns keep it, also for a hostile value.
+ */
+function limitAngle(theta: number): number {
+  return Math.abs(theta) <= INITIAL_LIMITS.angle ? theta : wrapAngle(theta);
+}
+
+/** Initial conditions of the chain, padded to the maximum number of links and limited in angle and angular speed. */
+function sanitisePendInitial(
+  initial: { thetas?: readonly number[]; omegas?: readonly number[] } | undefined,
+): { thetas: number[]; omegas: number[] } {
+  return {
+    thetas: padAngles(initial?.thetas).map(limitAngle),
+    omegas: padAngles(initial?.omegas).map((omega) =>
+      clamp(omega, -INITIAL_LIMITS.angularSpeed, INITIAL_LIMITS.angularSpeed),
+    ),
+  };
+}
+
 export function defaultSimState(): SimState {
   const oscillator = OSCILLATOR_PRESETS[0];
   return {
@@ -214,7 +267,10 @@ export interface PerformanceStats {
   stepsPerFrame: number;
   /** Smoothed wall-clock cost of physics per frame [ms]. */
   physicsMs: number;
-  /** Frames in which the step budget was exhausted and simulated time was dropped. */
+  /**
+   * Frames of the current run that lasted longer than the frame cap, so that
+   * simulated time fell behind the wall clock (a slow device, or a stall).
+   */
   droppedFrames: number;
 }
 
@@ -267,6 +323,8 @@ export class Simulation {
   separation = 0;
   /** Simulated time at which the twin separation first exceeded DIVERGENCE_THRESHOLD, or null. */
   divergenceTime: number | null = null;
+  /** Simulated time at which the twin was last launched; its separation is tracked from then on [s]. */
+  twinSince = 0;
   private shadow: Float64Array;
   private pendAdvancer!: Advancer;
   private twinAdvancer!: Advancer;
@@ -283,7 +341,19 @@ export class Simulation {
   readonly perf: PerformanceStats = { fps: 60, stepsPerFrame: 0, physicsMs: 0, droppedFrames: 0 };
   private dragging = false;
   private accumulator = 0;
-  private stepIndex = 0;
+  /** Steps taken since the last restart, per experiment: the sampling grid starts at the release. */
+  private oscStepIndex = 0;
+  private pendStepIndex = 0;
+  /** State before the step in progress, restored if the step leaves the finite range or throws. */
+  private readonly oscBackup = new Float64Array(OSC.SIZE);
+  private pendBackup = new Float64Array(0);
+  private twinBackup = new Float64Array(0);
+  /** Experiment whose solver step has begun and not yet completed (see restoreOpenStep). */
+  private openStep: ModuleId | null = null;
+  /** Experiment whose solution diverged; it is restarted before the "diverged" state is cleared. */
+  private divergedModule: ModuleId | null = null;
+  /** Solver replaced by a preset that demonstrates a particular method; restored by the next preset. */
+  private presetSolverBackup: SolverSettings | null = null;
   private sampleStride = 1;
   private renormStride = 1;
   private raf = 0;
@@ -296,7 +366,8 @@ export class Simulation {
       ...base,
       oscillator: sanitiseOscillator(base.oscillator),
       pendulum: sanitisePendulum(base.pendulum),
-      pendInitial: { thetas: padAngles(base.pendInitial.thetas), omegas: padAngles(base.pendInitial.omegas) },
+      oscInitial: sanitiseOscInitial(base.oscInitial),
+      pendInitial: sanitisePendInitial(base.pendInitial),
       status: "ok",
       epoch: 0,
     };
@@ -386,12 +457,19 @@ export class Simulation {
       for (const listener of this.frameListeners) listener(this, dt);
     };
     this.raf = requestAnimationFrame(tick);
+    if (typeof document !== "undefined") document.addEventListener("visibilitychange", this.onVisibilityChange);
   }
 
   stop(): void {
     if (this.raf !== 0) cancelAnimationFrame(this.raf);
     this.raf = 0;
+    if (typeof document !== "undefined") document.removeEventListener("visibilitychange", this.onVisibilityChange);
   }
+
+  /** The time spent in a background tab is not a slow frame: start measuring afresh when the page is shown again. */
+  private readonly onVisibilityChange = (): void => {
+    if (typeof document !== "undefined" && document.visibilityState === "visible") this.lastFrameTime = performance.now();
+  };
 
   /**
    * Spends `realDt` seconds of wall-clock time (scaled by the time scale) in
@@ -401,16 +479,11 @@ export class Simulation {
     this.perf.stepsPerFrame = 0;
     if (!this.state.running || this.dragging || this.state.status !== "ok") return;
     const h = this.stepSize;
+    if (realDt > MAX_FRAME_SECONDS) this.perf.droppedFrames++;
     this.accumulator += Math.min(realDt, MAX_FRAME_SECONDS) * this.state.timeScale;
-    let steps = Math.floor(this.accumulator / h + 1e-9);
+    const steps = Math.floor(this.accumulator / h + 1e-9);
     if (steps <= 0) return;
-    if (steps > MAX_STEPS_PER_FRAME) {
-      steps = MAX_STEPS_PER_FRAME;
-      this.accumulator = 0;
-      this.perf.droppedFrames++;
-    } else {
-      this.accumulator -= steps * h;
-    }
+    this.accumulator -= steps * h;
     this.run(steps);
   }
 
@@ -420,27 +493,53 @@ export class Simulation {
     this.run(Math.max(1, Math.round(this.state.solver.rateHz / 60)));
   }
 
+  /**
+   * Takes `steps` solver steps of the active experiment. The solution is
+   * tested after every step, and for the pendulum the test includes the twin
+   * and the Lyapunov shadow, which go through the same equations: a run that
+   * has left the finite range ends in the state "diverged". An exception from
+   * the physics layer ends the run in the same way and never leaves the frame
+   * loop.
+   */
   private run(steps: number): void {
     const h = this.stepSize;
-    if (this.state.module === "oscillator") {
-      for (let i = 0; i < steps; i++) this.stepOscillator(h);
-      if (!Number.isFinite(this.osc.x) || !(Math.abs(this.osc.v) < 1e6)) this.halt();
-    } else {
-      for (let i = 0; i < steps; i++) this.stepPendulum(h);
-      const y = this.pend.y;
-      const n = this.model.n;
-      for (let i = 0; i < 2 * n; i++) {
-        if (!(Math.abs(y[i]) < 1e7)) {
-          this.halt();
-          break;
-        }
+    let taken = 0;
+    try {
+      if (this.state.module === "oscillator") {
+        while (taken < steps && this.stepOscillator(h)) taken++;
+      } else {
+        while (taken < steps && this.stepPendulum(h)) taken++;
       }
+      if (taken < steps) this.halt();
+    } catch {
+      this.restoreOpenStep();
+      this.halt();
     }
-    this.perf.stepsPerFrame = steps;
+    this.perf.stepsPerFrame = taken;
     this.frame++;
   }
 
+  /**
+   * After an exception: if it came from inside a solver step, the state
+   * vectors may be partly advanced (the reference already moved, the twin not
+   * yet, the clock not at all). They are put back to the state before that
+   * step, as for a non-finite result. An exception from the book-keeping
+   * after a completed step leaves the consistent state as it is.
+   */
+  private restoreOpenStep(): void {
+    const open = this.openStep;
+    this.openStep = null;
+    if (open === "oscillator") {
+      // The right-hand side of the oscillator is plain arithmetic and cannot throw; restored for symmetry.
+      this.osc.y.set(this.oscBackup);
+    } else if (open === "pendulum") {
+      this.pend.y.set(this.pendBackup);
+      if (this.state.twin.enabled) this.twin.y.set(this.twinBackup);
+    }
+  }
+
   private halt(): void {
+    this.divergedModule = this.state.module;
     this.update({ running: false, status: "diverged" });
   }
 
@@ -469,17 +568,30 @@ export class Simulation {
   /* Oscillator                                                        */
   /* ================================================================ */
 
-  private stepOscillator(h: number): void {
+  /**
+   * One solver step; false if the solution has left the finite range. In that
+   * case nothing is recorded and the last valid state is put back, so that the
+   * scene and the read-outs of a halted run show numbers, not NaN.
+   */
+  private stepOscillator(h: number): boolean {
     const osc = this.osc;
+    this.oscBackup.set(osc.y);
+    this.openStep = "oscillator";
     osc.step(this.oscAdvancer, h);
+    this.openStep = null;
+    if (!Number.isFinite(osc.x) || !(Math.abs(osc.v) < SPEED_LIMIT)) {
+      osc.y.set(this.oscBackup);
+      return false;
+    }
     if (osc.impactCount !== this.impactsSeen || osc.contact !== this.contactSeen) {
       // The closed-form reference is only valid between discontinuities.
       this.impactsSeen = osc.impactCount;
       this.contactSeen = osc.contact;
       this.rebaseExact();
     }
-    this.stepIndex++;
-    if (this.stepIndex % this.sampleStride === 0) this.recordOscillator();
+    this.oscStepIndex++;
+    if (this.oscStepIndex % this.sampleStride === 0) this.recordOscillator();
+    return true;
   }
 
   private rebaseExact(): void {
@@ -550,27 +662,73 @@ export class Simulation {
     this.rebaseExact();
     this.oscAdvancer.reset();
     this.accumulator = 0;
+    this.oscStepIndex = 0;
+    this.perf.droppedFrames = 0;
     this.recordOscillator();
+    this.clearDivergence("oscillator");
     if (notify) this.update({ epoch: this.state.epoch + 1, status: "ok" });
+  }
+
+  /**
+   * Called when `restarted` starts afresh. The state "diverged" is one flag
+   * for both experiments, so it may only be cleared once the experiment that
+   * actually diverged has been restarted as well; otherwise its blown-up
+   * state would be resumed.
+   */
+  private clearDivergence(restarted: ModuleId): void {
+    const diverged = this.divergedModule;
+    this.divergedModule = null;
+    if (diverged === null || diverged === restarted) return;
+    if (diverged === "pendulum") this.restartPendulum(false);
+    else this.restartOscillator(false);
   }
 
   /* ================================================================ */
   /* Pendulum                                                          */
   /* ================================================================ */
 
-  private stepPendulum(h: number): void {
+  /** True while the reference, the twin (if shown) and the Lyapunov shadow are all within the finite range. */
+  private pendulumFinite(): boolean {
+    const n = this.model.n;
+    const y = this.pend.y;
+    const twin = this.state.twin.enabled ? this.twin.y : null;
+    const shadow = this.shadow;
+    for (let i = 0; i < 2 * n; i++) {
+      if (!(Math.abs(y[i]) < STATE_LIMIT)) return false;
+      if (twin !== null && !(Math.abs(twin[i]) < STATE_LIMIT)) return false;
+      if (!(Math.abs(shadow[i]) < STATE_LIMIT)) return false;
+    }
+    return true;
+  }
+
+  /** One solver step; false if any of the trajectories has left the finite range (nothing is recorded then). */
+  private stepPendulum(h: number): boolean {
     const { model, pend, twin } = this;
     const derivative = model.derivative;
     const n = model.n;
 
-    pend.evaluations += this.pendAdvancer.advance(derivative, pend.t, pend.y, h);
-    if (this.state.twin.enabled) {
-      this.twinAdvancer.advance(derivative, pend.t, twin.y, h);
-      twin.t += h;
+    if (this.pendBackup.length !== pend.y.length) {
+      this.pendBackup = new Float64Array(pend.y.length);
+      this.twinBackup = new Float64Array(pend.y.length);
     }
+    this.pendBackup.set(pend.y);
+    if (this.state.twin.enabled) this.twinBackup.set(twin.y);
+
+    this.openStep = "pendulum";
+    pend.evaluations += this.pendAdvancer.advance(derivative, pend.t, pend.y, h);
+    if (this.state.twin.enabled) this.twinAdvancer.advance(derivative, pend.t, twin.y, h);
     this.shadowAdvancer.advance(derivative, pend.t, this.shadow, h);
+    if (!this.pendulumFinite()) {
+      // Put the last valid state back (see stepOscillator); the shadow is re-seeded by the next restart.
+      this.openStep = null;
+      pend.y.set(this.pendBackup);
+      if (this.state.twin.enabled) twin.y.set(this.twinBackup);
+      return false;
+    }
     pend.t += h;
-    this.stepIndex++;
+    if (this.state.twin.enabled) twin.t = pend.t;
+    this.openStep = null;
+    this.pendStepIndex++;
 
     if (n === 2) {
       // Poincare section theta_2 = 0 (mod 2 pi), crossed with theta_2 increasing.
@@ -590,10 +748,11 @@ export class Simulation {
       this.previousMomentum1 = momentum1;
     }
 
-    if (this.stepIndex % this.renormStride === 0) {
+    if (this.pendStepIndex % this.renormStride === 0) {
       this.lyapunov.renormalise(pend.y, this.shadow, this.renormStride * h);
     }
-    if (this.stepIndex % this.sampleStride === 0) this.recordPendulum();
+    if (this.pendStepIndex % this.sampleStride === 0) this.recordPendulum();
+    return true;
   }
 
   private recordPendulum(): void {
@@ -642,6 +801,7 @@ export class Simulation {
     this.lyapunov.seed(pend.y, this.shadow);
     this.separation = this.state.twin.enabled ? Math.abs(this.state.twin.offset) : 0;
     this.divergenceTime = null;
+    this.twinSince = pend.t;
     this.previousSection = Math.sin(pend.y[1] ?? 0);
     this.previousTheta1 = pend.y[0];
     this.previousMomentum1 = model.n === 2 ? model.canonicalMomentum(pend.y, 0) : 0;
@@ -667,7 +827,10 @@ export class Simulation {
     this.pendSeries.clear();
     this.clearPendulumInstruments();
     this.accumulator = 0;
+    this.pendStepIndex = 0;
+    this.perf.droppedFrames = 0;
     this.recordPendulum();
+    this.clearDivergence("pendulum");
     if (notify) this.update({ epoch: this.state.epoch + 1, status: "ok" });
   }
 
@@ -676,7 +839,8 @@ export class Simulation {
   /* ================================================================ */
 
   setModule(module: ModuleId): void {
-    if (module === this.state.module) return;
+    // While a body is held, the release must act on the experiment it belongs to.
+    if (module === this.state.module || this.dragging) return;
     this.accumulator = 0;
     this.update({ module });
   }
@@ -696,13 +860,48 @@ export class Simulation {
     this.update({ timeScale });
   }
 
+  /**
+   * Selects the integrator and its step. A trajectory is defined by one
+   * method and one step, and that is also all an experiment file records, so
+   * a change starts both experiments afresh instead of continuing a run whose
+   * telemetry, ledger and error statistics would belong to two integrators.
+   */
   setSolver(solver: SolverSettings): void {
-    const diverged = this.state.status !== "ok";
-    this.state = { ...this.state, solver };
+    // An explicit choice replaces whatever a demonstration preset installed.
+    this.presetSolverBackup = null;
+    this.installSolver(solver, true);
+  }
+
+  private installSolver(solver: SolverSettings, notify: boolean): void {
+    const current = this.state.solver;
+    if (solver.method === current.method && solver.rateHz === current.rateHz && this.state.status === "ok") return;
+    // A preset that prescribes its own solver ("Euler drift") is no longer the experiment that runs once
+    // another solver is installed, so it no longer stays marked as the active preset.
+    const own = OSCILLATOR_PRESETS.find((preset) => preset.id === this.state.scenario.oscillator)?.solver;
+    const scenario =
+      own && (own.method !== solver.method || own.rateHz !== solver.rateHz) ? this.withoutScenario("oscillator") : this.state.scenario;
+    this.state = { ...this.state, solver, scenario };
     this.configureSolver();
-    // A run that blew up cannot be continued with a better method: start it again.
-    if (diverged) this.reset();
-    else this.update({});
+    this.restartOscillator(false);
+    this.restartPendulum(false);
+    this.divergedModule = null;
+    if (notify) this.update({ epoch: this.state.epoch + 1, status: "ok" });
+  }
+
+  /**
+   * A preset may demonstrate a particular solver (explicit Euler at 60 Hz).
+   * The next preset without one restores the solver that was replaced, so
+   * that every preset remains a complete, reproducible experiment.
+   */
+  private applyPresetSolver(override: SolverSettings | undefined): void {
+    if (override) {
+      this.presetSolverBackup ??= this.state.solver;
+      this.installSolver(override, false);
+    } else if (this.presetSolverBackup) {
+      const previous = this.presetSolverBackup;
+      this.presetSolverBackup = null;
+      this.installSolver(previous, false);
+    }
   }
 
   /** Restarts the active experiment from its stored initial conditions. */
@@ -717,16 +916,15 @@ export class Simulation {
     this.state = { ...this.state, oscillator: next };
     this.rebaseExact();
     this.oscMeter.reset();
+    // A step response measured before the change says nothing about the new parameters.
+    this.stepMeter.reset(this.osc.t, 0);
     this.lastMaximumTime = Number.NEGATIVE_INFINITY;
     this.update({ scenario: this.withoutScenario("oscillator") });
   }
 
   setOscillatorInitial(patch: Partial<OscillatorInitial>): void {
-    const { xMin, xMax } = OSC_GEOMETRY;
-    const merged = { ...this.state.oscInitial, ...patch };
-    const x = Math.min(xMax, Math.max(xMin, Number.isFinite(merged.x) ? merged.x : 0));
-    const v = Math.min(30, Math.max(-30, Number.isFinite(merged.v) ? merged.v : 0));
-    this.state = { ...this.state, oscInitial: { x, v }, scenario: this.withoutScenario("oscillator") };
+    const oscInitial = sanitiseOscInitial({ ...this.state.oscInitial, ...patch });
+    this.state = { ...this.state, oscInitial, scenario: this.withoutScenario("oscillator") };
     this.restartOscillator();
   }
 
@@ -739,14 +937,11 @@ export class Simulation {
       ...this.state,
       module: "oscillator",
       oscillator: params,
-      oscInitial: { x: preset.x0, v: preset.v0 },
+      oscInitial: sanitiseOscInitial({ x: preset.x0, v: preset.v0 }),
       scenario: { ...this.state.scenario, oscillator: preset.id },
       running: true,
     };
-    if (preset.solver) {
-      this.state = { ...this.state, solver: preset.solver };
-      this.configureSolver();
-    }
+    this.applyPresetSolver(preset.solver);
     this.restartOscillator();
   }
 
@@ -778,10 +973,9 @@ export class Simulation {
     const thetas = [...this.state.pendInitial.thetas];
     const omegas = [...this.state.pendInitial.omegas];
     if (patch.theta !== undefined && Number.isFinite(patch.theta)) thetas[index] = patch.theta;
-    if (patch.omega !== undefined && Number.isFinite(patch.omega)) {
-      omegas[index] = Math.min(40, Math.max(-40, patch.omega));
-    }
-    this.state = { ...this.state, pendInitial: { thetas, omegas }, scenario: this.withoutScenario("pendulum") };
+    if (patch.omega !== undefined && Number.isFinite(patch.omega)) omegas[index] = patch.omega;
+    const pendInitial = sanitisePendInitial({ thetas, omegas });
+    this.state = { ...this.state, pendInitial, scenario: this.withoutScenario("pendulum") };
     this.restartPendulum();
   }
 
@@ -799,10 +993,11 @@ export class Simulation {
         masses: [...DEFAULT_PENDULUM_MASSES],
         lengths: [...DEFAULT_PENDULUM_LENGTHS],
       }),
-      pendInitial: { thetas: padAngles(preset.thetas), omegas: padAngles(preset.omegas) },
+      pendInitial: sanitisePendInitial({ thetas: preset.thetas, omegas: preset.omegas }),
       scenario: { ...this.state.scenario, pendulum: preset.id },
       running: true,
     };
+    this.applyPresetSolver(undefined);
     this.restartPendulum();
   }
 
@@ -813,6 +1008,7 @@ export class Simulation {
     this.twin.y[0] += this.state.twin.offset;
     this.separation = this.state.twin.enabled ? Math.abs(this.state.twin.offset) : 0;
     this.divergenceTime = null;
+    this.twinSince = this.pend.t;
     this.twinAdvancer.reset();
     this.update({});
   }
@@ -885,7 +1081,10 @@ export class Simulation {
     } else {
       const omegas = padAngles(undefined);
       omegas[index] = Math.min(MAX_THROW_SPEED, Math.max(-MAX_THROW_SPEED, v));
-      this.state = { ...this.state, pendInitial: { thetas: this.state.pendInitial.thetas, omegas } };
+      // The held chain carries the winding of the run before it (angles are not wrapped while it runs).
+      // A chain at rest has no winding, so the release keeps it within the limits of the initial conditions.
+      const thetas = this.state.pendInitial.thetas.map(limitAngle);
+      this.state = { ...this.state, pendInitial: { thetas, omegas } };
       this.restartPendulum();
     }
   }
@@ -899,9 +1098,13 @@ export class Simulation {
       ...merged,
       oscillator: sanitiseOscillator(merged.oscillator),
       pendulum: sanitisePendulum(merged.pendulum),
-      pendInitial: { thetas: padAngles(merged.pendInitial.thetas), omegas: padAngles(merged.pendInitial.omegas) },
+      // Imported initial conditions get the same limits as the number fields.
+      oscInitial: sanitiseOscInitial(merged.oscInitial),
+      pendInitial: sanitisePendInitial(merged.pendInitial),
       status: "ok",
     };
+    this.presetSolverBackup = null;
+    this.divergedModule = null;
     this.osc.setParams(this.state.oscillator);
     this.configureSolver();
     this.restartOscillator(false);

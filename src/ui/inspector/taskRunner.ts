@@ -84,7 +84,12 @@ export function startTask(sim: Simulation, id: TaskId): void {
   set({ active: id, viewing: id, status: task.evaluate(sim, memory), finished: false });
 }
 
-/** Stops evaluating; the apparatus keeps its state, except that a deliberately poor solver is replaced. */
+/**
+ * Stops evaluating. The apparatus keeps its state, with one exception: a
+ * deliberately poor solver (explicit Euler) is replaced by the default one,
+ * and because a change of solver is a new run (Simulation.setSolver), both
+ * experiments then start again from their initial conditions.
+ */
 export function stopTask(sim: Simulation): void {
   if (session.active === null) return;
   if (sim.getState().solver.method === "euler") sim.setSolver(DEFAULT_SOLVER);

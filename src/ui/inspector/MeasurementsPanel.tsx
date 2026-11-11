@@ -4,8 +4,8 @@ import { useMemo, useRef, type ReactNode } from "react";
 import { MAX_LINKS, OSC_GEOMETRY } from "@/physics/constants";
 import { INTEGRATORS } from "@/physics/integrators";
 import { predictionHorizon } from "@/physics/lyapunov";
-import { CRITICAL_SETTLING_FACTOR, dampingRatioFromDecrement, STEADY_TOLERANCE, steadyState } from "@/physics/measure";
-import { oscillatorTheory } from "@/physics/oscillator";
+import { dampingRatioFromDecrement, STEADY_TOLERANCE, steadyState } from "@/physics/measure";
+import { oscillatorTheory, settlingTimeFromRest } from "@/physics/oscillator";
 import { linearModes } from "@/physics/pendulum";
 import { exactPendulumPeriod } from "@/physics/special";
 import { useLiveTick, useSim, useSimState } from "@/sim/react";
@@ -132,11 +132,17 @@ function OscillatorMeasurements() {
   const initial = useSimState((state) => state.oscInitial);
   const solver = useSimState((state) => state.solver);
   const theory = useMemo(() => oscillatorTheory(params), [params]);
+  const step = sim.stepMeter;
+  const band = step.band;
+  // Reference for the step-response instrument, from the closed-form solution at the actual damping
+  // ratio and for the band of the instrument. The value 5.834 / omega0 holds at zeta = 1 only and
+  // is already 4 % off at zeta = 0.98.
+  const expectedSettling = useMemo(() => settlingTimeFromRest(params, band), [params, band]);
   useLiveTick(5);
 
   const text = t.measurements.oscillator;
   const meter = sim.oscMeter;
-  const step = sim.stepMeter;
+  const bandPercent = fixed(100 * band, 0);
   const driven = params.driveAmplitude > 0;
   const oscillatory = theory.zeta < 1;
   const free = !driven && oscillatory;
@@ -202,7 +208,8 @@ function OscillatorMeasurements() {
     });
   }
   const drift = meter.amplitudeDrift;
-  const settled = steadyState(drift, sim.oscUndisturbedFor, theory.gamma);
+  const centreDrift = meter.centreDrift;
+  const settled = steadyState(drift, centreDrift, sim.oscUndisturbedFor, theory.transientRate);
   const steady = settled.steady;
   if (driven) {
     const trail = sim.responseTrail;
@@ -227,7 +234,6 @@ function OscillatorMeasurements() {
   if (released) {
     const expectedOvershoot = theory.zeta < 1 ? Math.exp((-Math.PI * theory.zeta) / Math.sqrt(1 - theory.zeta * theory.zeta)) : 0;
     const settling = step.settlingTime;
-    const expectedSettling = theory.regime === "critical" ? CRITICAL_SETTLING_FACTOR / theory.omega0 : null;
     rows.push({
       symbol: "M_p",
       name: rowsText.overshoot,
@@ -238,7 +244,7 @@ function OscillatorMeasurements() {
     });
     rows.push({
       symbol: "t_s",
-      name: rowsText.settling("2"),
+      name: rowsText.settling(bandPercent),
       unit: "s",
       theory: value(expectedSettling, 4),
       measured: value(settling, 4),
@@ -254,6 +260,7 @@ function OscillatorMeasurements() {
     <div>
       <Section title={text.characteristic.title}>
         <ValueTable rows={characteristic} caption={text.characteristic.title} />
+        <Note>{text.characteristic.decayNote}</Note>
         <Note>{text.characteristic.missing}</Note>
       </Section>
 
@@ -284,7 +291,9 @@ function OscillatorMeasurements() {
               {text.comparison.steadyNote(
                 fixed(100 * STEADY_TOLERANCE, 0),
                 drift === null ? null : fixed(100 * drift, 2),
-                Number.isFinite(settled.remaining) ? fixed(settled.remaining, 0) : null,
+                centreDrift === null ? null : fixed(100 * centreDrift, 2),
+                // Rounded up, so that "0" appears only once the waiting time has really passed.
+                Number.isFinite(settled.remaining) ? fixed(Math.ceil(settled.remaining), 0) : null,
               )}
             </Note>
             <Note>{text.comparison.responseNote}</Note>
@@ -293,7 +302,7 @@ function OscillatorMeasurements() {
         ) : null}
         {released ? (
           <>
-            <Note>{text.comparison.stepNote(fixed(step.initialDisplacement, 2), "2")}</Note>
+            <Note>{text.comparison.stepNote(fixed(step.initialDisplacement, 2), bandPercent)}</Note>
             <Note>{text.comparison.stepTheoryNote}</Note>
             <Formula>{String.raw`M_p = e^{-\pi\zeta/\sqrt{1-\zeta^2}},\qquad t_s\big|_{\zeta=1} = \frac{5.834}{\omega_0}`}</Formula>
           </>
@@ -594,8 +603,9 @@ function PendulumMeasurements() {
                   { symbol: String.raw`\delta_0`, name: text.chaos.rows.twinOffset, value: scientific(twin.offset, 0), unit: "rad" },
                   { symbol: String.raw`\delta`, name: text.chaos.rows.separation, value: scientific(sim.separation, 2), unit: "rad" },
                   {
+                    // Counted from the launch of the twin, like the horizon it is compared with.
                     name: text.chaos.rows.divergence(fixed(DIVERGENCE_THRESHOLD, 0)),
-                    value: sim.divergenceTime === null ? t.measurements.notYet : fixed(sim.divergenceTime, 2),
+                    value: sim.divergenceTime === null ? t.measurements.notYet : fixed(sim.divergenceTime - sim.twinSince, 2),
                     unit: sim.divergenceTime === null ? undefined : "s",
                   },
                   {

@@ -39,25 +39,25 @@ $`m = 2`$ kg, $`k = 24{,}5`$ N/m, $`c = 0{,}55`$ N·s/m, $`F_0 = 1`$ N. Osilatö
 
 | Büyüklük | Ölçülen | Başvuru değeri | Hata | Tolerans | Sonuç |
 | --- | ---: | ---: | ---: | ---: | :---: |
-| $`A(0{,}5\,\omega_0)`$ | 0.05434726 m | 0.05434726 m | 9.43×10⁻¹⁰ | ≤ 1.00×10⁻⁵ | geçti |
+| $`A(0{,}5\,\omega_0)`$ | 0.05434726 m | 0.05434726 m | 9.48×10⁻¹⁰ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(0{,}5\,\omega_0)`$ | 0.05233312 rad | 0.05233312 rad | 4.15×10⁻⁹ | ≤ 0.001 | geçti |
 | $`A(0{,}9\,\omega_0)`$ | 0.2013308 m | 0.2013308 m | 2.43×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(0{,}9\,\omega_0)`$ | 0.3562965 rad | 0.3562964 rad | 1.09×10⁻⁸ | ≤ 0.001 | geçti |
-| $`A(\omega_0)`$ | 0.5194805 m | 0.5194805 m | 2.61×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
-| $`\delta(\omega_0)`$ | 1.570796 rad | 1.570796 rad | 8.93×10⁻⁹ | ≤ 0.001 | geçti |
+| $`A(\omega_0)`$ | 0.5194805 m | 0.5194805 m | 2.62×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
+| $`\delta(\omega_0)`$ | 1.570796 rad | 1.570796 rad | 8.74×10⁻⁹ | ≤ 0.001 | geçti |
 | $`A(1{,}1\,\omega_0)`$ | 0.1797363 m | 0.1797363 m | 3.30×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(1{,}1\,\omega_0)`$ | 2.751157 rad | 2.751157 rad | 1.63×10⁻⁹ | ≤ 0.001 | geçti |
-| $`A(1{,}5\,\omega_0)`$ | 0.03250888 m | 0.03250888 m | 1.04×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
+| $`A(1{,}5\,\omega_0)`$ | 0.03250888 m | 0.03250888 m | 1.05×10⁻⁸ | ≤ 1.00×10⁻⁵ | geçti |
 | $`\delta(1{,}5\,\omega_0)`$ | 3.047585 rad | 3.047585 rad | 3.28×10⁻⁸ | ≤ 0.001 | geçti |
 
 ### A.4 Basamak yanıtı: aşım ve yerleşme süresi
 
-$`m = 4`$ kg, $`k = 36`$ N/m, $`x_0 = 2`$ m. Kritik sönümde aşım olmamalı ve %2 yerleşme süresi $`5{,}834/\omega_0`$ değerine eşit olmalıdır; $`\zeta = 0{,}5`$ için aşım $`e^{-\pi\zeta/\sqrt{1-\zeta^2}}`$ değerini vermelidir. Yerleşme süresi 1 ms çözünürlükle ölçülür.
+$`m = 4`$ kg, $`k = 36`$ N/m, $`x_0 = 2`$ m. Kritik sönümde aşım olmamalı ve %2 yerleşme süresi $`5{,}834/\omega_0`$ değerine eşit olmalıdır; $`\zeta = 0{,}5`$ için aşım $`e^{-\pi\zeta/\sqrt{1-\zeta^2}}`$ değerini vermelidir. Basamak yanıtı ölçer her 1 ms'lik adımın sonunda bir örnek alır ve %2'lik banda giriş anını iki örnek arasında doğrusal ara değerlemeyle bulur.
 
 | Büyüklük | Ölçülen | Başvuru değeri | Hata | Tolerans | Sonuç |
 | --- | ---: | ---: | ---: | ---: | :---: |
 | Aşım, $`\zeta = 1`$ | 0 | — | — | ≤ 1.00×10⁻⁹ | geçti |
-| %2 yerleşme süresi, $`\zeta = 1`$ | 1.944 s | 1.944641 s | 3.29×10⁻⁴ | ≤ 0.002 | geçti |
+| %2 yerleşme süresi, $`\zeta = 1`$ | 1.944641 s | 1.944641 s | 1.47×10⁻⁷ | ≤ 0.002 | geçti |
 | Aşım, $`\zeta = 0{,}5`$ | 0.1630335 | 0.1630335 | 1.79×10⁻⁷ | ≤ 1.00×10⁻⁴ | geçti |
 
 ### A.5 Durdurucuya çarpma: an, hız ve enerji kaybı
@@ -208,25 +208,25 @@ $`m = 2`$ kg, $`k = 24.5`$ N/m, $`c = 0.55`$ N·s/m, $`F_0 = 1`$ N. The oscillat
 
 | Quantity | Measured | Reference value | Error | Tolerance | Result |
 | --- | ---: | ---: | ---: | ---: | :---: |
-| $`A(0.5\,\omega_0)`$ | 0.05434726 m | 0.05434726 m | 9.43×10⁻¹⁰ | ≤ 1.00×10⁻⁵ | passed |
+| $`A(0.5\,\omega_0)`$ | 0.05434726 m | 0.05434726 m | 9.48×10⁻¹⁰ | ≤ 1.00×10⁻⁵ | passed |
 | $`\delta(0.5\,\omega_0)`$ | 0.05233312 rad | 0.05233312 rad | 4.15×10⁻⁹ | ≤ 0.001 | passed |
 | $`A(0.9\,\omega_0)`$ | 0.2013308 m | 0.2013308 m | 2.43×10⁻⁸ | ≤ 1.00×10⁻⁵ | passed |
 | $`\delta(0.9\,\omega_0)`$ | 0.3562965 rad | 0.3562964 rad | 1.09×10⁻⁸ | ≤ 0.001 | passed |
-| $`A(\omega_0)`$ | 0.5194805 m | 0.5194805 m | 2.61×10⁻⁸ | ≤ 1.00×10⁻⁵ | passed |
-| $`\delta(\omega_0)`$ | 1.570796 rad | 1.570796 rad | 8.93×10⁻⁹ | ≤ 0.001 | passed |
+| $`A(\omega_0)`$ | 0.5194805 m | 0.5194805 m | 2.62×10⁻⁸ | ≤ 1.00×10⁻⁵ | passed |
+| $`\delta(\omega_0)`$ | 1.570796 rad | 1.570796 rad | 8.74×10⁻⁹ | ≤ 0.001 | passed |
 | $`A(1.1\,\omega_0)`$ | 0.1797363 m | 0.1797363 m | 3.30×10⁻⁸ | ≤ 1.00×10⁻⁵ | passed |
 | $`\delta(1.1\,\omega_0)`$ | 2.751157 rad | 2.751157 rad | 1.63×10⁻⁹ | ≤ 0.001 | passed |
-| $`A(1.5\,\omega_0)`$ | 0.03250888 m | 0.03250888 m | 1.04×10⁻⁸ | ≤ 1.00×10⁻⁵ | passed |
+| $`A(1.5\,\omega_0)`$ | 0.03250888 m | 0.03250888 m | 1.05×10⁻⁸ | ≤ 1.00×10⁻⁵ | passed |
 | $`\delta(1.5\,\omega_0)`$ | 3.047585 rad | 3.047585 rad | 3.28×10⁻⁸ | ≤ 0.001 | passed |
 
 ### A.4 Step response: overshoot and settling time
 
-$`m = 4`$ kg, $`k = 36`$ N/m, $`x_0 = 2`$ m. At critical damping there must be no overshoot and the 2 % settling time must equal $`5.834/\omega_0`$; for $`\zeta = 0.5`$ the overshoot must equal $`e^{-\pi\zeta/\sqrt{1-\zeta^2}}`$. The settling time is measured with a resolution of 1 ms.
+$`m = 4`$ kg, $`k = 36`$ N/m, $`x_0 = 2`$ m. At critical damping there must be no overshoot and the 2 % settling time must equal $`5.834/\omega_0`$; for $`\zeta = 0.5`$ the overshoot must equal $`e^{-\pi\zeta/\sqrt{1-\zeta^2}}`$. The step-response meter receives a sample after every step of 1 ms and places the entry into the 2 % band between two samples by linear interpolation.
 
 | Quantity | Measured | Reference value | Error | Tolerance | Result |
 | --- | ---: | ---: | ---: | ---: | :---: |
 | Overshoot, $`\zeta = 1`$ | 0 | — | — | ≤ 1.00×10⁻⁹ | passed |
-| 2 % settling time, $`\zeta = 1`$ | 1.944 s | 1.944641 s | 3.29×10⁻⁴ | ≤ 0.002 | passed |
+| 2 % settling time, $`\zeta = 1`$ | 1.944641 s | 1.944641 s | 1.47×10⁻⁷ | ≤ 0.002 | passed |
 | Overshoot, $`\zeta = 0.5`$ | 0.1630335 | 0.1630335 | 1.79×10⁻⁷ | ≤ 1.00×10⁻⁴ | passed |
 
 ### A.5 Impact with a stop: instant, speed and energy loss

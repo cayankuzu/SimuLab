@@ -125,9 +125,18 @@ export class OscillationMeter {
     return Math.sqrt(sum / (n - 1));
   }
 
-  /** Number of period intervals measured since the last reset. */
+  /**
+   * Number of period intervals measured since the last reset. Upward and
+   * downward crossings each yield one interval per period and the two series
+   * overlap, so this count grows by two per period.
+   */
   get cycles(): number {
     return this.totalCycles;
+  }
+
+  /** Number of complete periods observed since the last reset (half the interval count, rounded down). */
+  get periods(): number {
+    return Math.floor(this.totalCycles / 2);
   }
 
   get lastMaximum(): Extremum | null {
@@ -170,6 +179,22 @@ export class OscillationMeter {
   }
 
   /**
+   * Change of the oscillation centre (mid-point of maximum and minimum)
+   * between the two most recent cycles, relative to the amplitude. A decaying
+   * offset - the slow exponential of an overdamped transient, for instance -
+   * shows up here while the peak-to-peak amplitude is already constant.
+   */
+  get centreDrift(): number | null {
+    const a = this.maxima;
+    const b = this.minima;
+    if (a.length < 2 || b.length < 2) return null;
+    const latest = 0.5 * (a[a.length - 1].value + b[b.length - 1].value);
+    const before = 0.5 * (a[a.length - 2].value + b[b.length - 2].value);
+    const amplitude = 0.5 * (a[a.length - 1].value - b[b.length - 1].value);
+    return amplitude === 0 ? null : Math.abs(latest - before) / Math.abs(amplitude);
+  }
+
+  /**
    * Logarithmic decrement averaged over the recent positive maxima,
    * delta = ln(x_n / x_{n+m}) / m.
    */
@@ -191,9 +216,14 @@ export class OscillationMeter {
 /** Relative tolerance below which a driven response counts as steady. */
 export const STEADY_TOLERANCE = 0.01;
 
-/** Time after which a transient decaying as exp(-gamma t) has fallen to `tolerance` of its initial size [s]. */
-export function transientDecayTime(gamma: number, tolerance: number = STEADY_TOLERANCE): number {
-  return gamma > 0 ? Math.log(1 / tolerance) / gamma : Number.POSITIVE_INFINITY;
+/**
+ * Time after which a transient decaying as exp(-rate t) has fallen to
+ * `tolerance` of its initial size [s]. `rate` must be the decay rate of the
+ * slowest free mode (OscillatorTheory.transientRate), not c/(2m): for an
+ * overdamped system the two differ by a factor of about 4 zeta^2.
+ */
+export function transientDecayTime(rate: number, tolerance: number = STEADY_TOLERANCE): number {
+  return rate > 0 ? Math.log(1 / tolerance) / rate : Number.POSITIVE_INFINITY;
 }
 
 export interface SteadyState {
@@ -203,24 +233,29 @@ export interface SteadyState {
 }
 
 /**
- * Steady-state test for a driven oscillation. Two conditions must hold:
+ * Steady-state test for a driven oscillation. Three conditions must hold:
  *  1. the peak-to-peak amplitude changes by less than `tolerance` from one
  *     cycle to the next (`drift`, see OscillationMeter.amplitudeDrift);
- *  2. the last disturbance (restart, parameter change, impact) lies at least
- *     one transient decay time ln(1/tolerance)/gamma back (`elapsed`).
+ *  2. the centre of the oscillation moves by less than `tolerance` of the
+ *     amplitude from one cycle to the next (OscillationMeter.centreDrift);
+ *  3. the last disturbance (restart, parameter change, impact) lies at least
+ *     one transient decay time ln(1/tolerance)/rate back (`elapsed`).
  * The first condition alone is not sufficient: a transient that decays slowly
- * changes the amplitude only a little per cycle, by about (exp(gamma T) - 1)
+ * changes the amplitude only a little per cycle, by about (exp(rate T) - 1)
  * times its own size, so it can still be several times larger than the
- * observed change.
+ * observed change; and a non-oscillatory transient does not change the
+ * peak-to-peak amplitude at all, it shifts the centre.
  */
 export function steadyState(
   drift: number | null,
+  centreDrift: number | null,
   elapsed: number,
-  gamma: number,
+  rate: number,
   tolerance: number = STEADY_TOLERANCE,
 ): SteadyState {
-  const remaining = Math.max(0, transientDecayTime(gamma, tolerance) - elapsed);
-  return { steady: drift !== null && drift < tolerance && remaining === 0, remaining };
+  const remaining = Math.max(0, transientDecayTime(rate, tolerance) - elapsed);
+  const quiet = drift !== null && centreDrift !== null && drift < tolerance && centreDrift < tolerance;
+  return { steady: quiet && remaining === 0, remaining };
 }
 
 /** Damping ratio implied by a logarithmic decrement: zeta = delta / sqrt(4 pi^2 + delta^2). */
@@ -240,6 +275,8 @@ export class StepResponseMeter {
   private worst = 0;
   private lastOutside = 0;
   private tNow = 0;
+  private tPrev = 0;
+  private xPrev = 0;
   private active = false;
 
   constructor(readonly band = 0.02) {}
@@ -251,6 +288,8 @@ export class StepResponseMeter {
     this.worst = 0;
     this.lastOutside = t0;
     this.tNow = t0;
+    this.tPrev = t0;
+    this.xPrev = x0;
     this.active = Math.abs(x0) > 0;
   }
 
@@ -259,7 +298,18 @@ export class StepResponseMeter {
     this.tNow = t;
     const signed = x * this.sign;
     if (signed < this.worst) this.worst = signed;
-    if (Math.abs(x) > this.band * Math.abs(this.x0)) this.lastOutside = t;
+    const limit = this.band * Math.abs(this.x0);
+    if (Math.abs(x) > limit) {
+      this.lastOutside = t;
+    } else if (Math.abs(this.xPrev) > limit) {
+      // The response entered the band between the previous sample and this
+      // one: place the crossing by linear interpolation, as the other
+      // instruments do, instead of reporting the last sample outside.
+      const edge = this.xPrev > 0 ? limit : -limit;
+      this.lastOutside = this.tPrev + ((this.xPrev - edge) / (this.xPrev - x)) * (t - this.tPrev);
+    }
+    this.tPrev = t;
+    this.xPrev = x;
   }
 
   get initialDisplacement(): number {

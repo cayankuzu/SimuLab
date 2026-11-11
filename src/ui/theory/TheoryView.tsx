@@ -198,7 +198,9 @@ export function TheoryView({ document, front, cite }: TheoryViewProps) {
         aria-current={current ? "location" : undefined}
         className={cn(
           "flex w-full items-baseline gap-2.5 rounded-sm px-2 py-1.5 text-left text-[13px] leading-snug transition-colors duration-100",
-          current ? "bg-active text-ink" : "text-ink-3 hover:bg-hover hover:text-ink",
+          // The current entry carries an accent bar at its leading edge: fill and text colour alone differ
+          // from the other entries by less than 3:1, and the abstract has no opened section list either.
+          current ? "bg-active text-ink shadow-[inset_2px_0_0_var(--color-accent)]" : "text-ink-3 hover:bg-hover hover:text-ink",
         )}
       >
         <span className={cn("num w-5 shrink-0 text-right text-[11.5px]", current ? "text-accent" : "text-ink-4")}>{number ?? ""}</span>
@@ -236,13 +238,19 @@ export function TheoryView({ document, front, cite }: TheoryViewProps) {
         </ol>
       </nav>
 
-      <div ref={scroller} className="relative min-w-0 flex-1 overflow-y-auto">
+      {/*
+        Below lg the chapter selector sticks to the top of this scroller: 49 px (8 + 32 + 8 px and a
+        1 px border). The scroll padding keeps an element that receives the keyboard focus, and its
+        focus ring, clear of that bar (WCAG 2.4.11).
+      */}
+      <div ref={scroller} className="relative min-w-0 flex-1 scroll-pt-14 overflow-y-auto lg:scroll-pt-0">
         <div ref={selector} className="sticky top-0 z-10 border-b border-line bg-panel px-5 py-2 lg:hidden">
           <select
             aria-label={text.chapterSelect}
             value={active}
             onChange={(event) => jump(event.target.value)}
-            className="h-8 w-full rounded-sm border border-line-strong bg-raised px-2 text-[13px] text-ink"
+            // The outline is the only boundary of the control: at least 3:1 against the bar (WCAG 1.4.11).
+            className="h-8 w-full rounded-sm border border-edge bg-raised px-2 text-[13px] text-ink"
           >
             <option value={FRONT_ID}>{text.frontMatter}</option>
             {document.map((chapter) => (

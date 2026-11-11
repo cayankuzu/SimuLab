@@ -11,11 +11,12 @@ export const plotsChaos = {
     footer: {
       lyapunov: (value: string, seconds: string) => `λ ≈ ${value} s⁻¹ (sonlu zaman kestirimi, ${seconds} s ortalama)`,
       lyapunovTime: (value: string) => `Lyapunov süresi 1/λ ≈ ${value} s`,
-      horizon: (estimate: string, observed: string) => `öngörü ufku kestirimi ${estimate} s, gözlenen ayrılma ${observed}`,
+      horizon: (estimate: string, observed: string) =>
+        `öngörü ufku kestirimi ${estimate} s, ikizin bırakılmasından sonra gözlenen ayrılma süresi: ${observed}`,
       notYet: "henüz yok",
       seconds: (value: string) => `${value} s`,
       caution:
-        "Ufuk formülü t ≈ ln(a/δ₀)/λ bir mertebe kestirimidir: yerel gerilme hızı yörünge boyunca değişir, bu yüzden gözlenen ayrılma anı kestirimden birkaç kat sapabilir.",
+        "Ufuk formülü t ≈ ln(a/δ₀)/λ bir mertebe kestirimidir: yerel gerilme hızı yörünge boyunca değişir, bu yüzden gözlenen ayrılma süresi kestirimden birkaç kat sapabilir.",
       integrable:
         "Tek sarkaç integre edilebilir bir sistemdir: λ sıfıra gider ve sonlu zaman kestirimi yaklaşık ln t / t gibi azalır.",
     },

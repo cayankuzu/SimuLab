@@ -2,22 +2,19 @@ import type { shell as source } from "../tr/shell";
 
 /** Application shell: top bar, 3-D viewport, status bar and general dialogs. */
 export const shell: typeof source = {
-  meta: { languageName: "English", locale: "en" },
+  meta: { languageName: "English" },
 
   common: {
     close: "Close",
-    cancel: "Cancel",
-    apply: "Apply",
     theory: "Theory",
-    measured: "Measured",
-    deviation: "Deviation",
-    notAvailable: "n/a",
+    invalidNumber: (min: string, max: string) => `This is not a number. Enter a value from ${min} to ${max}.`,
+    limitedNumber: (min: string, max: string, used: string) =>
+      `The admissible range is ${min} to ${max}; the nearest limit, ${used}, is used.`,
   },
 
   app: {
     name: "SimuLab",
     tagline: "Oscillation and Chaos Laboratory",
-    loading: "Preparing the laboratory",
     noWebgl: "Your browser does not support WebGL; the 3-D scene cannot be shown.",
   },
 
@@ -41,6 +38,8 @@ export const shell: typeof source = {
     title: "Numerical solver",
     intro:
       "The equations of motion are integrated with a fixed step; identical initial conditions give the identical trajectory regardless of the display refresh rate.",
+    restartNote:
+      "Changing the method or the step rate returns both experiments to their initial conditions and clears the data recorded so far, so that every record is produced by a single solver.",
     method: "Method",
     rate: "Step rate",
     stepSize: "Step",
@@ -78,14 +77,11 @@ export const shell: typeof source = {
 
   topbar: {
     theory: "Theory and references",
-    verification: "Verification",
     exportMenu: "Data and sharing",
-    soundOn: "Mute",
-    soundOff: "Unmute (sonification)",
+    sound: "Sound (sonification)",
     shortcuts: "Keyboard shortcuts",
     language: "Interface language",
     panel: "Open the parameter panel",
-    dock: "Show/hide the plot panel",
   },
 
   exchange: {
@@ -120,9 +116,9 @@ export const shell: typeof source = {
 
   viewport: {
     ariaLabel:
-      "Three-dimensional experiment scene. Bodies can be grabbed and dragged with the pointer; the same can be done from the keyboard through the initial-condition fields of the Parameters panel.",
+      "Three-dimensional experiment scene. Bodies can be grabbed and dragged with the pointer; the same can be done from the keyboard through the initial-condition fields of the Parameters panel. While the scene has the focus, the arrow keys orbit the camera and, with Shift, pan it.",
     hint: "Grab a body and drag it; release while moving to throw it",
-    views: { title: "View", iso: "Isometric", front: "Front", top: "Top", side: "Side" },
+    views: { title: "View", isoCode: "3D", iso: "Isometric", front: "Front", top: "Top", side: "Side" },
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",
     overlaysLabel: "Scene layers",
@@ -150,9 +146,13 @@ export const shell: typeof source = {
       title: "Vector scale",
       force: (newtons: string) => `1 m ≙ ${newtons} N`,
       velocity: (speed: string) => `1 m ≙ ${speed} m/s`,
+      time: (scale: string) => `Time scale ${scale}×`,
     },
     strobeInterval: "Flash interval",
-    selectedLink: (index: number) => `Vectors on mass ${index}. Click a mass to change.`,
+    vectorMass: {
+      label: "Vectors drawn on mass",
+      hint: "Clicking a mass in the scene selects it as well.",
+    },
     regimes: {
       undamped: "Undamped",
       underdamped: "Underdamped",
@@ -174,21 +174,35 @@ export const shell: typeof source = {
     ledger: "Energy-ledger residual",
     ledgerHint:
       "The quantity E_k + E_p + Q − W − E₀ relative to the energy of the system. It is zero for an exact solver; the value shown is the numerical error.",
-    switchToAdaptive: "Error is growing: switch to the adaptive solver",
+    switchToAdaptive: "Restart with the adaptive solver",
+    switchToAdaptiveHint: (threshold: string) =>
+      `The energy-ledger residual has reached ${threshold}. The adaptive solver divides every step into as many sub-steps as its error control requires. Switching returns both experiments to their initial conditions.`,
     exactError: "Deviation from the analytical solution",
     exactErrorHint: "Largest difference between the numerical x(t) and the closed-form solution (since the last restart).",
     fps: "Frame rate",
-    steps: "Steps per frame",
     physics: "Physics time",
     samples: "Recording",
     paused: "Paused",
     held: "Body held",
-    dropped: (count: number) => `time budget exceeded in ${count} frames`,
+    dropped: "Late frames",
+    droppedHint: (cap: number) =>
+      `Number of frames since the last restart that took longer than ${cap} s. The part of such a frame beyond ${cap} s is not simulated, so simulated time falls behind.`,
+  },
+
+  dock: {
+    resizeHint:
+      "Drag, or click: each click steps to the next height, and from the tallest back to the lowest. From the keyboard, use the up and down arrow keys, Home and End.",
   },
 
   shortcuts: {
     title: "Keyboard shortcuts",
-    groups: { transport: "Experiment", view: "View", panels: "Panels" },
+    groups: { transport: "Experiment", view: "View", panels: "Panels", scene: "While the 3-D scene has the focus" },
+    keys: { arrows: "Arrow keys" },
+    singleKey: {
+      label: "Single-key shortcuts",
+      description:
+        "When off, letter, digit and punctuation keys do nothing; the space bar keeps working. Switch them off if you use speech input or keyboard-assistance software.",
+    },
     items: {
       toggleRun: "Run / pause",
       step: "Advance one frame while paused",
@@ -205,6 +219,8 @@ export const shell: typeof source = {
       theory: "Theory and references",
       sound: "Sound",
       help: "This window",
+      orbit: "Orbit the camera",
+      pan: "Pan the camera",
     },
   },
 
@@ -218,7 +234,7 @@ export const shell: typeof source = {
       },
       {
         title: "Change a parameter, watch the plots",
-        body: "The panel on the right is always open and the plots below update at the same time. Type into a number field for an exact value.",
+        body: "The parameter panel stays open beside the scene (in a window narrower than 1024 px it opens with the slider button of the top bar), and the plots below update at the same time. Type into a number field for an exact value.",
       },
       {
         title: "Measure and compare",

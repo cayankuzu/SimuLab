@@ -17,6 +17,7 @@ import {
   type PendulumPresetId,
 } from "@/sim/presets";
 import { useSim, useSimState } from "@/sim/react";
+import { TIME_SCALES } from "@/sim/Simulation";
 import { useT } from "@/i18n";
 import { scientific } from "../format";
 import { cn, Section, Tex, Tooltip } from "../kit/core";
@@ -27,7 +28,35 @@ const DEG = 180 / Math.PI;
 
 export function ParametersPanel() {
   const moduleId = useSimState((state) => state.module);
-  return moduleId === "oscillator" ? <OscillatorParameters /> : <PendulumParameters />;
+  return (
+    <>
+      <TimeScaleSection />
+      {moduleId === "oscillator" ? <OscillatorParameters /> : <PendulumParameters />}
+    </>
+  );
+}
+
+/**
+ * The time scale, in windows whose top bar has no room for its own selector
+ * (below 1536 px). Without it the scale could not be changed at all there.
+ */
+function TimeScaleSection() {
+  const t = useT();
+  const sim = useSim();
+  const timeScale = useSimState((state) => state.timeScale);
+  return (
+    <Section title={t.transport.speed} className="2xl:hidden">
+      <Segmented
+        size="sm"
+        fill
+        ariaLabel={t.transport.speed}
+        value={String(timeScale)}
+        onChange={(value) => sim.setTimeScale(Number(value))}
+        options={TIME_SCALES.map((scale) => ({ value: String(scale), label: `${scale}×` }))}
+      />
+      <p className="mt-2 text-[12px] leading-snug text-ink-3">{t.parameters.timeScaleNote}</p>
+    </Section>
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -51,7 +80,7 @@ function PresetButton({ name, note, active, onClick }: PresetButtonProps) {
         className={cn(
           "h-8 truncate rounded-sm border px-2.5 text-left text-[12.5px] font-medium transition-colors duration-100",
           active
-            ? "border-accent/60 bg-accent-soft text-accent-strong"
+            ? "border-accent/70 bg-accent-soft text-accent-strong"
             : "border-line bg-raised text-ink-2 hover:border-line-strong hover:bg-hover hover:text-ink",
         )}
       >
@@ -189,6 +218,7 @@ function OscillatorParameters() {
             step={0.1}
             decimals={2}
             onCommit={(x) => sim.setOscillatorInitial({ x })}
+            align="start"
           />
           <InitialField
             symbol="v_0"
@@ -218,9 +248,11 @@ interface InitialFieldProps {
   step: number;
   decimals: number;
   onCommit: (value: number) => void;
+  /** The left-hand field of the pair: its messages extend to the right, into the panel. */
+  align?: "start" | "end";
 }
 
-function InitialField({ symbol, name, unit, value, min, max, step, decimals, onCommit }: InitialFieldProps) {
+function InitialField({ symbol, name, unit, value, min, max, step, decimals, onCommit, align }: InitialFieldProps) {
   return (
     <label className="grid gap-1">
       <span className="flex items-baseline gap-1.5 text-[12px] text-ink-3">
@@ -238,6 +270,7 @@ function InitialField({ symbol, name, unit, value, min, max, step, decimals, onC
         unit={unit}
         ariaLabel={name}
         width={7}
+        align={align}
       />
     </label>
   );
@@ -320,7 +353,7 @@ function PendulumParameters() {
                     className={cn(
                       "h-6 rounded-xs border px-2 text-[11.5px] font-medium transition-colors duration-100",
                       active
-                        ? "border-accent/60 bg-accent-soft text-accent-strong"
+                        ? "border-accent/70 bg-accent-soft text-accent-strong"
                         : "border-line text-ink-3 hover:border-line-strong hover:text-ink",
                     )}
                   >
@@ -382,6 +415,7 @@ function PendulumParameters() {
                     {...PEND_RANGES.mass}
                     decimals={2}
                     ariaLabel={text.massOf(index + 1)}
+                    align="start"
                   />
                 </td>
                 <td className="pr-1">
@@ -393,6 +427,7 @@ function PendulumParameters() {
                     {...PEND_RANGES.length}
                     decimals={3}
                     ariaLabel={text.lengthOf(index + 1)}
+                    align="start"
                   />
                 </td>
                 <td className="pr-1">

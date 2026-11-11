@@ -1,8 +1,8 @@
 "use client";
 
-import katex from "katex";
 import { forwardRef, useCallback, useMemo, useSyncExternalStore, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Tooltip as RadixTooltip } from "radix-ui";
+import { renderTex } from "./tex";
 
 /** Joins class names, skipping falsy entries. */
 export function cn(...parts: Array<string | false | null | undefined>): string {
@@ -51,10 +51,7 @@ interface TexProps {
 
 /** Typesets a LaTeX expression with KaTeX. Input always comes from the application's own source. */
 export function Tex({ children, block = false, className }: TexProps) {
-  const html = useMemo(
-    () => katex.renderToString(children, { displayMode: block, throwOnError: false, strict: "ignore", output: "html" }),
-    [children, block],
-  );
+  const html = useMemo(() => renderTex(children, block), [children, block]);
   const Tag = block ? "div" : "span";
   return <Tag className={className} dangerouslySetInnerHTML={{ __html: html }} />;
 }
@@ -128,7 +125,21 @@ const BUTTON_VARIANT: Record<ButtonVariant, string> = {
   ghost: "text-ink-3 hover:bg-hover hover:text-ink",
 };
 
-const PRESSED = "bg-accent-soft text-accent-strong hover:bg-accent-soft hover:text-accent-strong";
+/**
+ * Colours of a pressed toggle, used instead of those of its variant. They are
+ * not added to the variant's classes: of two utilities for the same property
+ * the style sheet's order wins, not the order of the class names. The outline
+ * marks the state by more than a tint (WCAG 1.4.1) and reaches at least 3:1
+ * against the tinted fill and the surfaces around it (WCAG 1.4.11).
+ */
+const BUTTON_PRESSED: Record<ButtonVariant, string> = {
+  primary: BUTTON_VARIANT.primary,
+  secondary: "border border-accent/70 bg-accent-soft text-accent-strong",
+  ghost: "bg-accent-soft text-accent-strong inset-ring inset-ring-accent/70",
+};
+
+const buttonColours = (variant: ButtonVariant, pressed: boolean | undefined): string =>
+  pressed ? BUTTON_PRESSED[variant] : BUTTON_VARIANT[variant];
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = "secondary", size = "md", pressed, className, type = "button", ...rest },
@@ -139,7 +150,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       type={type}
       aria-pressed={pressed}
-      className={cn(BUTTON_BASE, BUTTON_SIZE[size], BUTTON_VARIANT[variant], pressed && PRESSED, className)}
+      className={cn(BUTTON_BASE, BUTTON_SIZE[size], buttonColours(variant, pressed), className)}
       {...rest}
     />
   );
@@ -168,8 +179,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
         className={cn(
           BUTTON_BASE,
           size === "sm" ? "size-7" : "size-8",
-          BUTTON_VARIANT[variant],
-          pressed && PRESSED,
+          buttonColours(variant, pressed),
           "[&_svg]:size-4",
           className,
         )}

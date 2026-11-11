@@ -234,34 +234,59 @@ export function buildCsv(sim: Simulation, dialect: CsvDialect = CSV_INTERNATIONA
     : pendulumColumns(state.pendulum.count, state.twin.enabled);
   const h = 1 / state.solver.rateHz;
   const lines: string[] = [];
-  const meta = (text: string) => lines.push(`# ${text}`);
+  // Metadata lines start with "# " and must stay a single field for every
+  // reader: tools that skip comment lines never look at them, but a
+  // spreadsheet or a strict CSV parser splits them at the delimiter, and a
+  // double quote would open a quoted field that swallows the data rows. Items
+  // are therefore separated by " | ", and neither the delimiter nor a double
+  // quote may occur.
+  const meta = (...items: string[]) =>
+    lines.push(`# ${items.join(" | ").replaceAll('"', "'").replaceAll(",", " ").replaceAll(";", " ")}`);
 
   meta("SimuLab telemetry export (schema simulab.telemetry/1)");
   meta(`exported: ${exportedAt.toISOString()}`);
   meta(`experiment: ${state.module}`);
   meta(
-    `integrator: ${state.solver.method} (order ${INTEGRATORS[state.solver.method].order}), fixed step h = ${h} s (${state.solver.rateHz} Hz)`,
+    `integrator: ${state.solver.method} (order ${INTEGRATORS[state.solver.method].order})`,
+    `fixed step h = ${h} s (${state.solver.rateHz} Hz)`,
   );
-  meta(`sample interval: ${sim.sampleInterval} s; samples: ${series.length}`);
+  meta(`sample interval: ${sim.sampleInterval} s`, `samples: ${series.length}`);
   if (isOscillator) {
     const p = state.oscillator;
-    meta(`model: m x'' + c x' + k x = F0 cos(phi), phi' = omega; stops at x = ${sim.osc.xMin} m and ${sim.osc.xMax} m, restitution e = ${sim.osc.restitution}`);
-    meta(`m = ${p.mass} kg; k = ${p.stiffness} N/m; c = ${p.damping} N s/m; F0 = ${p.driveAmplitude} N; omega = ${p.driveFrequency} rad/s`);
-    meta(`initial conditions: x0 = ${state.oscInitial.x} m; v0 = ${state.oscInitial.v} m/s; phi0 = 0 rad`);
+    meta(
+      "model: m x'' + c x' + k x = F0 cos(phi) with phi' = omega",
+      `stops at x = ${sim.osc.xMin} m and ${sim.osc.xMax} m`,
+      `restitution e = ${sim.osc.restitution}`,
+    );
+    meta(
+      `m = ${p.mass} kg`,
+      `k = ${p.stiffness} N/m`,
+      `c = ${p.damping} N s/m`,
+      `F0 = ${p.driveAmplitude} N`,
+      `omega = ${p.driveFrequency} rad/s`,
+    );
+    meta("initial conditions", `x0 = ${state.oscInitial.x} m`, `v0 = ${state.oscInitial.v} m/s`, "phi0 = 0 rad");
     meta("ledger: E_kinetic + E_potential + Q_damper + Q_impact - W_drive - E0 = ledger_residual (numerical error)");
-    meta("x_exact: closed-form solution of the linear model, restarted at every impact or parameter change");
+    meta("x_exact: closed-form solution of the linear model (restarted at every impact or parameter change)");
   } else {
     const p = state.pendulum;
     const n = p.count;
-    meta(`model: planar ${n}-link pendulum, point masses on massless rigid rods, absolute angles from the downward vertical`);
-    meta(`m [kg] = ${p.masses.slice(0, n).join(" ")}; L [m] = ${p.lengths.slice(0, n).join(" ")}`);
-    meta(`g = ${p.gravity} m/s^2; viscous joint coefficient b = ${p.jointDamping} N m s/rad`);
+    meta(
+      `model: planar ${n}-link pendulum`,
+      "point masses on massless rigid rods",
+      "absolute angles from the downward vertical",
+    );
+    meta(`m [kg] = ${p.masses.slice(0, n).join(" ")}`, `L [m] = ${p.lengths.slice(0, n).join(" ")}`);
+    meta(`g = ${p.gravity} m/s^2`, `viscous joint coefficient b = ${p.jointDamping} N m s/rad`);
     meta(`initial angles [rad] = ${state.pendInitial.thetas.slice(0, n).join(" ")}`);
     meta(`initial angular velocities [rad/s] = ${state.pendInitial.omegas.slice(0, n).join(" ")}`);
     if (state.twin.enabled) meta(`twin trajectory: theta1 offset ${state.twin.offset} rad at launch`);
-    meta("lyapunov_estimate: finite-time largest Lyapunov exponent (Benettin two-trajectory method, d0 = 1e-8)");
+    meta("lyapunov_estimate: finite-time largest Lyapunov exponent (Benettin two-trajectory method with d0 = 1e-8)");
   }
-  meta(`decimal separator "${dialect.decimal}", field delimiter "${dialect.delimiter}"`);
+  meta(
+    `decimal separator: ${dialect.decimal === "," ? "comma" : "point"}`,
+    `field delimiter: ${dialect.delimiter === ";" ? "semicolon" : "comma"}`,
+  );
 
   lines.push(columns.map((column) => column.name).join(dialect.delimiter));
   const row: string[] = new Array<string>(columns.length);

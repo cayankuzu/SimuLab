@@ -133,8 +133,10 @@ export const PENDULUM_PRESETS: readonly PendulumPreset[] = [
   { id: "triple", count: 3, gravity: STANDARD_GRAVITY, jointDamping: 0, thetas: [2.2, 1.7, 1.2] },
   { id: "quad", count: 4, gravity: STANDARD_GRAVITY, jointDamping: 0, thetas: [2.3, 1.8, 1.4, 1.1] },
   { id: "six", count: 6, gravity: STANDARD_GRAVITY, jointDamping: 0, thetas: [2.4, 2.0, 1.6, 1.3, 1.0, 0.8] },
-  { id: "moon", count: 2, gravity: 1.62, jointDamping: 0, thetas: [2.2, 1.6] },
-  { id: "mars", count: 2, gravity: 3.73, jointDamping: 0, thetas: [2.2, 1.6] },
+  // The release angles of "double": with everything else equal, the motion under another g is the same
+  // trajectory on a time axis stretched by sqrt(g_Earth / g), which is what the preset notes state.
+  { id: "moon", count: 2, gravity: 1.62, jointDamping: 0, thetas: [2.15, 1.65] },
+  { id: "mars", count: 2, gravity: 3.73, jointDamping: 0, thetas: [2.15, 1.65] },
   {
     id: "microgravity",
     count: 2,

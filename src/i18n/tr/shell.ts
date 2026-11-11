@@ -1,21 +1,18 @@
 /** Uygulama kabuğu: üst çubuk, 3B görünüm, durum çubuğu ve genel iletişim kutuları. */
 export const shell = {
-  meta: { languageName: "Türkçe", locale: "tr" },
+  meta: { languageName: "Türkçe" },
 
   common: {
     close: "Kapat",
-    cancel: "Vazgeç",
-    apply: "Uygula",
     theory: "Kuram",
-    measured: "Ölçülen",
-    deviation: "Sapma",
-    notAvailable: "yok",
+    invalidNumber: (min: string, max: string) => `Bu bir sayı değil. ${min} ile ${max} arasında bir değer yazın.`,
+    limitedNumber: (min: string, max: string, used: string) =>
+      `İzin verilen aralık ${min} ile ${max} arasıdır; en yakın sınır olan ${used} kullanıldı.`,
   },
 
   app: {
     name: "SimuLab",
     tagline: "Salınım ve Kaos Laboratuvarı",
-    loading: "Laboratuvar hazırlanıyor",
     noWebgl: "Tarayıcınız WebGL desteklemiyor; 3B sahne gösterilemiyor.",
   },
 
@@ -39,6 +36,8 @@ export const shell = {
     title: "Sayısal çözücü",
     intro:
       "Hareket denklemleri sabit adımla çözülür; aynı başlangıç koşulları, ekran yenileme hızından bağımsız olarak aynı yörüngeyi verir.",
+    restartNote:
+      "Yöntemi ya da adım frekansını değiştirmek iki deneyi de başlangıç koşullarına döndürür ve o ana kadarki kaydı siler; böylece her kayıt tek bir çözücüyle üretilmiş olur.",
     method: "Yöntem",
     rate: "Adım frekansı",
     stepSize: "Adım",
@@ -76,14 +75,11 @@ export const shell = {
 
   topbar: {
     theory: "Kuram ve kaynakça",
-    verification: "Doğrulama",
     exportMenu: "Veri ve paylaşım",
-    soundOn: "Sesi kapat",
-    soundOff: "Sesi aç (sonifikasyon)",
+    sound: "Ses (sonifikasyon)",
     shortcuts: "Klavye kısayolları",
     language: "Arayüz dili",
     panel: "Parametre panelini aç",
-    dock: "Grafik panelini göster/gizle",
   },
 
   exchange: {
@@ -118,9 +114,9 @@ export const shell = {
 
   viewport: {
     ariaLabel:
-      "Üç boyutlu deney sahnesi. Cisimler işaretçiyle tutulup sürüklenebilir; aynı işlem Parametreler panelindeki başlangıç koşulu alanlarından klavyeyle yapılabilir.",
+      "Üç boyutlu deney sahnesi. Cisimler işaretçiyle tutulup sürüklenebilir; aynı işlem Parametreler panelindeki başlangıç koşulu alanlarından klavyeyle yapılabilir. Sahne odaktayken ok tuşları kamerayı döndürür, Shift ile birlikte kaydırır.",
     hint: "Cismi tutup sürükleyin; bırakırken hız verebilirsiniz",
-    views: { title: "Bakış", iso: "İzometrik", front: "Önden", top: "Üstten", side: "Yandan" },
+    views: { title: "Bakış", isoCode: "3B", iso: "İzometrik", front: "Önden", top: "Üstten", side: "Yandan" },
     zoomIn: "Yakınlaş",
     zoomOut: "Uzaklaş",
     overlaysLabel: "Sahne katmanları",
@@ -148,9 +144,13 @@ export const shell = {
       title: "Vektör ölçeği",
       force: (newtons: string) => `1 m ≙ ${newtons} N`,
       velocity: (speed: string) => `1 m ≙ ${speed} m/s`,
+      time: (scale: string) => `Zaman ölçeği ${scale}×`,
     },
     strobeInterval: "Flaş aralığı",
-    selectedLink: (index: number) => `Vektörler ${index}. kütlede. Değiştirmek için bir kütleye tıklayın.`,
+    vectorMass: {
+      label: "Vektörlerin çizildiği kütle",
+      hint: "Sahnedeki bir kütleye tıklamak da onu seçer.",
+    },
     regimes: {
       undamped: "Sönümsüz",
       underdamped: "Zayıf sönümlü",
@@ -172,21 +172,37 @@ export const shell = {
     ledger: "Enerji defteri kalıntısı",
     ledgerHint:
       "E_k + E_p + Q − W − E₀ ifadesinin sistem enerjisine oranı. Tam bir çözücüde sıfırdır; görülen değer sayısal hatadır.",
-    switchToAdaptive: "Hata büyüyor: uyarlamalı çözücüye geç",
+    switchToAdaptive: "Uyarlamalı çözücüyle yeniden başlat",
+    switchToAdaptiveHint: (threshold: string) =>
+      `Enerji defteri kalıntısı ${threshold} değerine ulaştı. Uyarlamalı çözücü her adımı, hata denetiminin gerektirdiği kadar alt adıma böler. Geçişte iki deney de başlangıç koşullarına döner.`,
     exactError: "Analitik çözümden sapma",
     exactErrorHint: "Sayısal x(t) ile kapalı biçimli çözüm arasındaki en büyük fark (son başlatmadan beri).",
     fps: "Kare hızı",
-    steps: "Kare başına adım",
     physics: "Fizik süresi",
     samples: "Kayıt",
     paused: "Duraklatıldı",
     held: "Cisim tutuluyor",
-    dropped: (count: number) => `${count} karede süre bütçesi aşıldı`,
+    dropped: "Geciken kare",
+    droppedHint: (cap: number) => {
+      const seconds = String(cap).replace(".", ",");
+      return `Son başlatmadan beri ${seconds} s'den uzun süren karelerin sayısı. Böyle bir karenin ${seconds} s'yi aşan bölümü benzetime aktarılmaz; benzetim zamanı geride kalır.`;
+    },
+  },
+
+  dock: {
+    resizeHint:
+      "Sürükleyin ya da tıklayın: her tıklama bir sonraki yüksekliğe, en yüksekten sonra en alçağa geçer. Klavyede yukarı ve aşağı ok tuşları ile Home ve End tuşları kullanılır.",
   },
 
   shortcuts: {
     title: "Klavye kısayolları",
-    groups: { transport: "Deney akışı", view: "Görünüm", panels: "Paneller" },
+    groups: { transport: "Deney akışı", view: "Görünüm", panels: "Paneller", scene: "3B sahne odaktayken" },
+    keys: { arrows: "Ok tuşları" },
+    singleKey: {
+      label: "Tek tuşlu kısayollar",
+      description:
+        "Kapalıyken harf, rakam ve noktalama tuşları hiçbir işlem yapmaz; boşluk tuşu çalışmayı sürdürür. Sesle yazma ya da klavye yardımcısı kullanıyorsanız kapatın.",
+    },
     items: {
       toggleRun: "Çalıştır / duraklat",
       step: "Duraklatılmışken bir kare ilerlet",
@@ -203,6 +219,8 @@ export const shell = {
       theory: "Kuram ve kaynakça",
       sound: "Ses",
       help: "Bu pencere",
+      orbit: "Kamerayı döndür",
+      pan: "Kamerayı kaydır",
     },
   },
 
@@ -216,7 +234,7 @@ export const shell = {
       },
       {
         title: "Parametreyi değiştirin, grafiği izleyin",
-        body: "Sağdaki panel her zaman açıktır; alttaki grafikler aynı anda güncellenir. Kesin değer için sayı alanına yazın.",
+        body: "Parametre paneli sahnenin yanında açık durur (1024 pikselden dar bir pencerede üst çubuktaki kaydırıcı düğmesiyle açılır); alttaki grafikler aynı anda güncellenir. Kesin değer için sayı alanına yazın.",
       },
       {
         title: "Ölçün ve karşılaştırın",

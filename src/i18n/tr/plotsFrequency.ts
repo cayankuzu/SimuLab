@@ -12,9 +12,11 @@ export const plotsFrequency = {
     cancelSweep: "İptal",
     progress: (done: number, total: number) => `${done}/${total}`,
     sweepHint:
-      "Çözücü her frekansta kararlı duruma kadar ayrıca çalıştırılır ve genlik ile faz sanal cihazlarla ölçülür.",
-    sweepDisabled:
-      "Tarama için sürücü açık ve ζ ≥ 0,01 olmalıdır; sönüm çok küçükken kararlı duruma ulaşmak uygulanamayacak kadar uzun sürer.",
+      "Çözücü her frekansta kararlı duruma kadar ayrıca çalıştırılır ve genlik ile faz sanal cihazlarla ölçülür. ζ < 0,01 iken kararlı duruma ulaşmak uygulanamayacak kadar uzun sürdüğünden tarama yapılmaz.",
+    sweepBlocked: {
+      drive: "Tarama için sürücü açık olmalıdır (F₀ > 0).",
+      damping: "Tarama için ζ ≥ 0,01 olmalıdır.",
+    },
     footer: {
       amplitude: "Genlik",
       phaseLag: "Faz gecikmesi",
@@ -35,7 +37,7 @@ export const plotsFrequency = {
     mode: (index: number) => `f${index}`,
     amplitudeAxis: (unit: string) => `Genlik [${unit}]`,
     need: (count: number) => `Spektrum için en az ${count} örnek gerekir`,
-    footer: (resolution: string, seconds: string) =>
-      `Çözünürlük Δf = ${resolution} Hz; çözümlenen kayıt ${seconds} s. Keskin çizgiler düzenli (periyodik ya da yarı periyodik) hareketi, geniş bantlı sürekli spektrum kaotik hareketi gösterir.`,
+    footer: (resolution: string, samples: number, seconds: string, minBin: number) =>
+      `Çözünürlük Δf = ${resolution} Hz (son ${samples} örnek, ${seconds} s). Baskın tepe yalnızca ${minBin}·Δf ve üzerindeki frekanslarda verilir; frekansı, sabit genlikli bir çizgi varsayılarak komşu iki kutu arasında ara değerlemeyle okunur. Keskin çizgiler düzenli (periyodik ya da yarı periyodik) hareketi, geniş bantlı sürekli spektrum kaotik hareketi gösterir.`,
   },
 };

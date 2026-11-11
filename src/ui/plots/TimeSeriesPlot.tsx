@@ -26,6 +26,12 @@ import {
 
 const OSC_MARGINS: Margins = { left: 46, right: 46, top: 10, bottom: 30 };
 const PEND_MARGINS: Margins = { left: 46, right: 12, top: 10, bottom: 30 };
+/**
+ * Opacity of the closed-form trace, a wide band under x(t). At 0.4 the ink
+ * colour has a contrast of 3.5:1 against the plot background and against the
+ * panel behind its legend key (WCAG 1.4.11 asks for 3:1; 0.28 gave 2.3:1).
+ */
+const EXACT_ALPHA = 0.4;
 
 /**
  * Strip chart of the state variables over a sliding time window.
@@ -99,7 +105,7 @@ export function TimeSeriesPlot() {
           drawLine(surface, n, px, (i) => yScale(series.get(OSC_CH.xExact, first + i)), {
             color: QUANTITY.exact,
             width: 3.2,
-            alpha: 0.28,
+            alpha: EXACT_ALPHA,
           });
         }
         drawLine(surface, n, px, (i) => yScale(series.get(OSC_CH.x, first + i)), { color: QUANTITY.position, width: 1.7 });
@@ -148,7 +154,8 @@ export function TimeSeriesPlot() {
       ? [
           { color: QUANTITY.position, label: t.plots.timeSeries.position, value: `${fixed(sim.osc.x, 3)} m` },
           { color: QUANTITY.velocity, label: t.plots.timeSeries.velocity, value: `${fixed(sim.osc.v, 3)} m/s` },
-          ...(showExact ? [{ color: "rgba(238,241,245,0.45)", label: t.plots.timeSeries.exact }] : []),
+          // The legend key shows the trace as it is drawn: QUANTITY.exact at the same opacity.
+          ...(showExact ? [{ color: `rgba(238,241,245,${EXACT_ALPHA})`, label: t.plots.timeSeries.exact }] : []),
         ]
       : Array.from({ length: count }, (_, link) => ({
           color: LINK_COLORS[link],

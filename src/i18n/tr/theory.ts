@@ -11,7 +11,6 @@ export const theory = {
   },
   contents: "İçindekiler",
   frontMatter: "Özet",
-  chapter: (number: string) => `Bölüm ${number}`,
   chapterSelect: "Bölüme git",
   notes: {
     info: "Not",

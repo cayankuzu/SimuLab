@@ -179,12 +179,17 @@ describe("experiments", () => {
     const sim = new Simulation();
     sim.applyOscillatorPreset("resonance");
     const theory = oscillatorTheory(sim.getState().oscillator);
-    const waitTime = transientDecayTime(theory.gamma);
+    const waitTime = transientDecayTime(theory.transientRate);
     let reportedAt: number | null = null;
     for (let i = 0; i < 600 && reportedAt === null; i++) {
       run(sim, 0.2);
       const relative = Math.abs((sim.oscMeter.amplitude ?? 0) - theory.steadyAmplitude) / theory.steadyAmplitude;
-      const settled = steadyState(sim.oscMeter.amplitudeDrift, sim.oscUndisturbedFor, theory.gamma);
+      const settled = steadyState(
+        sim.oscMeter.amplitudeDrift,
+        sim.oscMeter.centreDrift,
+        sim.oscUndisturbedFor,
+        theory.transientRate,
+      );
       // The cycle-to-cycle change alone would announce the steady state several per cent too early.
       if (settled.steady) {
         reportedAt = sim.osc.t;
@@ -199,9 +204,9 @@ describe("experiments", () => {
     // A parameter change is a disturbance: the waiting time starts again.
     sim.setOscillatorParams({ driveFrequency: 3.2 });
     expect(sim.oscUndisturbedFor).toBe(0);
-    expect(steadyState(0, sim.oscUndisturbedFor, theory.gamma).steady).toBe(false);
+    expect(steadyState(0, 0, sim.oscUndisturbedFor, theory.transientRate).steady).toBe(false);
     // Without damping there is no steady state at all.
-    expect(steadyState(0, 1e6, 0)).toEqual({ steady: false, remaining: Number.POSITIVE_INFINITY });
+    expect(steadyState(0, 0, 1e6, 0)).toEqual({ steady: false, remaining: Number.POSITIVE_INFINITY });
   });
 
   it("shows explicit Euler pumping energy into a frictionless oscillator", () => {
@@ -482,8 +487,8 @@ describe("data exchange", () => {
     const lines = csv.trimEnd().split("\n");
     const header = lines.findIndex((line) => !line.startsWith("#"));
     expect(lines[1]).toBe("# exported: 2026-11-10T12:00:00.000Z");
-    expect(csv).toContain("integrator: rk4 (order 4), fixed step h = 0.001 s (1000 Hz)");
-    expect(csv).toContain("m = 2 kg; k = 24.5 N/m; c = 0.55 N s/m; F0 = 8 N; omega = 3.5 rad/s");
+    expect(csv).toContain("integrator: rk4 (order 4) | fixed step h = 0.001 s (1000 Hz)");
+    expect(csv).toContain("m = 2 kg | k = 24.5 N/m | c = 0.55 N s/m | F0 = 8 N | omega = 3.5 rad/s");
     expect(lines[header].split(",")).toHaveLength(15);
     expect(lines.length - header - 1).toBe(sim.oscSeries.length);
     const first = lines[header + 1].split(",").map(Number);

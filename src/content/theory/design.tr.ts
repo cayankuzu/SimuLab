@@ -23,7 +23,7 @@ export const designTr: TheoryDocument = [
           },
           {
             kind: "p",
-            text: "Sürekli durum (konumlar, hızlar, enerji terimleri) React durumunda tutulmaz. Sahne ve grafikler her canlandırma karesinde çalışma zamanından doğrudan okuyarak çizer; sayısal göstergeler ise saniyede en çok on kez yenilenir. Böylece fizik adımı, çizim ve arayüz birbirinin maliyetinden bağımsızdır. Parametreler, çalışma durumu ve başlangıç koşulları gibi kesikli durum, değişmez (immutable) bir nesne olarak yayımlanır ve bileşenler yalnızca kullandıkları dilime abone olur.",
+            text: "Sürekli durum (konumlar, hızlar, enerji terimleri) React durumunda tutulmaz. Sahne ve grafikler her canlandırma karesinde çalışma zamanından doğrudan okuyarak çizer; sayısal göstergeler ise saniyede en çok on iki kez yenilenir. Böylece fizik adımı, çizim ve arayüz birbirinin maliyetinden bağımsızdır. Parametreler, çalışma durumu ve başlangıç koşulları gibi kesikli durum, değişmez (immutable) bir nesne olarak yayımlanır ve bileşenler yalnızca kullandıkları dilime abone olur.",
           },
           {
             kind: "p",
@@ -37,7 +37,7 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Her canlandırma karesinin duvar saati süresi bir bütçeye eklenir; bütçe, tam olarak $h = 1/f_s$ büyüklüğünde adımlarla harcanır ve artan kısım bir sonraki kareye devreder [@fiedler2004]. Kare başına adım sayısı sınırlıdır; sekme arka plandayken biriken süre atılır. Bu düzenle durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $h$ değerine bağlıdır. Sınama paketi bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarında durumların bit düzeyinde eşit olduğu doğrulanır.",
+            text: "Her canlandırma karesinin duvar saati süresi bir bütçeye eklenir; bütçe, tam olarak $h = 1/f_s$ büyüklüğünde adımlarla harcanır ve artan kısım bir sonraki kareye devreder [@fiedler2004]. Bir kare bütçeye en çok 0,1 s'lik duvar saati süresi ekler; kare başına adım sayısı böylece sınırlıdır (en yüksek adım frekansında ve zaman ölçeğinde 400). Daha uzun süren kare bu uzunluğa kırpılır ve durum çubuğunda sayılır; sekmenin arka planda geçirdiği süre ise atılır. Bu düzenle durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $h$ değerine bağlıdır. Sınama paketi bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarında durumların bit düzeyinde eşit olduğu doğrulanır.",
           },
           {
             kind: "note",
@@ -55,8 +55,8 @@ export const designTr: TheoryDocument = [
             kind: "list",
             items: [
               "TypeScript katı kipte derlenir; statik çözümleme (ESLint) uyarısız geçer.",
-              "102 otomatik sınama vardır: doğrusal cebir, özel fonksiyonlar, integratörler, her iki model, ölçüm cihazları, çalışma zamanı, veri alışverişi ve on dört doğrulama deneyi. Deney föylerinin her biri için, föyün gerçekten ölçümle tamamlanabildiğini ve yanlış ayarla tamamlanamadığını gösteren bir sınama bulunur. İçerik de sınanır: kuram metninin iki dilde aynı yapıda olması, her atfın kaynakçada bulunması, her formülün dizilebilmesi ve föy ile doğrulama metinlerinin koddaki ölçüt ve satır sayılarıyla uyuşması.",
-              "Dışarıdan gelen veri (deney dosyası, paylaşım bağlantısı) tür ve aralık bakımından doğrulanır; geçersiz girdi reddedilir, aralık dışı sayılar sınırlanır.",
+              "153 otomatik sınama vardır: doğrusal cebir, özel fonksiyonlar, integratörler, her iki model, ölçüm cihazları, çalışma zamanı, veri alışverişi ve on dört doğrulama deneyi; arayüz renklerinin karşıtlık oranları (ve bu bölümün onların verdiği değerleri doğru aktardığı), sayı girişinin okunması, saklanan tercihlerin doğrulanması ve spektrum göstergesinin kayıt ve tepe kuralları da sınanır. Her deney föyü için sınamalar, föyün öngörülen ölçümle tamamlandığını ve yanlış bir ayarla açık kaldığını gösterir. İçerik de sınanır: kuram metninin iki dilde aynı yapıda olması, her atfın kaynakçada bulunması, her formülün dizilebilmesi ve föy ile doğrulama metinlerinin koddaki ölçüt ve satır sayılarıyla uyuşması.",
+              "Dışarıdan gelen veri (deney dosyası, paylaşım bağlantısı) kullanılmadan önce doğrulanır. Yapısı yanlış olan ya da bilinmeyen bir yöntem, sunulan altı değerden başka bir adım frekansı ya da sonlu bir sayı olmayan bir değer içeren veri bütünüyle reddedilir. Aralığının dışındaki bir parametre en yakın sınıra çekilir; başlangıç koşullarına sayı alanlarının sınırları uygulanır: konum iki durdurucunun arasında, hız ±30 m/s, açılar ±1800°, açısal hızlar ±40 rad/s içinde kalır. Sınırı aşan bir açı tam turlar atılarak (−180°, 180°] aralığına indirgenir; böylece zincirin biçimi korunur. İşaretçiyle tutulan bir zincir de bırakıldığında aynı biçimde saklanır. Tarayıcının yerel deposunda saklanan tercihler de aynı biçimde doğrulanır: arayüzün kullanamayacağı bir değerin yerine varsayılanı alınır.",
               "Sürekli tümleştirme her değişiklikte tür denetimi, statik çözümleme, sınamalar ve üretim derlemesini çalıştırır.",
             ],
           },
@@ -105,14 +105,14 @@ export const designTr: TheoryDocument = [
               [
                 "Dışa aktarılan CSV",
                 "Satırların %99,6'sında enerji başka bir ana ait; 4,3 s'lik kayıt",
-                "Her satır tek bir an; 600 s'ye kadar kayıt; tam üstveri",
+                "Her satır tek bir an; 60 000 satıra kadar kayıt (varsayılan adım frekansında 600 s); parametreleri, başlangıç koşullarını, yöntemi ve adımı veren başlık",
               ],
               [
                 "Yay geometrisi",
                 "Karede yeniden oluşturulur: 1031 KiB bellek, 0,57 ms",
                 "Aynı tamponda güncellenir; bellek ayrılmaz",
               ],
-              ["Otomatik sınama", "Yok", "102 sınama, 14'ü doğrulama deneyi"],
+              ["Otomatik sınama", "Yok", "153 sınama, 14'ü doğrulama deneyi"],
               [
                 "Erişilebilirlik",
                 "ARIA özniteliği, klavye denetimi ve iletişim kutusu anlamı yok",
@@ -138,11 +138,11 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Bir laboratuvar tezgâhında bir düğme çevrilirken osiloskoba bakılır. Bu nedenle üç bölge aynı anda görünür tutulur: ortada deney düzeneği, altında grafik paneli, sağında parametre paneli. Bir parametre değiştirildiğinde etkisi hem sahnede hem grafikte hem de ölçüm çizelgesinde aynı anda izlenir; birini görmek için ötekini kapatmak gerekmez. Sayısal durum, alt kenardaki durum çubuğunda sürekli görünür: çözücü, adım, enerji defteri kalıntısı ve (osilatörde) analitik çözümden sapma.",
+            text: "Bir laboratuvar tezgâhında bir düğme çevrilirken osiloskoba bakılır. Bu nedenle üç bölge aynı anda görünür tutulur: ortada deney düzeneği, altında grafik paneli, sağında parametre paneli. Bir parametre değiştirildiğinde etkisi sahnede ve grafiklerde aynı anda izlenir; ölçüm çizelgesi ile deney föyleri sağdaki panelin öteki sekmeleridir. 1024 pikselden dar bir pencerede bu panel, sahnenin üzerinde açılan bir yan panele dönüşür. Alt kenardaki durum çubuğu sayısal durumu gösterir: enerji defteri kalıntısı her genişlikte, (osilatörde) analitik çözümden sapma 1024 pikselden, çözücü, adım ve mertebe ise 1280 pikselden başlayarak görünür; daha dar bir pencerede üst çubuktaki çözücü düğmesi yöntemi ve 640 pikselden başlayarak adım frekansını yazmayı sürdürür. Durum çubuğu geciken kareleri bildirirken ya da uyarlamalı çözücüyü önerirken bu bildirimler göstergelerin önüne geçer.",
           },
           {
             kind: "p",
-            text: "Geri bildirim süreleri için yerleşik eşikler gözetilir: yaklaşık 0,1 s altındaki tepki anlık algılanır, 1 s düşünce akışını bozmadan fark edilir, 10 s dikkatin korunabildiği sınırdır [@nielsen1993; @miller1968; @card1991]. Parametre değişikliği aynı karede uygulanır; uzun süren tek işlem olan frekans taraması ve doğrulama paketi ilerleme göstererek parçalar hâlinde yürütülür ve iptal edilebilir.",
+            text: "Geri bildirim süreleri için yerleşik eşikler gözetilir: yaklaşık 0,1 s altındaki tepki anlık algılanır, 1 s düşünce akışını bozmadan fark edilir, 10 s dikkatin korunabildiği sınırdır [@nielsen1993; @miller1968; @card1991]. Parametre değişikliği aynı karede uygulanır; uzun süren iki işlem, frekans taraması ve doğrulama paketi, ilerleme göstererek parçalar hâlinde yürütülür; tarama iptal edilebilir.",
           },
         ],
       },
@@ -152,11 +152,11 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Cisimler işaretçiyle tutulur, sürüklenir ve bırakılır; ilgilenilen nesne sürekli görünürdür, eylem fizikseldir ve sonucu anında geri alınabilir [@shneiderman1983; @hutchins1985]. Araba tek serbestlik derecelidir: işaretçi ışınının ray eksenine en yakın noktası alınır, böylece eşleme her kamera açısında tutarlıdır. Sarkaç bağlantısı, kendi dönme düzlemiyle kesişim noktasına yöneltilir. Bırakma anındaki hız, son 90 ms'deki işaretçi hareketinden kestirilir ve cisme aktarılır; işaretçi durdurulup bırakılırsa cisim durgun bırakılır.",
+            text: "Cisimler işaretçiyle tutulur, sürüklenir ve bırakılır; ilgilenilen nesne sürekli görünürdür, eylem fizikseldir ve sonucu anında geri alınabilir [@shneiderman1983; @hutchins1985]. Araba tek serbestlik derecelidir: işaretçi ışınının ray eksenine en yakın noktası alınır, böylece eşleme her kamera açısında tutarlıdır. Sarkaç bağlantısı, işaretçi ışınının bağlantının kendi dönme düzlemini kestiği noktaya yöneltilir. Bırakma anındaki hız, son 90 ms'deki işaretçi hareketinden kestirilir ve cisme aktarılır; işaretçi durdurulup bırakılırsa cisim durgun bırakılır.",
           },
           {
             kind: "p",
-            text: "Sürükleme tek giriş yolu değildir. Aynı başlangıç koşulları parametre panelindeki sayı alanlarından klavyeyle ve kesin değerle girilebilir; bu hem erişilebilirlik hem de yinelenebilirlik gereğidir. “Sıfırla” komutu varsayılan değerlere değil, yürütülmekte olan deneyin başlangıç koşullarına döner.",
+            text: "Sürükleme tek giriş yolu değildir. Aynı başlangıç koşulları parametre panelindeki sayı alanlarından klavyeyle ve kesin değerle girilebilir; bu hem erişilebilirlik hem de yinelenebilirlik gereğidir. “Başlangıç koşullarına dön” komutu (R tuşu) varsayılan değerlere değil, yürütülmekte olan deneyin başlangıç koşullarına döner.",
           },
         ],
       },
@@ -166,7 +166,7 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Bir fiziksel nicelik her yerde aynı renkle gösterilir: konum ve açı gök mavisi, hız mavimsi yeşil, net kuvvet turuncu, yay kuvveti sarı, sönüm kuvveti kırmızımsı mor, sürücü kuvveti ve ağırlık kızıl turuncudur; kinetik enerji hızın, potansiyel enerji konumun rengini taşır. Renkler Okabe–Ito paletinden alınmıştır [@okabe2008; @wong2011]. Kuzey Avrupa kökenli erkeklerin %8'e varan bölümünde ve kadınların %0,5'inde yaygın kırmızı–yeşil renk görme farklılığı bulunduğundan [@wong2011] bu seçim süsleme değil okunabilirlik koşuludur; bilimsel görsellerde renk seçiminin veriyi çarpıtabildiği de belgelenmiştir [@crameri2020]. Hiçbir bilgi yalnızca renkle verilmez: her vektörün simgesi ve sayısal değeri, her eğrinin etiketi vardır.",
+            text: "Bir fiziksel nicelik her yerde aynı renkle gösterilir: konum ve açı gök mavisi, hız mavimsi yeşil, net kuvvet turuncu, yay kuvveti sarı, sönüm kuvveti kırmızımsı mor, sürücü kuvveti ve ağırlık kızıl turuncudur; kinetik enerji hızın, potansiyel enerji konumun rengini taşır. Birden çok bağlantılı bir zincirde ise her bağlantının sahnede, grafiklerde ve çizelgelerde koruduğu kendi rengi vardır (birinci bağlantı gök mavisi, ötekiler sırasıyla turuncu, mavimsi yeşil, sarı, mavi ve kızıl turuncu). Renkler Okabe–Ito paletinden alınmıştır [@okabe2008; @wong2011]. Kuzey Avrupa kökenli erkeklerin %8'e varan bölümünde ve kadınların %0,5'inde yaygın kırmızı–yeşil renk görme farklılığı bulunduğundan [@wong2011] bu seçim süsleme değil okunabilirlik koşuludur; bilimsel görsellerde renk seçiminin veriyi çarpıtabildiği de belgelenmiştir [@crameri2020]. Hiçbir nicelik yalnızca rengiyle tanıtılmaz: her vektörün simgesi ve sayısal değeri, her eğrinin etiketi vardır.",
           },
         ],
       },
@@ -190,7 +190,7 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Her grafikte birimli ve sayısal eksenler, 1–2–5 aralıklı bölmeler ve silik bir ızgara vardır; süsleme yoktur [@tufte2001]. Nicel karşılaştırmalar, algısal olarak en doğru okunan kodlamayla, ortak bir ölçek üzerindeki konumla yapılır [@cleveland1984]. Eksen sınırları veriyi titremeden izler: veri aralığın dışına çıkınca hemen genişler, daralınca yavaşça toplanır. Açılar $(-\\pi, \\pi]$ aralığına sarılır ve eğri sarma noktasında kesilir; böylece yanıltıcı düşey çizgiler oluşmaz. Zaman ekseni kare sayısına değil benzetim zamanına bağlıdır; telemetri çözücü hızından bağımsız olarak yaklaşık 100 Hz'te örneklenir.",
+            text: "Her grafikte birimli ve sayısal eksenler, 1–2–5 aralıklı bölmeler ve silik bir ızgara vardır; süsleme yoktur [@tufte2001]. Nicel karşılaştırmalar, algısal olarak en doğru okunan kodlamayla, ortak bir ölçek üzerindeki konumla yapılır [@cleveland1984]. Eksen sınırları veriyi titremeden izler: veri aralığın dışına çıkınca hemen genişler, daralınca yavaşça toplanır. Açılar $(-\\pi, \\pi]$ aralığına sarılır ve eğri sarma noktasında kesilir; böylece yanıltıcı düşey çizgiler oluşmaz. Zaman ekseni kare sayısına değil benzetim zamanına bağlıdır; telemetri 300 Hz ve üzerindeki adım frekanslarında 100 Hz'te, 60 Hz ve 120 Hz'te ise her adımda kaydedilir.",
           },
         ],
       },
@@ -200,22 +200,33 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Hedef, WCAG 2.2'nin AA düzeyidir [@w3c2023wcag22]. Bu belgeden alınan ve tasarımı doğrudan belirleyen ölçütler şunlardır:",
+            text: "Hedef, WCAG 2.2'nin AA düzeyidir [@w3c2023wcag22]. Bu belgeden alınan ve tasarımı en doğrudan belirleyen ölçütler, arayüzün bunları karşılamak için yaptıklarıyla birlikte aşağıda sıralanmıştır. Karşıtlık oranları renk değerlerinden, o belgedeki bağıntıyla hesaplanmıştır; otomatik sınamalar aynı hesabı yineler, 4,5:1 ile 3:1 eşiklerinin adı geçen yüzeylerde sağlandığını ve aşağıda verilen değerlerin renk değerlerinden çıkan değerler olduğunu denetler.",
           },
           {
             kind: "list",
             items: [
-              "**1.4.3 Karşıtlık (en az):** metin için en az 4,5:1. Kullanılan en soluk metin renginin panel zeminiyle karşıtlığı 6:1'in üzerindedir.",
-              "**1.4.11 Metin dışı karşıtlık:** denetim sınırları ve grafik öğeleri için en az 3:1.",
-              "**1.4.1 Renk kullanımı:** bilgi yalnızca renkle iletilmez; durumlar simge ve sözcükle birlikte verilir.",
-              "**2.1.1 Klavye:** bütün işlevler klavyeyle kullanılabilir; sürüklemenin karşılığı sayı alanlarıdır.",
-              "**2.4.7 Görünür odak:** tek ve tutarlı bir odak göstergesi.",
-              "**2.5.8 Hedef boyutu (en az):** etkileşimli hedefler en az 24×24 CSS pikseli.",
+              "**1.1.1 Metin dışı içerik:** dizilen her formül iki kez üretilir: görsel dizgi olarak ve yardımcı teknolojilerin okuduğu MathML olarak. Sahnenin ve grafiklerin metin açıklaması vardır; bunlarda ölçülen büyüklükler Ölçümler sekmesinde metin olarak listelenir.",
+              "**1.4.3 Karşıtlık (en az):** metin için en az 4,5:1. Üç ana metin rengi her yüzeyde en az 5,17:1 verir. Etiketlerde ve birimlerde kullanılan en soluk metin rengi panel zemininde 5,50:1, göründüğü her yüzeyde en az 4,76:1 verir; en küçük değer, üzerine gelinen bir öğenin zeminindedir. Seçili öğelerin ve ipuçlarının zemini olan en açık yüzeyde bu renk yalnızca 4,21:1 verirdi; orada kullanılmaz.",
+              "**1.4.11 Metin dışı karşıtlık:** bir denetimi ya da durumunu tanıtan öğeler için en az 3:1. Bu işi yalnızca bir çerçevenin ya da bir işaretin gördüğü yerlerde, her yüzeyde en az 3,06:1 (panel zemininde 4,01:1) veren tek bir renk kullanılır: sayı alanlarının, anahtarın ve föylerdeki seçenek halkalarının çerçevesi, kaydırıcıların yolu, bölmeli denetimlerde seçili öğenin çerçevesi ve grafik panelinin tutamağındaki çizgi. Odak halkası en az 6,43:1, kaydırma çubuklarının tutamağı en az 3,10:1 verir. Basılı durumdaki bir aç-kapa düğmesi, vurgu renginde ve hem kendi renkli dolgusuna hem çevresindeki yüzeye karşı en az 3,59:1 veren bir çerçeve taşır. Bölgeleri ayıran ve düğmeleri çevreleyen ince çizgiler bilerek 3:1'in altında tutulmuştur (1,1:1 ile 1,6:1 arasında); bunlar süslemedir, bir düğmeyi etiketi tanıtır.",
+              "**1.4.1 Renk kullanımı:** aşağıdaki durumlar yalnızca renkle değil, ikinci bir işaretle de belirtilir. Çalışma durumu renkli noktanın yanında sözcükle yazılır; varsayılan dışı bir çözücü, çözücü düğmesinin rengiyle birlikte simgesini de değiştirir; bölmeli denetimde seçili öğe ile basılı durumdaki bir aç-kapa düğmesi (sahne katmanları, ses) çerçeve taşır; kuram okuyucusunun içindekiler listesinde bulunulan başlık, ön kenarında bir çizgi taşır; reddedilen bir girdi hata rengindeki çerçeveye ek olarak simgeli bir iletiyle bildirilir; doğrulama sonuçları ile tamamlanan föyler bir onay ya da çarpı işaretiyle ve ekran okuyucular için bir metinle belirtilir.",
+              "**2.1.1 Klavye:** bütün denetimlere klavyeyle ulaşılabilir ve hepsi klavyeyle kullanılabilir; grafik panelinin tutamağı da bunlardandır. Vektörlerin çizildiği sarkaç kütlesi, vektör ölçeğinin yanındaki seçiciyle belirlenir; kütleye tıklamak da aynı işi görür. Sahne odaktayken ok tuşları kamerayı 3°'lik adımlarla döndürür, Shift ile birlikte kaydırır; bakış yönleri ve yakınlaştırma için düğmeler vardır. İşaretçi gerektiren tek işlev bir cismin tutulup fırlatılmasıdır; karşılığı, başlangıç koşullarının sayı alanlarıdır.",
+              "**2.1.4 Karakter tuşu kısayolları:** tek tuşlu kısayollar kısayollar penceresinden kapatılabilir; boşluk tuşu çalışmayı sürdürür. Bir iletişim kutusu, menü ya da liste açıkken, bir alana yazı yazılırken ve bir cisim tutulurken kısayollar işlem yapmaz.",
+              "**2.4.7 Görünür odak:** odaktaki denetim vurgu renginde 2 piksellik bir çerçeve taşır; sayı alanı odağı vurgu rengindeki kenarlığıyla, menü ise vurgulanan satırıyla gösterir.",
+              "**2.4.11 Odağın örtülmemesi (en az):** başlığı yerinde sabit kalan iki kaydırılabilir panel en az bu başlığın yüksekliği kadar pay bırakır; böylece odak aldığı için görünüme getirilen bir denetim başlığın altında kalmaz.",
+              "**2.5.7 Sürükleme hareketleri:** sürükleyerek yapılan her ayar sürüklemeden de yapılabilir: grafik panelinin yüksekliği, tıklandıkça dört yükseklik (180, 288, 404 ve 520 piksel) arasında sırayla geçen tutamağıyla; bir kaydırıcı, yoluna tıklanarak ya da sayı alanından; kamera, bakış düğmeleri ve ok tuşlarıyla; bir cismin konumu, başlangıç koşullarının sayı alanlarından ayarlanır.",
+              "**2.5.8 Hedef boyutu (en az):** denetimler her iki yönde en az 24 CSS pikseli olacak biçimde boyutlandırılmıştır. En küçükleri 24 piksel yüksekliğindedir: küçük bölmeli denetimlerin öğeleri, anahtar (40×24), gök cisimlerinin yerçekimini seçen düğmeler, grafik panelinin tutamağı, durum çubuğundaki öneri ve kaynakça listesindeki bağlantılar. Metin içindeki atıf numaraları, ölçütün cümle içindeki hedefler için tanıdığı ayrıcalığa dayanır.",
+              "**3.3.1 Hata tanımlama:** sayı alanı, sayı olmayan bir metni kabul etmez: metin alanda kalır, alan işaretlenir ve izin verilen aralığı bildiren bir ileti görünür; ileti ekran okuyuculara da duyurulur. Aralığın dışındaki bir sayı en yakın sınıra çekilir: alan kullanılan değeri gösterir, ekran okuyuculara da duyurulan kısa bir not aralığı ve kullanılan sınırı bildirir.",
             ],
           },
           {
             kind: "p",
-            text: "İletişim kutuları odağı içeride tutar, Escape ile kapanır ve odağı tetikleyen denetime geri verir. Belge dili arayüz diliyle birlikte değişir. İşletim sisteminde hareket azaltma tercihi açıksa arayüz geçişleri kapatılır; benzetimin kendisi içerik olduğu için sürer ve her an duraklatılabilir.",
+            text: "İletişim kutuları odağı içeride tutar, Escape ile kapanır ve odağı kendilerini açan denetime geri verir. Saat, canlı duyurusu kapalı bir zamanlayıcı olarak sunulur; böylece süren bir deney ekran okuyucuyu kesintiye uğratmaz. Belge dili arayüz diliyle birlikte değişir. 1024 pikselin altında üst çubuk, denetimleri kesmek yerine alt satırlara geçirir. Üst çubukta ancak 1536 pikselden başlayarak yer bulan zaman ölçeği parametre panelinin başında da ayarlanır; 1'den farklı olduğu sürece sahnedeki ölçek anahtarında, sahnenin her boyutunda yazılı olarak görünür. İşletim sisteminde hareket azaltma tercihi açıksa arayüz geçişleri algılanamayacak kadar kısaltılır, kamera yeni bir bakışa süzülerek değil doğrudan geçer ve döndürme denetiminin eylemsizliği kalkar; deneyin hareketi içeriğin kendisi olduğu için sürer ve her an duraklatılabilir.",
+          },
+          {
+            kind: "note",
+            tone: "warning",
+            title: "Bu önlemlerin kapsamadıkları",
+            text: "Bir denetim ve dört gösterge yalnızca daha geniş pencerelerde bulunur: zaman grafiğindeki “Analitik çözümü göster” anahtarı ile üst çubuktaki saat 768 pikselden, durum çubuğunda kare hızı 640 pikselden (geciken kareler bildirilirken 768 pikselden), kare başına fizik süresi 1280 pikselden ve kayıtlı örnek sayısı 1536 pikselden başlayarak görünür. Daha dar bir pencerede, ya da pencereyi CSS pikseli cinsinden o kadar daraltan bir yakınlaştırma düzeyinde, bunlara ulaşılamaz. 640 pikselden dar bir pencerede durum çubuğu, bir bildirim gösterdiği sürece, çalışma durumunu yalnızca noktanın rengiyle verir; o durumda çalıştırma düğmesi durumu simgesiyle gösterir, ıraksamayı ise sahnenin üstündeki uyarı sözcükle bildirir. Bir cisim yalnızca işaretçiyle tutulup fırlatılabilir. Bu raporda ekran okuyucuyla ya da yardımcı teknolojiye gereksinim duyan kişilerle yapılmış bir sınama yoktur; yukarıdaki ifadeler kaynak koda ve hesaba dayanır.",
           },
         ],
       },
@@ -225,7 +236,7 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Mekanik frekanslar (2 Hz'in altında) işitme aralığının çok altındadır; bu yüzden ses bir kayıt değil, parametre eşlemeli bir işitsel göstergedir [@hermann2011]. Osilatörde ton yüksekliği konumu (3,5 m başına bir oktav), ses şiddeti hızı izler; durdurucuya çarpma, çarpma hızıyla orantılı kısa bir vuruşla duyulur. Sarkaçta birinci bağlantının düşeyden her geçişi, yöne göre farklı perdede bir tıkla işaretlenir: tek sarkaç saat gibi düzenli, kaotik zincir düzensiz duyulur. Ses yalnızca kullanıcı açtığında, benzetim yürürken ve sekme görünürken çalar.",
+            text: "Mekanik frekanslar (en çok birkaç hertz) işitme aralığının çok altındadır; bu yüzden ses bir kayıt değil, parametre eşlemeli bir işitsel göstergedir [@hermann2011]. Osilatörde ton yüksekliği konumu (3,5 m başına bir oktav), ses şiddeti hızı izler; durdurucuya çarpma, çarpma hızıyla orantılı kısa bir vuruşla duyulur. Sarkaçta birinci bağlantının düşeyden her geçişi, yöne göre farklı perdede bir tıkla işaretlenir: tek sarkaç saat gibi düzenli, kaotik zincir düzensiz duyulur. Ses yalnızca kullanıcı açtığında, benzetim yürürken ve sekme görünürken çalar.",
           },
         ],
       },
@@ -258,7 +269,7 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Föyler tahmin et – gözle – açıkla düzenini izler [@white1992; @champagne1980]: öğrenci önce föyün sorusuna verilen yanıtlardan birini seçerek bir öngörüde bulunur, sonra düzeneği kurar ve ölçer; föy tamamlandığında öngörüsü gözlemiyle karşılaştırılır ve ölçümü kuramla bağdaştıran, kaynak gösteren bir açıklama açılır. Ölçütler, öğrenci parametreleri değiştirirken arka planda sürekli değerlendirilir. Bir föyün tamamlanması bir sürgünün konumuna değil ölçüme bağlıdır: periyot sıfır geçişlerinden, sönüm ardışık tepe değerlerinden, aşım ve yerleşme süresi basamak yanıtından, öngörülebilirlik ikiz yörüngenin ayrılmasından ve Lyapunov kestiriminden okunur. Örneğin “kritik sönüm” föyü, sönüm oranının 1 olarak ayarlanmasıyla değil, ölçülen aşımın %0,5'in altında ve yerleşme süresinin kritik değerin %10'u içinde olmasıyla tamamlanır; yarı değerdeki sönüm aşım ölçütünde, iki katı sönüm süre ölçütünde başarısız olur.",
+            text: "Föyler tahmin et – gözle – açıkla düzenini izler [@white1992; @champagne1980]: öğrenci önce föyün sorusuna verilen yanıtlardan birini seçerek bir öngörüde bulunur, sonra düzeneği kurar ve ölçer; föy tamamlandığında öngörüsü gözlemiyle karşılaştırılır ve ölçümü kuramla bağdaştıran, kaynak gösteren bir açıklama açılır. Ölçütler, öğrenci parametreleri değiştirirken arka planda sürekli değerlendirilir. Bir föyün tamamlanması bir kaydırıcının konumuna değil ölçüme bağlıdır: periyot sıfır geçişlerinden, sönüm ardışık tepe değerlerinden, aşım ve yerleşme süresi basamak yanıtından, öngörülebilirlik ikiz yörüngenin ayrılmasından ve Lyapunov kestiriminden okunur. Örneğin “kritik sönüm” föyü, sönüm oranının 1 olarak ayarlanmasıyla değil, ölçülen aşımın en çok %0,5 ve ölçülen yerleşme süresinin kritik sönümdeki değerin en çok 1,1 katı olmasıyla tamamlanır; kritik sönümün yarısı aşım ölçütünde, iki katı ise süre ölçütünde başarısız olur. Bir parametre değiştirilmeden önce yapılmış ölçüm sayılmaz: basamak yanıtı bir sonraki bırakıştan başlayarak yeniden ölçülür.",
           },
           {
             kind: "p",

@@ -50,9 +50,9 @@ export const evidenceTr: TheoryDocument = [
               ["Serbest yanıt, dört rejim, 20 s", "En büyük konum hatası", r`$1{,}6 \times 10^{-10}$ m`, r`$10^{-9}$ m`],
               ["Kararlı durum, beş frekans", "Genliğin bağıl hatası", r`$3{,}3 \times 10^{-8}$`, r`$10^{-5}$`],
               ["Kararlı durum, beş frekans", "Faz gecikmesinin hatası", r`$3{,}3 \times 10^{-8}$ rad`, r`$10^{-3}$ rad`],
-              ["Kritik sönüm", "%2 yerleşme süresinin bağıl hatası", r`$3{,}3 \times 10^{-4}$`, r`$2 \times 10^{-3}$`],
+              ["Kritik sönüm", "%2 yerleşme süresinin bağıl hatası", r`$1{,}5 \times 10^{-7}$`, r`$2 \times 10^{-3}$`],
               ["Durdurucuya çarpma", "Çarpma anının hatası", r`$8{,}6 \times 10^{-13}$ s`, r`$10^{-8}$ s`],
-              ["Enerji defteri, 27 çarpma, 60 s", "En büyük bağıl artık", r`$1{,}3 \times 10^{-12}$`, r`$10^{-8}$`],
+              ["Enerji defteri, 27 çarpma, 60 s", "En büyük bağıl kalıntı", r`$1{,}3 \times 10^{-12}$`, r`$10^{-8}$`],
               ["Sarkaç periyodu, 10°–170° ve dönme", "Bağıl hata", r`$2{,}3 \times 10^{-10}$`, r`$10^{-7}$`],
               ["Enerji sapması, 60 s", r`$N = 1;\ 2;\ 3;\ 6$`, r`$4{,}7 \times 10^{-13}$; $2{,}0 \times 10^{-9}$; $2{,}4 \times 10^{-8}$; $3{,}3 \times 10^{-7}$`, r`$10^{-6}$`],
               ["Özfrekanslar", "Laguerre sıfırlarından bağıl sapma", r`$8{,}5 \times 10^{-16}$`, r`$10^{-10}$`],
@@ -76,7 +76,7 @@ export const evidenceTr: TheoryDocument = [
           {
             kind: "list",
             items: [
-              r`**Toleranslar bilerek geniştir.** Ölçülen hatalar toleransların birkaç büyüklük mertebesi altındadır. Toleranslar, deneylerin farklı çalışma ortamlarında da geçmesi ve gerçek bir kod hatasını (mertebenin düşmesi, yanlış bir katsayı) yine de yakalaması için seçilmiştir.`,
+              r`**Toleranslar ölçülen hatalardan geniştir, ama her ölçütte aynı oranda değil.** Güvenlik payı, yani toleransın ölçülen hataya (alt sınır ölçütlerinde ölçülen değerin sınıra) oranı, 67 ölçütün 47'sinde iki büyüklük mertebesi ya da daha fazla, 12'sinde bir ile iki mertebe arasında, 8'inde ise on katın altındadır. Bu sekiz ölçütten Çizelge 7.1'de yer alanlar sönümsüz serbest yanıt (6 kat), altı bağlantılı zincirin enerji sapması (3 kat) ve iki Lyapunov sınırıdır (3 ve 2 kat). Ötekiler Dormand–Prince yönteminin gözlenen mertebesi (4 kat), parametre aralığının en zor köşesinde sabit adımın sapması (6 kat), adım yarıya indirildiğinde Lyapunov kestirimindeki değişim (4 kat) ve altı bağlantılı zincirin asılı iple karşılaştırılmasıdır (1,3 kat); bu sonuncusunda ölçülen fark sayısal bir hata değil, altı bağlantı ile sürekli ortam arasındaki fiziksel farktır. Toleranslar, deneylerin farklı çalışma ortamlarında da geçmesi ve gerçek bir kod hatasını (mertebenin düşmesi, yanlış bir katsayı) yine de yakalaması için seçilmiştir; güvenlik payı dar olan ölçütlerin başka bir ortamda geçip geçmediği sınanmamıştır (Bölüm 9).`,
               r`**Enerji sapması bağlantı sayısıyla büyür.** Daha çok bağlantı daha yüksek açısal hızlar ve daha sert bir doğrusal olmayan bağlaşım demektir; aynı adımla altı bağlantılı zincirin sapması çift sarkacınkinin yaklaşık 160 katıdır, ama hâlâ $10^{-6}$ değerinin altındadır.`,
               r`**Adım büyüklüğü belirleyicidir.** Çift sarkaçta adım 1 ms yerine 3,3 ms seçildiğinde sapma $2{,}0 \times 10^{-9}$ değerinden $5{,}3 \times 10^{-7}$ değerine çıkar. Açık Euler aynı deneyde, aynı adımla enerji defterinde %24'lük bir sapma üretir; bu satır pakette bilerek bir **alt sınır** ölçütü olarak durur.`,
               r`**Yöntemin mertebesi kaotik yörüngede de gözlenir.** Üç bağlantılı zincirde RK4 ile hata denetimli başvuru çözümü arasındaki fark, adım dört kat küçültüldüğünde 256,6 kat küçülür; dördüncü mertebe bir yöntem için beklenen değer $4^4 = 256$ olur.`,
@@ -110,7 +110,7 @@ export const evidenceTr: TheoryDocument = [
             kind: "note",
             tone: "correction",
             title: "“Rezonans tam doğal frekansta olur”",
-            text: r`Soğurulan güç ve hız genliği için doğrudur. Yer değiştirme genliği ise $\omega_0\sqrt{1-2\zeta^2}$ değerinde, yani doğal frekansın altında en büyüktür ve $\zeta \ge 1/\sqrt{2}$ için hiç tepe yapmaz (Bölüm 2). Zayıf sönümde fark küçüktür, ama ölçülebilir: “Rezonans tepesini bul” föyü tam olarak bunu ölçtürür.`,
+            text: r`Soğurulan güç ve hız genliği için doğrudur. Yer değiştirme genliği ise $\omega_0\sqrt{1-2\zeta^2}$ değerinde, yani doğal frekansın altında en büyüktür ve $\zeta \ge 1/\sqrt{2}$ için hiç tepe yapmaz (Bölüm 2). Zayıf sönümde fark küçüktür: $\zeta = 0{,}1$ için tepe $\omega_0$ değerinin %1 altındadır ve tam $\omega_0$ değerindeki genlik tepe değerinin %99,5'idir. “Rezonans tepesini bul” föyü bu yüzden $\zeta = 0{,}25$ ile kurulur; bu sönümde tepe $\omega_0$ değerinin %6,5 altındadır ve $\omega_0$ değerindeki genlik tepe değerinin %96,8'inde kalır. Föy, kararlı durumda ölçülen genliğin tepe değerinin en az %98'i olmasını ister; dolayısıyla doğal frekansta değil, onun altında tamamlanır.`,
           },
           {
             kind: "note",
@@ -214,7 +214,7 @@ export const evidenceTr: TheoryDocument = [
               r`**Yalnızca viskoz sürtünme.** Kuru sürtünme ve hava direnci yoktur; sönüm kuvveti her hızda hızla doğru orantılıdır. Girdap akımı freni için bu, yalnızca düşük hızlarda geçerli bir yaklaşıklıktır [@wiederick1987; @heald1988].`,
               r`**Doğrusal, kütlesiz yay.** Yay kuvveti katı boya kadar tam doğrusaldır ve yayın kendi kütlesi yoktur. Çizilen yay ölçekli bir tasarım değildir: aynı geometri çelik telden yapılsaydı $k = Gd^4/(8D^3N_a)$ bağıntısı yaklaşık $10^5$ N/m verirdi [@budynas2015; @budynas2020]. Düzeneğin metre ölçeğindeki boyutları görünürlük için seçilmiştir.`,
               r`**Rijit durdurucular, sabit geri sıçrama katsayısı.** Çarpma anlıktır; temas süresi, hıza bağlı geri sıçrama ve tamponun biçim değiştirmesi modellenmemiştir.`,
-              r`**İdeal sürücü.** Sürücü, taşıyıcının hareketinden etkilenmeyen ideal bir kuvvet kaynağıdır.`,
+              r`**İdeal sürücü.** Sürücü, arabanın hareketinden etkilenmeyen ideal bir kuvvet kaynağıdır.`,
             ],
           },
         ],
@@ -226,10 +226,11 @@ export const evidenceTr: TheoryDocument = [
           {
             kind: "list",
             items: [
-              r`**Enerji sapması birikir.** RK4 simplektik değildir; sapma zamanla büyür. Verilen değerler 60 saniyelik deneylere aittir; saatler süren bir çalıştırmada artık izlenmeli, gerekirse adım küçültülmeli ya da uyarlamalı yönteme geçilmelidir.`,
+              r`**Enerji sapması birikir.** RK4 simplektik değildir; sapma zamanla büyür. Verilen değerler 60 saniyelik deneylere aittir; saatler süren bir çalıştırmada kalıntı izlenmeli, gerekirse adım küçültülmeli ya da uyarlamalı yönteme geçilmelidir. Her iki değişiklik de deneyi baştan başlatır (Bölüm 4).`,
+              r`**Çözüm ıraksayabilir.** Düşük mertebeli bir yöntem ve iri bir adımla sarkaç zincirinin çözümü sonlu aralıktan çıkabilir. Deney o zaman durdurulur (Bölüm 4); hiçbir şey değiştirilmeden aynı çözücüyle yeniden başlatılırsa aynı anda yine durdurulur.`,
               r`**Kaotik yörüngeler ufkun ötesinde tek tek anlamlı değildir.** Bölüm 5'te açıklandığı gibi, birkaç on saniyeden sonra gösterilen durum tam çözümün durumu değildir; anlamlı olan istatistiksel ve geometrik özelliklerdir.`,
               r`**Lyapunov üsteli sonlu süreli bir kestirimdir** ve yörüngeye bağlıdır; bir düzeneğin “üsteli” olarak tek bir sayı verilemez.`,
-              r`**Gerçek zaman güvencesi yoktur.** Yavaş bir aygıtta ya da çok yüksek adım frekansında benzetim zamanı duvar saatinin gerisinde kalabilir; durum çubuğu bunu bildirir. Fiziksel sonuç etkilenmez.`,
+              r`**Gerçek zaman güvencesi yoktur.** Yavaş bir aygıt ya da yüksek bir adım frekansı bir karenin 0,1 saniyeden uzun sürmesine yol açtığında, karenin 0,1 saniyeyi aşan bölümü benzetime aktarılmaz ve benzetim zamanı duvar saatinin gerisinde kalır; durum çubuğu son başlatmadan beri bu kareleri sayar. Adım dizisi aynı kaldığı için fiziksel sonuç etkilenmez.`,
               r`**Çalışma ortamları arası yinelenebilirlik sınanmamıştır** (Bölüm 4).`,
             ],
           },

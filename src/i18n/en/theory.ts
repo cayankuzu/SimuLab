@@ -13,7 +13,6 @@ export const theory: typeof source = {
   },
   contents: "Contents",
   frontMatter: "Abstract",
-  chapter: (number: string) => `Chapter ${number}`,
   chapterSelect: "Go to chapter",
   notes: {
     info: "Note",

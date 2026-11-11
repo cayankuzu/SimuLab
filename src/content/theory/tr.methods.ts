@@ -63,7 +63,7 @@ export const methodsTr: TheoryDocument = [
             kind: "note",
             tone: "warning",
             title: "Açık Runge–Kutta yöntemleri simplektik değildir",
-            text: r`Hiçbir açık Runge–Kutta yöntemi Hamilton sistemlerinin faz uzayı yapısını tam olarak korumaz [@sanzserna1988; @hairer2006]. Buradaki simplektik Euler de yalnızca ayrılabilir Hamilton fonksiyonları için simplektiktir; sarkaç zincirinin kütle matrisi açılara bağlı olduğundan bu özellik zincirde geçerli değildir. Sönüm, sürücü ve çarpma içeren genel durumda sistem zaten Hamilton sistemi değildir. Bu çalışmada enerji korunumu varsayılmaz, ölçülür: enerji defterinin artığı her an ekrandadır.`,
+            text: r`Hiçbir açık Runge–Kutta yöntemi Hamilton sistemlerinin faz uzayı yapısını tam olarak korumaz [@sanzserna1988; @hairer2006]. Buradaki simplektik Euler de yalnızca ayrılabilir Hamilton fonksiyonları için simplektiktir; sarkaç zincirinin kütle matrisi açılara bağlı olduğundan bu özellik zincirde geçerli değildir. Sönüm, sürücü ve çarpma içeren genel durumda sistem zaten Hamilton sistemi değildir. Bu çalışmada enerji korunumu varsayılmaz, ölçülür: enerji defterinin kalıntısı her an ekrandadır.`,
           },
         ],
       },
@@ -73,11 +73,19 @@ export const methodsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Her canlandırma karesinin duvar saati süresi, zaman ölçeğiyle çarpılarak bir bütçeye eklenir. Bütçe tam olarak $h = 1/f_s$ büyüklüğünde adımlarla harcanır; artan kısım sonraki kareye devreder [@fiedler2004]. Adım frekansı $f_s$ 60 Hz ile 2000 Hz arasında seçilebilir, varsayılan değer 1000 Hz'tir. Tek bir karenin katkısı 0,1 saniyeyle ve kare başına adım sayısı 800 ile sınırlıdır; bu sınır aşılırsa benzetim zamanı duvar saatinin gerisinde kalır, ama adım büyüklüğü hiçbir zaman değişmez. Telemetri 100 Hz ile örneklenir.`,
+            text: r`Her canlandırma karesinin duvar saati süresi, zaman ölçeğiyle çarpılarak bir bütçeye eklenir. Bütçe tam olarak $h = 1/f_s$ büyüklüğünde adımlarla harcanır; artan kısım sonraki kareye devreder [@fiedler2004]. Adım frekansı $f_s$ 60, 120, 300, 600, 1000 ya da 2000 Hz olarak seçilebilir; varsayılan değer 1000 Hz'tir. Tek bir kare bütçeye en çok 0,1 s'lik duvar saati süresi ekler; bu, 2000 Hz'te ve en büyük zaman ölçeği olan 2'de 400 adım eder. Daha uzun süren kare 0,1 saniyeye kırpılır: artan bölüm benzetime aktarılmaz, benzetim zamanı duvar saatinin gerisinde kalır ve durum çubuğu son başlatmadan beri bu tür kareleri sayar (“Geciken kare”). Sekme arka plandan döndüğünde kare süresinin ölçümü yeniden başlar; arka planda geçen süre bu yüzden ne benzetime aktarılır ne de sayılır. Adım büyüklüğü hiçbir zaman değişmez. Telemetri, 300 Hz ve üzerindeki adım frekanslarında 10 ms'de bir, 60 Hz ve 120 Hz'te ise her adımda kaydedilir.`,
           },
           {
             kind: "p",
-            text: r`Bu düzende durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $h$ değerine bağlıdır. Otomatik sınamalar bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarındaki durumların bit düzeyinde eşit olduğu görülür. Deney dosyası ve paylaşım bağlantısı yalnızca bu girdileri taşır; alıcı aynı yörüngeyi yeniden üretir.`,
+            text: r`Bu düzende durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $h$ değerine bağlıdır. Otomatik sınamalar bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarındaki durumların bit düzeyinde eşit olduğu görülür. Deney dosyası ve paylaşım bağlantısı yalnızca bu girdileri taşır; alıcı aynı yörüngeyi yeniden üretir. Aynı nedenle yöntemin ya da adım frekansının değiştirilmesi sürmekte olan deneyi devam ettirmez: iki deney de başlangıç koşullarından yeniden başlar; böylece bir kayıt, o kaydın enerji defteri ve hata istatistikleri her zaman tek bir yönteme ve tek bir adıma aittir.`,
+          },
+          {
+            kind: "p",
+            text: r`Benzetim zamanı adımların toplamıdır ve bu toplamın kendi yuvarlama hatası vardır. $h = 1$ ms değerini olağan kayan noktalı aritmetikle 600 000 kez toplamak $7 \times 10^{-9}$ s yitirir. Arabanın 6,9 m/s hıza ulaştığı “Sönümsüz” hazır deneyinde yalnızca bu kayıp, Bölüm 2'deki kapalı biçimli başvuru çözümünü, arabanın en hızlı olduğu yerde yaklaşık $5 \times 10^{-8}$ m kaydırırdı; bu, RK4 yönteminin aynı 600 s içindeki hatasının on katıdır. Osilatörün saati bu yüzden dengelemeli (Kahan) toplamayla ilerletilir; sürücünün fazı da biriktirilmek yerine saatten hesaplanır. Sarkacın denklemleri zamanı açık olarak içermez; saati olağan bir toplamdır ve yuvarlama hatası yalnızca kaydın zaman damgalarına yansır.`,
+          },
+          {
+            kind: "p",
+            text: r`Çalışma zamanı her adımdan sonra çözümün sonlu aralıkta kalıp kalmadığını denetler. Sarkaçta bu, bütün açıların ve açısal hızların mutlak değerce $10^7$'nin (rad ve rad/s) altında olması demektir; denetim asıl yörüngeyi, gösterildiği sürece ikiz yörüngeyi ve Lyapunov kestiriminin gölge yörüngesini kapsar. Osilatörde konumun sonlu, hızın $10^6$ m/s'nin altında olması aranır. Denetim sağlanmazsa o adımdan önceki durum geri konur, deney durdurulur ve arayüz çözümün ıraksadığını bildirir; fizik çekirdeğinde oluşan bir istisna (exception) da deneyi aynı biçimde durdurur. Düşük mertebeli bir yöntem iri bir adımla böyle sonlanabilir: altı bağlantılı hazır zincir 60 Hz'te açık Euler yöntemiyle çözüldüğünde 12 s sonra durdurulur. Durdurma iki deney için de geçerlidir; deneylerden biri yeniden başlatıldığında ya da bir çözücü seçildiğinde kalkar ve her iki işlem ıraksayan deneyi de yeniden başlatır.`,
           },
           {
             kind: "note",
@@ -93,7 +101,7 @@ export const methodsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Durdurucular hareket denklemini parçalı yapar; çarpma anı adımın içinde bulunmazsa hata adım büyüklüğüyle doğru orantılı olur ve yöntemin mertebesi yitirilir. Bir adımın sonunda taşıyıcı sınırın dışına çıkmışsa, adımın $s \in [0,1]$ kesri üzerinde ikiye bölme yapılır: adımın başındaki durumdan $s\,h$ kadar ilerlenir ve taşıyıcının hâlâ içeride kaldığı en büyük $s$ aranır. 52 yineleme, çift duyarlığın bütün basamaklarını tüketir. Sonra durum bu ana kadar ilerletilir, (2.9) uygulanır ve adımın kalan kısmı çözülür. Bir adımda altıdan fazla çarpma olursa (taşıyıcının durdurucu üzerinde giderek küçülen sıçramaları) taşıyıcı durdurucuda durgun kabul edilir ve kalan kinetik enerji ısıya yazılır.`,
+            text: r`Durdurucular hareket denklemini parçalı yapar; çarpma anı adımın içinde bulunmazsa hata adım büyüklüğüyle doğru orantılı olur ve yöntemin mertebesi yitirilir. Bir adımın sonunda araba sınırın dışına çıkmışsa, adımın $s \in [0,1]$ kesri üzerinde ikiye bölme yapılır: adımın başındaki durumdan $s\,h$ kadar ilerlenir ve arabanın hâlâ içeride kaldığı en büyük $s$ aranır. 52 yineleme, çift duyarlığın bütün basamaklarını tüketir. Sonra durum bu ana kadar ilerletilir, (2.9) uygulanır ve adımın kalan kısmı çözülür. Bir adımda altıdan fazla çarpma olursa (arabanın durdurucu üzerinde giderek küçülen sıçramaları) araba durdurucuda durgun kabul edilir ve kalan kinetik enerji ısıya yazılır.`,
           },
           {
             kind: "p",
@@ -111,7 +119,7 @@ export const methodsTr: TheoryDocument = [
           },
           {
             kind: "p",
-            text: r`Sabit adımlı RK4 varsayılan parametrelerde yeterlidir: çift sarkaçta 60 saniyelik bağıl enerji sapması $2 \times 10^{-9}$, altı bağlantılı zincirde $3 \times 10^{-7}$ değerindedir. İzin verilen aralığın en zor köşesinde ise (üç ağır ve uzun bağlantı, üç hafif ve kısa bağlantıyı sürükler; açısal hızlar 140 rad/s değerini aşar) sabit adımın sapması $1{,}5 \times 10^{-3}$ düzeyine çıkar; Dormand–Prince aynı deneyde $4 \times 10^{-9}$ verir. Durum çubuğu, bağıl artık $10^{-5}$ değerini aştığında uyarlamalı yönteme geçmeyi önerir.`,
+            text: r`Sabit adımlı RK4 varsayılan parametrelerde yeterlidir: çift sarkaçta 60 saniyelik bağıl enerji sapması $2 \times 10^{-9}$, altı bağlantılı zincirde $3 \times 10^{-7}$ değerindedir. İzin verilen aralığın en zor köşesinde ise (üç ağır ve uzun bağlantı, üç hafif ve kısa bağlantıyı sürükler; açısal hızlar 140 rad/s değerini aşar) sabit adımın sapması $1{,}5 \times 10^{-3}$ düzeyine çıkar; Dormand–Prince aynı deneyde $4 \times 10^{-9}$ verir. Sabit adımlı bir yöntemle çözülen deneyde bağıl kalıntı $10^{-5}$ değerine ulaştığında durum çubuğu uyarlamalı yöntemle yeniden başlatmayı önerir; öneri kabul edildiğinde, her çözücü değişikliğinde olduğu gibi, iki deney de baştan başlar.`,
           },
         ],
       },
@@ -172,7 +180,7 @@ export const methodsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Üstel, Benettin, Galgani ve Strelcyn'in iki yörüngeli yöntemiyle kestirilir [@benettin1976; @skokos2010]. Asıl yörüngenin yanında, faz uzayında ondan $d_0 = 10^{-8}$ uzaklıkta bir gölge yörünge aynı yöntemle ve aynı adımla çözülür. Her $\tau = 0{,}01$ s sonunda ayrılık $d_k$ ölçülür ve gölge, ayrılığın o andaki doğrultusu korunarak yeniden $d_0$ uzaklığına çekilir. Akan kestirim`,
+            text: r`Üstel, Benettin, Galgani ve Strelcyn'in iki yörüngeli yöntemiyle kestirilir [@benettin1976; @skokos2010]. Asıl yörüngenin yanında, faz uzayında ondan $d_0 = 10^{-8}$ uzaklıkta bir gölge yörünge aynı yöntemle ve aynı adımla çözülür. Her $\tau$ aralığının sonunda ayrılık $d_k$ ölçülür ve gölge, ayrılığın o andaki doğrultusu korunarak yeniden $d_0$ uzaklığına çekilir; $\tau$, 300 Hz ve üzerindeki adım frekanslarında 0,01 s, 60 Hz ve 120 Hz'te ise bir adımdır. Akan kestirim`,
           },
           { kind: "eq", label: "5.2", tex: r`\lambda(t) = \frac{1}{t}\sum_{k=1}^{t/\tau}\ln\frac{d_k}{d_0}` },
           {
@@ -198,7 +206,7 @@ export const methodsTr: TheoryDocument = [
           { kind: "eq", label: "5.3", tex: r`t_\mathrm{u} \approx \frac{1}{\lambda}\,\ln\frac{a}{\delta_0}` },
           {
             kind: "p",
-            text: r`Bağımlılık logaritmiktir: başlangıç belirsizliğini bin kat küçültmek ufku yalnızca $\ln 1000/\lambda \approx 6{,}9/\lambda$ kadar uzatır. Bağıntı bir büyüklük mertebesi kestirimidir; yerel büyüme hızı yörünge boyunca değiştiğinden gözlenen ayrılma süresi bundan birkaç kat farklı olabilir. Uygulama kestirilen ufku ve ikizin gerçekten 1 rad ayrıldığı anı yan yana verir.`,
+            text: r`Bağımlılık logaritmiktir: başlangıç belirsizliğini bin kat küçültmek ufku yalnızca $\ln 1000/\lambda \approx 6{,}9/\lambda$ kadar uzatır. Bağıntı bir büyüklük mertebesi kestirimidir; yerel büyüme hızı yörünge boyunca değiştiğinden gözlenen ayrılma süresi bundan birkaç kat farklı olabilir. Uygulama kestirilen ufku, ikizin bırakıldığı andan 1 rad ayrıldığı ana kadar gerçekten geçen süreyle yan yana verir.`,
           },
           {
             kind: "note",
@@ -273,11 +281,11 @@ export const methodsTr: TheoryDocument = [
           {
             kind: "list",
             items: [
-              r`**Periyot ölçer.** İşaretin aynı yöndeki ardışık sıfır geçişleri arasındaki süreyi ölçer; geçiş anı iki örnek arasında doğrusal ara değerlemeyle bulunur. Son on iki aralığın ortalaması ve standart sapması gösterilir. Sarkaçta $\sin\theta$ izlenir ve yalnızca alt noktadaki geçişler sayılır; böylece tepeden aşan sarkacın dönme periyodu da ölçülür.`,
+              r`**Periyot ölçer.** İşaretin aynı yöndeki ardışık sıfır geçişleri arasındaki süreyi ölçer; geçiş anı iki örnek arasında doğrusal ara değerlemeyle bulunur. Yukarı ve aşağı yönlü geçişler ayrı ayrı izlenir; bu yüzden bir salınımın her periyodu iki aralık verir (dönen sarkacın her turu bir aralık). Son on iki aralığın ortalaması ve standart sapması gösterilir. Sarkaçta $\sin\theta$ izlenir ve yalnızca alt noktadaki geçişler sayılır; böylece tepeden aşan sarkacın dönme periyodu da ölçülür.`,
               r`**Tepe dedektörü.** Uç değerler en büyük örnek aranarak değil, hızın sıfır geçişinden bulunur; bu, örnekleme aralığından çok daha ince bir zaman çözünürlüğü verir. Genlik, son tepe ile son çukurun farkının yarısıdır.`,
               r`**Logaritmik azalma.** Ardışık pozitif tepelerden (2.5) ile hesaplanır; sönüm oranı $\zeta = \Lambda/\sqrt{4\pi^2 + \Lambda^2}$ bağıntısından elde edilir.`,
-              r`**Kararlı durum ölçütü.** İki koşul birlikte aranır: ardışık iki salınımın tepeden tepeye genlikleri arasındaki bağıl fark %1'in altında olmalı ve son değişiklikten (yeniden başlatma, parametre değişikliği, çarpma) bu yana geçici rejimin %1'ine inmesine yetecek süre, $\ln 100/\gamma$, geçmiş olmalıdır. Birinci koşul tek başına yetmez: yavaş sönen bir geçici rejim genliği salınım başına yalnızca kendi büyüklüğünün $e^{\gamma T} - 1$ katı kadar değiştirir, dolayısıyla gözlenen değişimin birkaç katı büyüklükte olabilir. Faz gecikmesi, yer değiştirmenin son tepesi anındaki sürücü fazıdır.`,
-              r`**Basamak yanıtı ölçer.** Durgun bırakılan kütlenin aşımını ve $|x|$ değerinin başlangıç yer değiştirmesinin %2'si içinde kalmaya başladığı anı ölçer.`,
+              r`**Kararlı durum ölçütü.** Üç koşul birlikte aranır. Bir salınımdan ötekine tepeden tepeye genlik %1'den az değişmeli ve salınım merkezi, yani son tepe ile son çukurun orta noktası, genliğin %1'inden az kaymalıdır. Ayrıca son değişiklikten (yeniden başlatma, parametre değişikliği, çarpma) bu yana, geçici rejimin en yavaş sönen teriminin %1'ine inmesine yeten $\ln 100/r$ süresi geçmiş olmalıdır; burada $\zeta \le 1$ için $r = \gamma$, $\zeta > 1$ için $r = \gamma - \sqrt{\gamma^2 - \omega_0^2}$ alınır. Birinci koşul tek başına yetmez: yavaş sönen bir geçici rejim genliği salınım başına yalnızca kendi büyüklüğünün $e^{rT} - 1$ katı kadar değiştirir, dolayısıyla gözlenen değişimin birkaç katı büyüklükte olabilir. Salınmayan bir geçici terim, örneğin aşırı sönümlü sistemin yavaş sönen üsteli, tepeden tepeye genliği hiç değiştirmez; yalnızca merkezi kaydırır ve bunu ikinci koşul yakalar. Sönüm yokken bekleme süresi sonsuzdur ve kararlı durum bildirilmez. Faz gecikmesi, yer değiştirmenin son tepesi anındaki sürücü fazıdır.`,
+              r`**Basamak yanıtı ölçer.** Durgun bırakılan kütle için aşımı, yani dengenin ötesindeki en uç örneğin başlangıç yer değiştirmesine oranını, ve yerleşme süresini, yani $|x|$ değerinin başlangıç yer değiştirmesinin %2'si içinde kalmaya başladığı anı ölçer. Bu banda giriş anı, bandın dışındaki son örnek ile içindeki ilk örnek arasında doğrusal ara değerlemeyle bulunur; değer, yanıt bu sürenin dörtte biri kadar ve en az 0,25 s bandın içinde kaldıktan sonra gösterilir. Yanında verilen kuramsal değer, eldeki sönüm oranı için (2.3) ve (2.4) kapalı biçimli çözümlerinin yerleşme süresidir ve ikiye bölme yöntemiyle bulunur; $\zeta = 1$ için $5{,}834/\omega_0$ değerine eşittir. Bırakıştan sonra bir parametre değiştirilirse ölçüm sona erer ve bir sonraki bırakışla yeniden başlar.`,
             ],
           },
           {
@@ -292,7 +300,7 @@ export const methodsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Kaydedilen işaretin son 4096 örneği (100 Hz örnekleme ile 41 s) Hann penceresiyle çarpılır ve hızlı Fourier dönüşümüyle çözümlenir [@cooley1965; @harris1978]. Frekans çözünürlüğü $100/4096 = 0{,}024$ Hz'tir. Pencerenin tutarlı kazancı 0,5 ve eşdeğer gürültü bant genişliği 1,5 kutudur [@heinzel2002]; genlik ekseni buna göre ölçeklenir. Bir sinüsün frekansı genellikle iki kutunun arasına düşer; tepe frekansı ve genliği, Hann penceresi altında tek bir sinüs için tam olan iki kutulu ara değerlemeyle düzeltilir [@grandke1983]. Doğrulama deneyinde 1,2345 Hz frekanslı bir sinüsün frekansı $5 \times 10^{-9}$ Hz, genliği bağıl olarak $10^{-8}$ hatayla geri elde edilir.`,
+            text: r`Kaydedilen işaretin en yeni örnekleri Hann penceresiyle çarpılır ve hızlı Fourier dönüşümüyle çözümlenir [@cooley1965; @harris1978]. Çözümlenen kayıt $N$ örnekten oluşur; $N$, son başlatmadan beri kaydedilen telemetrinin doldurabildiği, ikinin en büyük kuvvetidir: en az 256 (100 Hz'lik telemetriyle 2,56 s), en çok 4096 (41 s). Kayıt hiçbir zaman sıfırlarla uzatılmaz; bu yüzden frekans çözünürlüğü kaydın kendi çözünürlüğüdür, $f_s/N$: 100 Hz'te en kısa kayıt için 0,39 Hz, en uzun kayıt için $100/4096 = 0{,}024$ Hz. Örnekleme frekansı $f_s$ kaydın zaman damgalarından alınır; 100 Hz'tir, yalnızca 60 Hz ve 120 Hz adım frekanslarında adım frekansına eşittir. Pencerenin tutarlı kazancı 0,5 ve eşdeğer gürültü bant genişliği 1,5 kutudur [@heinzel2002]; genlik ekseni tutarlı kazanca göre ölçeklenir, böylece frekansı bir kutuya tam denk gelen bir sinüs kendi genliğiyle okunur. Bir sinüsün frekansı genellikle iki kutunun arasına düşer; tepe frekansı ve genliği o zaman en büyük iki kutudan, Hann penceresi için verilen ara değerleme bağıntısıyla elde edilir [@grandke1983]. Bağıntı sabit genlikli bir çizgi ve aralarında kayıt süresinin tersi kadar fark bulunan kutular varsayar; kaydın sıfırlarla uzatılmamasının nedeni budur. Çizgi sıfır frekansa yakın olduğunda, negatif frekanstaki görüntüsü bağıntıyı bozar: 20 000 tek sinüsle yapılan bir denemede frekans okuması, tepe sıfır frekansın üstündeki ikinci kutudayken en kötü durumda %8, dördüncü kutudan başlayarak ise en çok %0,05 hata vermiştir. Grafik bu yüzden baskın tepeyi yalnızca spektrumun en güçlü kutusu $4 f_s/N$ frekansında ya da daha yukarıdaysa bildirir. Doğrulama deneyinde, 4096 örnekle ve çizgi 51. kutunun yakınındayken, 1,2345 Hz frekanslı bir sinüsün frekansı $5 \times 10^{-9}$ Hz, genliği bağıl olarak $10^{-8}$ hatayla geri elde edilir.`,
           },
           {
             kind: "p",
@@ -306,7 +314,7 @@ export const methodsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Zaman grafiği, faz portresi, enerji defteri, yanıt eğrisi, spektrum, ayrılma grafiği ve Poincaré kesiti aynı telemetriyi farklı sorulara yanıt verecek biçimde gösterir. Ayrılma grafiğinin düşey ekseni logaritmiktir; üstel büyüme orada eğimi $\lambda$ olan bir doğrudur. Her fiziksel büyüklük bütün görünümlerde aynı rengi taşır: sahnedeki vektör, grafikteki eğri, göstergedeki sayı. Renkler, renk görme farklılıklarında da ayırt edilebilen Okabe–Ito paletinden seçilmiştir [@okabe2008; @wong2011]; hiçbir bilgi yalnızca renkle verilmez.`,
+            text: r`Zaman grafiği, faz portresi, enerji defteri, yanıt eğrisi, spektrum, ayrılma grafiği ve Poincaré kesiti aynı telemetriyi farklı sorulara yanıt verecek biçimde gösterir. Ayrılma grafiğinin düşey ekseni logaritmiktir; üstel büyüme orada eğimi $\lambda$ olan bir doğrudur. Her fiziksel büyüklük bütün görünümlerde aynı rengi taşır: sahnedeki vektör, grafikteki eğri, göstergedeki sayı. Renkler, renk görme farklılıklarında da ayırt edilebilen Okabe–Ito paletinden seçilmiştir [@okabe2008; @wong2011]; hiçbir nicelik yalnızca rengiyle tanıtılmaz.`,
           },
         ],
       },
@@ -316,7 +324,7 @@ export const methodsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Telemetri CSV dosyası olarak indirilebilir. Sütun adları birimi taşır (örneğin $t$ için “t_s”, açı için “theta1_rad”); başlık satırları parametreleri, başlangıç koşullarını, yöntemi ve adımı kaydeder. İki yazım sunulur: ondalık noktalı ve virgülle ayrılmış biçim (Python, MATLAB, R) ile ondalık virgüllü ve noktalı virgülle ayrılmış biçim (Türkçe ayarlı hesap tabloları). Deney tanımı ayrıca JSON dosyası ya da bağlantı olarak paylaşılabilir; veriler hiçbir sunucuya gönderilmez.`,
+            text: r`Telemetri CSV dosyası olarak indirilebilir. Sütun adları birimi taşır (örneğin $t$ için “t_s”, açı için “theta1_rad”); başlık satırları parametreleri, başlangıç koşullarını, yöntemi, adımı ve örnekleme aralığını kaydeder. Çözücü değişikliği yeni bir deney başlattığından, bir dosyadaki her satır başlıkta adı geçen yöntemle ve adımla hesaplanmıştır. Parametreler ise dışa aktarma anındaki değerleriyle yazılır: deney sürerken değiştirilen bir parametre ayrı bir olay olarak kaydedilmez ve değişiklikten önceki satırlar önceki değere aittir. Başlık satırları “#” ile başlar, alan ayırıcısını ve tırnak işaretini içermez; dosyayı CSV biçiminin kurallarına göre okuyan bir program bu yüzden her birini tek bir alan olarak alır ve altlarındaki çizelge bozulmaz. İki yazım sunulur: ondalık noktalı ve virgülle ayrılmış biçim (Python, MATLAB, R) ile ondalık virgüllü ve noktalı virgülle ayrılmış biçim (Türkçe ayarlı hesap tabloları). Deney tanımı ayrıca JSON dosyası ya da bağlantı olarak paylaşılabilir; veriler hiçbir sunucuya gönderilmez.`,
           },
         ],
       },

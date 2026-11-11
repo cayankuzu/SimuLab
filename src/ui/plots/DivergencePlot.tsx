@@ -124,14 +124,19 @@ export function DivergencePlot() {
         return;
       }
       clipTo(surface, area);
-      // Exponential reference with the current estimate of lambda.
+      // Exponential reference with the current estimate of lambda. It starts with the offset at the
+      // instant the twin was launched, which is later than the start of the record if the twin was
+      // switched on during the run.
       const lambda = simulation.lyapunov.exponent;
       if (lambda > 0 && simulation.lyapunov.time > SKIP_SECONDS) {
+        const launch = simulation.twinSince;
+        const from = Math.max(tStart, launch);
+        const time = (i: number) => from + ((tEnd - from) * i) / REFERENCE_POINTS;
         drawLine(
           surface,
           REFERENCE_POINTS + 1,
-          (i) => xScale(tStart + ((tEnd - tStart) * i) / REFERENCE_POINTS),
-          (i) => yScale(Math.abs(twin.offset) * Math.exp((lambda * (tEnd - tStart) * i) / REFERENCE_POINTS)),
+          (i) => xScale(time(i)),
+          (i) => yScale(Math.abs(twin.offset) * Math.exp(lambda * (time(i) - launch))),
           { color: QUANTITY.lyapunov, width: 1.1, dash: [5, 4], alpha: 0.85 },
         );
       }
@@ -173,7 +178,8 @@ export function DivergencePlot() {
               {twin.enabled && Number.isFinite(horizon)
                 ? ` · ${footer.horizon(
                     fixed(horizon, 1),
-                    sim.divergenceTime === null ? footer.notYet : footer.seconds(fixed(sim.divergenceTime, 1)),
+                    // The horizon is a duration: compare it with the time the twin took, not with the clock.
+                    sim.divergenceTime === null ? footer.notYet : footer.seconds(fixed(sim.divergenceTime - sim.twinSince, 1)),
                   )}`
                 : ""}
               .{" "}

@@ -34,7 +34,7 @@ const cases: Record<ValidationCaseId, ValidationCaseText> = {
   criticalDamping: {
     title: "Step response: overshoot and settling time",
     description:
-      "$m = 4$ kg, $k = 36$ N/m, $x_0 = 2$ m. At critical damping there must be no overshoot and the 2 % settling time must equal $5.834/\\omega_0$; for $\\zeta = 0.5$ the overshoot must equal $e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}$. The settling time is measured with a resolution of 1 ms.",
+      "$m = 4$ kg, $k = 36$ N/m, $x_0 = 2$ m. At critical damping there must be no overshoot and the 2 % settling time must equal $5.834/\\omega_0$; for $\\zeta = 0.5$ the overshoot must equal $e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}$. The step-response meter receives a sample after every step of 1 ms and places the entry into the 2 % band between two samples by linear interpolation.",
     rows: ["Overshoot, $\\zeta = 1$", "2 % settling time, $\\zeta = 1$", "Overshoot, $\\zeta = 0.5$"],
   },
   impact: {

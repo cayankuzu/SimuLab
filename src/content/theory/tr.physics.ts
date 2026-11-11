@@ -110,7 +110,7 @@ export const physicsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Bütün büyüklükler SI birimleriyle verilir; simgeler ISO 80000 ile uyumludur [@iso80000-3; @iso80000-4; @bipm2019si]. Zamana göre türev nokta ile gösterilir. Açılar aşağı düşeyden, saat yönünün tersine ölçülür ve radyan cinsindendir; arayüz kolaylık için derece de gösterir. Arayüzde sayılar ondalık nokta ile yazılır; böylece ekranda okunan bir değer sayı alanına aynen yazılabilir ve dışa aktarılan veriyle birebir aynıdır. Bu metinde ise Türkçe yazım gereği ondalık virgül kullanılır.`,
+            text: r`Bütün büyüklükler SI birimleriyle verilir; simgeler ISO 80000 ile uyumludur [@iso80000-3; @iso80000-4; @bipm2019si]. Zamana göre türev nokta ile gösterilir. Açılar aşağı düşeyden, saat yönünün tersine ölçülür ve radyan cinsindendir; arayüz kolaylık için derece de gösterir. Arayüzdeki sayısal göstergeler ve sayı alanlarının iletileri ondalık nokta kullanır; böylece ekranda okunan bir değer sayı alanına aynen yazılabilir ve dışa aktarılan veriyle birebir aynıdır. Arayüzün açıklama metinlerinde ve bu metinde ise Türkçe yazım gereği ondalık virgül kullanılır.`,
           },
           {
             kind: "table",
@@ -149,12 +149,12 @@ export const physicsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Kütlesi $m$ olan taşıyıcı sürtünmesiz bir ray üzerinde hareket eder, sabiti $k$ olan doğrusal bir yayla duvara bağlıdır, hızıyla orantılı bir sönüm kuvveti ve harmonik bir sürücü kuvvet etkisindedir. Denge konumundan ölçülen yer değiştirme $x$ için`,
+            text: r`Kütlesi $m$ olan araba sürtünmesiz bir ray üzerinde hareket eder, sabiti $k$ olan doğrusal bir yayla duvara bağlıdır, hızıyla orantılı bir sönüm kuvveti ve harmonik bir sürücü kuvvet etkisindedir. Denge konumundan ölçülen yer değiştirme $x$ için`,
           },
           { kind: "eq", label: "2.1", tex: r`m\ddot{x} + c\dot{x} + kx = F_0\cos\varphi, \qquad \dot{\varphi} = \omega` },
           {
             kind: "p",
-            text: r`Sürücünün fazı $\varphi$ ayrı bir durum değişkeni olarak integre edilir. Böylece frekans çalışma sırasında değiştirildiğinde kuvvet süreksizlik göstermez; gerçek bir işaret üreteci de faz süreklidir. Hızla orantılı sönüm, düzenekte bir girdap akımı freni olarak gösterilmiştir: iletken bir şeridin mıknatıs kutupları arasındaki hareketi düşük hızlarda $F = -c\dot{x}$ biçiminde bir kuvvet doğurur [@wiederick1987; @heald1988]. Denklem iki parametreyle boyutsuzlaştırılır:`,
+            text: r`Sürücünün fazı $\varphi$ ayrı bir durum değişkenidir. Böylece frekans çalışma sırasında değiştirildiğinde kuvvet süreksizlik göstermez; gerçek bir işaret üreteci de faz süreklidir. İki parametre değişikliği arasında $\dot{\varphi} = \omega$ sabit olduğundan faz adım adım biriktirilmez: her adımın sonunda $\varphi_b + \omega\,(t - t_b)$ değerine eşitlenir; burada $t_b$ ve $\varphi_b$, deneyin başındaki ya da son parametre değişikliği anındaki zaman ve fazdır (Bölüm 4). Hızla orantılı sönüm, düzenekte bir girdap akımı freni olarak gösterilmiştir: iletken bir şeridin mıknatıs kutupları arasındaki hareketi düşük hızlarda $F = -c\dot{x}$ biçiminde bir kuvvet doğurur [@wiederick1987; @heald1988]. Denklem iki parametreyle boyutsuzlaştırılır:`,
           },
           {
             kind: "eq",
@@ -199,7 +199,7 @@ export const physicsTr: TheoryDocument = [
           },
           {
             kind: "p",
-            text: r`Uygulama bu kapalı biçimli çözümü sayısal çözümle birlikte hesaplar ve aradaki en büyük farkı gösterir; fark, durduruculara çarpma olmadığı sürece doğrudan çözücünün hatasıdır. Zayıf sönümde ardışık iki tepe arasındaki oran sabittir. Bu oranın doğal logaritması **logaritmik azalma**, salınımın keskinliğini ölçen büyüklük **kalite faktörü** adını alır:`,
+            text: r`Uygulama bu kapalı biçimli çözümü sayısal çözümle birlikte hesaplar ve aradaki en büyük farkı gösterir; fark, durduruculara çarpma olmadığı sürece doğrudan çözücünün hatasıdır. “Sönümsüz” hazır deneyinde ($m = 2$ kg, $k = 24$ N/m, $x_0 = 2$ m) bu fark 60 s sonunda varsayılan 1 ms'lik adımla $4{,}9 \times 10^{-10}$ m, bunun yarısı kadar adımla $3{,}1 \times 10^{-11}$ m'dir: dördüncü mertebe bir yöntemin vermesi gereken 16 katlık oran. Zayıf sönümde ardışık iki tepe arasındaki oran sabittir. Bu oranın doğal logaritması **logaritmik azalma**, salınımın keskinliğini ölçen büyüklük **kalite faktörü** adını alır:`,
           },
           {
             kind: "eq",
@@ -218,7 +218,7 @@ export const physicsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Sönüm varken geçici çözüm $e^{-\gamma t}$ ile söner ve geriye sürücüyle aynı frekansta, ona göre $\delta$ kadar geciken bir salınım kalır: $x(t) = A\cos(\omega t - \delta)$. Genlik ve faz gecikmesi [@french1971; @taylor2005; @thornton2004]`,
+            text: r`Sönüm varken geçici çözüm söner: $\zeta \le 1$ için $\gamma$ hızıyla, $\zeta > 1$ için ise yavaş sönen teriminin $\gamma - \sqrt{\gamma^2 - \omega_0^2}$ hızıyla. Geriye sürücüyle aynı frekansta, ona göre $\delta$ kadar geciken bir salınım kalır: $x(t) = A\cos(\omega t - \delta)$. Genlik ve faz gecikmesi [@french1971; @taylor2005; @thornton2004]`,
           },
           {
             kind: "eq",
@@ -251,7 +251,7 @@ export const physicsTr: TheoryDocument = [
             kind: "note",
             tone: "info",
             title: "Ölçülen yanıt eğrisi",
-            text: r`Frekans sekmesindeki eğri (2.6) bağıntısıdır; üzerindeki noktalar ise sanal cihazların kararlı durumda ölçtüğü genliklerdir. “Frekans taraması” aynı ölçümü bir frekans dizisi için otomatik yapar. Beş frekansta ölçülen genliğin kuramdan bağıl sapması en çok $3{,}3 \times 10^{-8}$ değerindedir (Bölüm 7).`,
+            text: r`Frekans sekmesindeki eğri (2.6) bağıntısıdır; üzerindeki noktalar ise sanal cihazların ölçtüğü genliklerdir. Sürmekte olan deney her salınımda bir nokta ekler; geçici rejim söndükçe bu noktalar eğrinin üzerine oturur. “Frekans taraması” ölçümü kararlı durumda, $0{,}3\,\omega_0$ ile $2\,\omega_0$ arasındaki 25 frekansta yapar: her frekans için denklem, geçici rejimin en yavaş sönen terimi $e^{-12}$ katına inene kadar ayrıca çözülür (RK4, $h = 2$ ms). Tarama $\zeta \ge 0{,}01$ için sunulur; daha küçük sönümde kararlı duruma ulaşmak uygulanamayacak kadar uzun sürer. Doğrulama deneyinde, beş frekansta, ölçülen genliğin kuramdan bağıl sapması en çok $3{,}3 \times 10^{-8}$ değerindedir (Bölüm 7).`,
           },
         ],
       },
@@ -261,7 +261,7 @@ export const physicsTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`Taşıyıcının hareketi iki yönde sınırlıdır. Duvar tarafında sınırı yayın **katı boyu** belirler: sarımlar birbirine değdiğinde yay daha fazla kısalamaz. Uçları düz bırakılmış bir basma yayında katı boy $L_s = d\,(N_t + 1)$ ile verilir [@budynas2015]; $N_t = 14$ sarım ve $L_s = 1{,}45$ m için tel çapı $d = 0{,}097$ m olur. Yayın sabit ucu $x = -7{,}05$ m, taşıyıcının yarı boyu 0,85 m olduğundan taşıyıcının merkezi $x_\mathrm{min} = -7{,}05 + 1{,}45 + 0{,}85 = -4{,}75$ m konumunun ötesine geçemez. Öbür yönde ray sonundaki durdurucu $x_\mathrm{max} = 6{,}50$ m sınırını koyar. Sahnedeki bütün parçalar bu ölçülerle çizilir; hiçbir parça bir başkasının içinden geçmez.`,
+            text: r`Arabanın hareketi iki yönde sınırlıdır. Duvar tarafında sınırı yayın **katı boyu** belirler: sarımlar birbirine değdiğinde yay daha fazla kısalamaz. Uçları düz bırakılmış bir basma yayında katı boy $L_s = d\,(N_t + 1)$ ile verilir [@budynas2015]; $N_t = 14$ sarım ve $L_s = 1{,}45$ m için tel çapı $d = 0{,}097$ m olur. Yayın sabit ucu $x = -7{,}05$ m, arabanın yarı boyu 0,85 m olduğundan arabanın merkezi $x_\mathrm{min} = -7{,}05 + 1{,}45 + 0{,}85 = -4{,}75$ m konumunun ötesine geçemez. Öbür yönde ray sonundaki durdurucu $x_\mathrm{max} = 6{,}50$ m sınırını koyar. Sahnedeki bütün parçalar bu ölçülerle çizilir; hiçbir parça bir başkasının içinden geçmez.`,
           },
           {
             kind: "p",
@@ -270,7 +270,7 @@ export const physicsTr: TheoryDocument = [
           { kind: "eq", label: "2.9", tex: r`v^{+} = -e\,v^{-}, \qquad \Delta Q_e = \tfrac12 m\,(v^{-})^2\,(1-e^2)` },
           {
             kind: "p",
-            text: r`Yitirilen kinetik enerji çarpma ısısı olarak deftere yazılır. Uygulanan net kuvvet taşıyıcıyı durdurucuya bastırmayı sürdürüyorsa taşıyıcı orada durur ve kuvvet yön değiştirince ayrılır. Çarpma anı zaman adımının içinde ikiye bölme yöntemiyle bulunur (Bölüm 4); kapalı biçimli çözümle karşılaştırıldığında çarpma anındaki hata $10^{-12}$ s mertebesindedir.`,
+            text: r`Yitirilen kinetik enerji çarpışma ısısı olarak deftere yazılır. Uygulanan net kuvvet arabayı durdurucuya bastırmayı sürdürüyorsa araba orada durur ve kuvvet yön değiştirince ayrılır. Çarpma anı zaman adımının içinde ikiye bölme yöntemiyle bulunur (Bölüm 4); kapalı biçimli çözümle karşılaştırıldığında çarpma anındaki hata $10^{-12}$ s mertebesindedir.`,
           },
           {
             kind: "note",
@@ -295,7 +295,7 @@ export const physicsTr: TheoryDocument = [
           },
           {
             kind: "p",
-            text: r`$Q_c$ ve $W$ durum vektörünün parçasıdır ve hareketle aynı yöntemle, aynı adımda integre edilir; $Q_e$ çarpmalarda (2.9) ile artar. Sol taraf ile $E_0$ arasındaki fark, yani **artık** $\Delta E$, tam bir çözümde sıfırdır; sıfırdan farklı her değer sayısal hatadır. Artık, durum çubuğunda ve Enerji sekmesinde sürekli gösterilir; bağıl değeri hesaplanırken payda olarak $|E_0|$, anlık mekanik enerji ve $Q + |W|$ büyüklüklerinin en büyüğü alınır. Sönüm, sürücü ve 27 çarpmanın birlikte bulunduğu 60 saniyelik bir doğrulama deneyinde bağıl artık $1{,}3 \times 10^{-12}$ değerini aşmaz.`,
+            text: r`$Q_c$ ve $W$ durum vektörünün parçasıdır ve hareketle aynı yöntemle, aynı adımda integre edilir; $Q_e$ çarpmalarda (2.9) ile artar. Sol taraf ile $E_0$ arasındaki fark, yani **kalıntı** $\Delta E$, tam bir çözümde sıfırdır; sıfırdan farklı her değer sayısal hatadır. Kalıntı, durum çubuğunda ve Enerji sekmesinde sürekli gösterilir; bağıl değeri hesaplanırken payda olarak $|E_0|$, anlık mekanik enerji ve $Q + |W|$ büyüklüklerinin en büyüğü alınır. Sönüm, sürücü ve 27 çarpmanın birlikte bulunduğu 60 saniyelik bir doğrulama deneyinde bağıl kalıntı $1{,}3 \times 10^{-12}$ değerini aşmaz.`,
           },
         ],
       },
@@ -360,7 +360,7 @@ export const physicsTr: TheoryDocument = [
           },
           {
             kind: "p",
-            text: r`biçimindedir; $Q_i$ korunumsuz genelleştirilmiş kuvvettir. İvmelerin katsayı matrisi $A_{ij} = \mu_{\max(i,j)}L_iL_j\cos(\theta_i-\theta_j)$ simetrik ve pozitif tanımlıdır, çünkü $T = \tfrac12\dot{\boldsymbol\theta}^{\mathsf T}\mathbf{A}\,\dot{\boldsymbol\theta}$ her sıfırdan farklı hız için pozitiftir. Bu yüzden ivmeler her adımda Cholesky ayrışımıyla çözülür [@golub2013]; ayrışımın başarısız olması modelde bir hata olduğunu gösterir. $N = 1$ için denklem bilinen $\ddot\theta = -(g/L)\sin\theta$ biçimine iner. Aynı Lagrange fonksiyonu çoklu sarkaç için hakemli yayınlarda da verilmiştir [@konishi2023; @braun2003; @udwadia2015].`,
+            text: r`biçimindedir; $Q_i$ korunumsuz genelleştirilmiş kuvvettir. İvmelerin katsayı matrisi $A_{ij} = \mu_{\max(i,j)}L_iL_j\cos(\theta_i-\theta_j)$ simetrik ve pozitif tanımlıdır, çünkü $T = \tfrac12\dot{\boldsymbol\theta}^{\mathsf T}\mathbf{A}\,\dot{\boldsymbol\theta}$ her sıfırdan farklı hız için pozitiftir. Bu yüzden ivmeler her adımda Cholesky ayrışımıyla çözülür [@golub2013]; sonlu bir durumda ayrışımın başarısız olması modelde bir hata olduğunu gösterir. Sonlu bir sayı olmayan bir değer içeren durum da ayrıştırılamaz; model o zaman sonlu olmayan sonucu aynen iletir ve çalışma zamanı deneyi durdurur (Bölüm 4). $N = 1$ için denklem bilinen $\ddot\theta = -(g/L)\sin\theta$ biçimine iner. Aynı Lagrange fonksiyonu çoklu sarkaç için hakemli yayınlarda da verilmiştir [@konishi2023; @braun2003; @udwadia2015].`,
           },
         ],
       },

@@ -11,7 +11,7 @@ Tarayıcıda çalışan, **doğrulanmış** bir hesaplamalı fizik laboratuvarı
 
 | | Osilatör | Sarkaç |
 | --- | --- | --- |
-| Model | $m\ddot x + c\dot x + kx = F_0\cos\varphi,\ \dot\varphi=\omega$; rijit durdurucular (Newton geri sekme katsayısı) | $N = 1\dots6$ noktasal kütle, kütlesiz rijit çubuklar; mafsallarda viskoz sönüm |
+| Model | $m\ddot x + c\dot x + kx = F_0\cos\varphi,\ \dot\varphi=\omega$; rijit durdurucular (Newton geri sıçrama katsayısı) | $N = 1\dots6$ noktasal kütle, kütlesiz rijit çubuklar; mafsallarda viskoz sönüm |
 | Çözüm | Sabit adımlı RK4 (varsayılan $h = 1$ ms); Euler, yarı örtük Euler, RK2 ve uyarlamalı Dormand–Prince 5(4) seçilebilir | Aynı çözücüler; kütle matrisi Cholesky ayrışımıyla çözülür |
 | Karşılaştırma | Kapalı biçimli çözüm aynı grafikte; genlik ve faz yanıtı eğrileri; sayısal frekans taraması | Eliptik integralle tam periyot; normal mod frekansları; Laguerre/Bessel spektrumu |
 | Kaos | — | İkiz yörünge, Benettin yöntemiyle en büyük Lyapunov üsteli, Poincaré kesiti, spektrum |
@@ -25,7 +25,7 @@ Ortak araçlar: enerji defteri ($E_k + E_p + Q - W = E_0$ ve kalıntısı), öl�
 | Deney | Ölçülen | Bağımsız başvuru |
 | --- | --- | --- |
 | RK4 gözlenen yakınsama mertebesi | 4,005 | 4 |
-| Sönümlü serbest yanıt, 20 s, en büyük konum hatası | $1{,}6\times10^{-10}$ m | kapalı biçimli çözüm |
+| Serbest yanıt, dört sönüm rejimi, 20 s, en büyük konum hatası | $1{,}6\times10^{-10}$ m | kapalı biçimli çözüm |
 | Sürülen kararlı durum genliği, en büyük bağıl hata | $3{,}3\times10^{-8}$ | $A(\omega)$ |
 | Durdurucuya çarpma anı | $8{,}6\times10^{-13}$ s hata | analitik $t = \arccos(x_\min/x_0)/\omega_0$ |
 | Sürülen, sönümlü, 27 çarpışmalı 60 s: defter kalıntısı | $1{,}3\times10^{-12}$ | 0 |
@@ -82,7 +82,7 @@ Yayımlarken `NEXT_PUBLIC_SITE_URL` ortam değişkenine sitenin adresi verilirse
 | --- | --- |
 | `npm run dev` | Geliştirme sunucusu |
 | `npm run build` | Üretim derlemesi |
-| `npm test` | Birim sınamaları, doğrulama paketi ve içerik tutarlılığı (102 sınama) |
+| `npm test` | Birim sınamaları, doğrulama paketi ve içerik tutarlılığı (153 sınama) |
 | `npm run typecheck` | TypeScript tür denetimi |
 | `npm run lint` | ESLint |
 | `npm run check` | Tür denetimi, lint ve sınamalar |
@@ -119,11 +119,17 @@ Sürekli durum React dışında tutulur; sahne ve grafikler her karede çalışm
 | `D` | Grafik paneli | `S` | Stroboskop |
 | `K` | Kuram ve kaynakça | `G` | Izgara |
 | `M` | Ses | `?` | Kısayollar |
+| Ok tuşları | Kamerayı döndür (sahne odaktayken) | `Shift` + ok tuşları | Kamerayı kaydır (sahne odaktayken) |
+
+Harf, rakam ve noktalama tuşlarıyla verilen tek tuşlu kısayollar, kısayollar penceresindeki anahtarla kapatılabilir; boşluk tuşu çalışmayı sürdürür. Bir iletişim kutusu, menü ya da liste açıkken, bir alana yazı yazılırken ve bir cisim tutulurken kısayollar işlem yapmaz. Vektörlerin çizildiği sarkaç kütlesi, sahnedeki vektör ölçeğinin yanında duran seçiciyle klavyeden de belirlenir.
 
 ## Sınırlılıklar
 
-- Model idealdir: noktasal kütleler, kütlesiz rijit çubuklar, düzlemsel hareket, kütlesiz ve doğrusal yay, hızla orantılı sönüm, sabit geri sekme katsayılı rijit durdurucular.
+- Model idealdir: noktasal kütleler, kütlesiz rijit çubuklar, düzlemsel hareket, kütlesiz ve doğrusal yay, hızla orantılı sönüm, sabit geri sıçrama katsayılı rijit durdurucular.
 - Doğrulama, denklemlerin doğru çözüldüğünü gösterir; ideal modelin gerçek bir düzenekle uyumunu sınamaz.
-- Açık, sabit adımlı yöntemlerde hata adım büyüklüğüne bağlıdır. Enerji defteri kalıntısı büyürse adım küçültülmeli ya da uyarlamalı yöntem seçilmelidir; durum çubuğu bunu renkle ve sayıyla bildirir.
+- Açık, sabit adımlı yöntemlerde hata adım büyüklüğüne bağlıdır. Durum çubuğu enerji defteri kalıntısını sayıyla ve renkle gösterir; bağıl kalıntı $10^{-5}$ değerine ulaştığında uyarlamalı çözücüyle yeniden başlatmayı önerir. Yöntemin ya da adım frekansının değiştirilmesi iki deneyi de başlangıç koşullarından yeniden başlatır; böylece her kayıt tek bir çözücüye aittir.
+- Düşük mertebeli bir yöntem ve iri bir adımla çözüm ıraksayabilir. Durum değişkenleri sonlu aralıktan çıktığında deney durdurulur ve son geçerli durum ekranda kalır.
+- Gerçek zaman güvencesi yoktur: 0,1 s'den uzun süren bir karenin 0,1 s'yi aşan bölümü benzetime aktarılmaz, benzetim zamanı duvar saatinin gerisinde kalır; durum çubuğu bu kareleri sayar.
+- Saat ile analitik çözümü gösteren anahtar yalnızca 768 piksel ve üzerindeki pencere genişliklerinde görünür. Zaman ölçeği üst çubukta 1536 pikselden başlayarak, daha dar pencerelerde parametre panelinin başında ayarlanır.
 - Lyapunov üsteli ve öngörü ufku sonlu zaman kestirimleridir.
 - Laboratuvarın öğrenmeye etkisi ölçülmemiştir.

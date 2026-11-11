@@ -432,6 +432,9 @@ export function drawReference(
   }
   ctx.stroke();
   if (label) {
+    // Only the line is softened. The label is text and keeps the full contrast of its colour:
+    // vermilion has 5.0:1 on the plot background at full opacity but 4.3:1 at 0.9 (WCAG 1.4.3 asks for 4.5:1).
+    ctx.globalAlpha = 1;
     ctx.setLineDash([]);
     ctx.font = FONT;
     if (orientation === "vertical") {

@@ -79,10 +79,10 @@ export const TASKS: readonly TaskDefinition[] = [
     evaluate(sim) {
       const p = sim.getState().oscillator;
       const period = sim.oscMeter.period;
-      const cycles = sim.oscMeter.cycles;
+      const enough = sim.oscMeter.periods >= 6;
       const free = p.damping === 0 && p.driveAmplitude === 0;
       return status(
-        [free, cycles >= 6, free && period !== null && cycles >= 6 && Math.abs(period - 2) <= 0.02],
+        [free, enough, free && period !== null && enough && Math.abs(period - 2) <= 0.02],
         [
           { key: "measuredPeriod", value: period, unit: "s", digits: 4 },
           { key: "theoryPeriod", value: oscillatorTheory(p).period0, unit: "s", digits: 4 },
@@ -129,15 +129,22 @@ export const TASKS: readonly TaskDefinition[] = [
     criteria: 3,
     setup(sim) {
       sim.applyOscillatorPreset("undamped");
-      sim.setOscillatorParams({ mass: 2, stiffness: 24.5, damping: 1.2, driveAmplitude: 4, driveFrequency: 2 });
+      // zeta = 0.25: the amplitude at omega0 is 96.8 % of the peak, clearly below the 98 % criterion,
+      // so the sheet cannot be completed by driving at the natural frequency.
+      sim.setOscillatorParams({ mass: 2, stiffness: 24.5, damping: 3.5, driveAmplitude: 4, driveFrequency: 2 });
       sim.setOscillatorInitial({ x: 0, v: 0 });
     },
     evaluate(sim) {
       const p = sim.getState().oscillator;
       const theory = oscillatorTheory(p);
       const amplitude = sim.oscMeter.amplitude;
-      const settled = steadyState(sim.oscMeter.amplitudeDrift, sim.oscUndisturbedFor, theory.gamma);
-      const steady = p.driveAmplitude > 0 && settled.steady && sim.oscMeter.cycles >= 6;
+      const settled = steadyState(
+        sim.oscMeter.amplitudeDrift,
+        sim.oscMeter.centreDrift,
+        sim.oscUndisturbedFor,
+        theory.transientRate,
+      );
+      const steady = p.driveAmplitude > 0 && settled.steady;
       const peak = theory.peakAmplitude;
       const atPeak = steady && amplitude !== null && peak !== null && Number.isFinite(peak) && amplitude >= 0.98 * peak;
       return status(
@@ -169,14 +176,20 @@ export const TASKS: readonly TaskDefinition[] = [
       if (conservative && method === "euler" && relative >= 0.05) memory.eulerSeen = 1;
       const accurate = method === "rk4" || method === "dopri5";
       if (conservative && accurate) {
+        memory["run:since"] ??= sim.osc.t;
         memory["run:worst"] = Math.max(memory["run:worst"] ?? 0, relative);
+      } else {
+        // Anything else interrupts the observation: the 20 s start again.
+        delete memory["run:since"];
+        delete memory["run:worst"];
       }
-      const verified = conservative && accurate && sim.osc.t >= 20 && (memory["run:worst"] ?? 1) <= 1e-6;
+      const observed = memory["run:since"] === undefined ? 0 : sim.osc.t - memory["run:since"];
+      const verified = conservative && accurate && observed >= 20 && (memory["run:worst"] ?? 1) <= 1e-6;
       return status(
         [memory.eulerSeen === 1, memory.eulerSeen === 1 && verified],
         [
           { key: "residual", value: relative, unit: "", digits: -2 },
-          { key: "elapsed", value: sim.osc.t, unit: "s", digits: 1 },
+          { key: "elapsed", value: observed, unit: "s", digits: 1 },
         ],
       );
     },
@@ -195,11 +208,12 @@ export const TASKS: readonly TaskDefinition[] = [
     },
     evaluate(sim) {
       const p = sim.getState().pendulum;
-      const single = p.count === 1 && p.jointDamping === 0 && Math.abs(p.gravity - STANDARD_GRAVITY) < 1e-9;
+      // 5e-4 m/s^2 is the tolerance with which the interface shows "Earth"; it changes the period by 4e-5 s.
+      const single = p.count === 1 && p.jointDamping === 0 && Math.abs(p.gravity - STANDARD_GRAVITY) < 5e-4;
       const amplitude = sim.swingMeter.amplitude;
       const small = amplitude !== null && degrees(amplitude) <= 6;
       const period = sim.periodMeter.period;
-      const enough = sim.periodMeter.cycles >= 6;
+      const enough = sim.periodMeter.periods >= 6;
       return status(
         [single, small, enough, single && small && enough && period !== null && Math.abs(period - 2) <= 0.003],
         [
@@ -226,7 +240,7 @@ export const TASKS: readonly TaskDefinition[] = [
       const exact = exactPendulumPeriod(p.lengths[0], p.gravity, sim.pend.y[0], sim.pend.y[1]);
       const large = single && exact.motion === "libration" && degrees(exact.amplitude) >= 90;
       const period = sim.periodMeter.period;
-      const measured = sim.periodMeter.cycles >= 4 && period !== null;
+      const measured = sim.periodMeter.periods >= 4 && period !== null;
       const agrees =
         large && measured && Math.abs((period as number) - exact.period) / exact.period <= 1e-3 &&
         (period as number) / exact.smallAngle >= 1.15;
@@ -260,7 +274,14 @@ export const TASKS: readonly TaskDefinition[] = [
         [ready, ready && sim.divergenceTime !== null],
         [
           { key: "separation", value: sim.separation, unit: "rad", digits: -2 },
-          { key: "divergenceTime", value: sim.divergenceTime, unit: "s", digits: 2 },
+          // Counted from the twin's release, like the Measurements tab and the chaos plot: a duration,
+          // comparable with the prediction horizon beside it, also after the twin was launched anew.
+          {
+            key: "divergenceTime",
+            value: sim.divergenceTime === null ? null : sim.divergenceTime - sim.twinSince,
+            unit: "s",
+            digits: 2,
+          },
           { key: "lyapunov", value: sim.lyapunov.time > 5 ? lambda : null, unit: "1/s", digits: 2 },
           { key: "horizon", value: Number.isFinite(horizon) && sim.lyapunov.time > 5 ? horizon : null, unit: "s", digits: 1 },
         ],
@@ -282,13 +303,17 @@ export const TASKS: readonly TaskDefinition[] = [
       const ready = state.pendulum.count === 2 && state.twin.enabled && state.pendulum.jointDamping === 0;
       memory["run:maxSeparation"] = Math.max(memory["run:maxSeparation"] ?? 0, sim.separation);
       const swinging = sim.pend.energy().mechanical > 0.05;
-      const longEnough = sim.pend.t >= 60;
+      // The twin must have been followed for 60 s; switching it off and on again starts the count anew.
+      const tracked = state.twin.enabled ? sim.pend.t - sim.twinSince : 0;
+      const longEnough = tracked >= 60;
       const coherent = memory["run:maxSeparation"] < 0.05;
       const lambda = sim.lyapunov.exponent;
+      // Right after a parameter change the estimate is 0 by construction; require a real average.
+      const regular = sim.lyapunov.time >= 30 && lambda < 0.1;
       return status(
-        [ready && swinging, longEnough, ready && longEnough && coherent, ready && longEnough && lambda < 0.1],
+        [ready && swinging, longEnough, ready && longEnough && coherent, ready && longEnough && regular],
         [
-          { key: "elapsed", value: sim.pend.t, unit: "s", digits: 1 },
+          { key: "elapsed", value: tracked, unit: "s", digits: 1 },
           { key: "maxSeparation", value: memory["run:maxSeparation"], unit: "rad", digits: -2 },
           { key: "lyapunov", value: sim.lyapunov.time > 5 ? lambda : null, unit: "1/s", digits: 3 },
         ],
@@ -313,7 +338,7 @@ export const TASKS: readonly TaskDefinition[] = [
       const small = amplitude !== null && degrees(amplitude) <= 5 && degrees(amplitude) >= 0.5;
       const period = sim.periodMeter.period;
       const spread = sim.periodMeter.periodSpread;
-      const enough = sim.periodMeter.cycles >= 12;
+      const enough = sim.periodMeter.periods >= 12;
       const pure = enough && period !== null && spread !== null && spread / period <= 0.003;
       let t1: number | null = null;
       let t2: number | null = null;

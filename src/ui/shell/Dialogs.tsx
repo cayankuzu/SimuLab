@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/i18n";
+import { Switch } from "../kit/controls";
 import { Button, Kbd } from "../kit/core";
 import { Dialog } from "../kit/overlays";
 import { setPrefs, usePrefs } from "../prefs";
@@ -12,6 +13,7 @@ interface OpenProps {
 
 export function ShortcutsDialog({ open, onOpenChange }: OpenProps) {
   const t = useT();
+  const singleKey = usePrefs((prefs) => prefs.charShortcuts);
   const items = t.shortcuts.items;
   const groups: Array<{ title: string; rows: Array<[string, string]> }> = [
     {
@@ -48,6 +50,14 @@ export function ShortcutsDialog({ open, onOpenChange }: OpenProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} title={t.shortcuts.title} closeLabel={t.common.close} widthClass="max-w-[640px]">
+      <div className="border-b border-line px-5 py-4">
+        <Switch
+          checked={singleKey}
+          onChange={(checked) => setPrefs({ charShortcuts: checked })}
+          label={t.shortcuts.singleKey.label}
+          description={t.shortcuts.singleKey.description}
+        />
+      </div>
       <div className="grid gap-5 p-5 sm:grid-cols-3">
         {groups.map((group) => (
           <section key={group.title}>
@@ -64,6 +74,24 @@ export function ShortcutsDialog({ open, onOpenChange }: OpenProps) {
             </dl>
           </section>
         ))}
+        {/* Keys of the scene itself: they act only while it has the focus, unlike the shortcuts above. */}
+        <section className="sm:col-span-3">
+          <h3 className="label-caps mb-2">{t.shortcuts.groups.scene}</h3>
+          <dl className="grid gap-1.5 sm:grid-cols-2 sm:gap-x-5">
+            <div className="flex items-center justify-between gap-3 text-[13px]">
+              <dt className="text-ink-2">{items.orbit}</dt>
+              <dd>
+                <Kbd>{t.shortcuts.keys.arrows}</Kbd>
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-3 text-[13px]">
+              <dt className="text-ink-2">{items.pan}</dt>
+              <dd className="flex items-center gap-1 text-ink-3">
+                <Kbd>Shift</Kbd>+<Kbd>{t.shortcuts.keys.arrows}</Kbd>
+              </dd>
+            </div>
+          </dl>
+        </section>
       </div>
     </Dialog>
   );

@@ -50,7 +50,7 @@ export const evidenceEn: TheoryDocument = [
               ["Free response, four regimes, 20 s", "Largest position error", r`$1.6 \times 10^{-10}$ m`, r`$10^{-9}$ m`],
               ["Steady state, five frequencies", "Relative error of the amplitude", r`$3.3 \times 10^{-8}$`, r`$10^{-5}$`],
               ["Steady state, five frequencies", "Error of the phase lag", r`$3.3 \times 10^{-8}$ rad`, r`$10^{-3}$ rad`],
-              ["Critical damping", "Relative error of the 2 % settling time", r`$3.3 \times 10^{-4}$`, r`$2 \times 10^{-3}$`],
+              ["Critical damping", "Relative error of the 2 % settling time", r`$1.5 \times 10^{-7}$`, r`$2 \times 10^{-3}$`],
               ["Impact with a stop", "Error of the instant of impact", r`$8.6 \times 10^{-13}$ s`, r`$10^{-8}$ s`],
               ["Energy ledger, 27 impacts, 60 s", "Largest relative residual", r`$1.3 \times 10^{-12}$`, r`$10^{-8}$`],
               ["Pendulum period, 10°–170° and rotation", "Relative error", r`$2.3 \times 10^{-10}$`, r`$10^{-7}$`],
@@ -76,7 +76,7 @@ export const evidenceEn: TheoryDocument = [
           {
             kind: "list",
             items: [
-              r`**The tolerances are deliberately wide.** The measured errors are several orders of magnitude below the tolerances. The tolerances were chosen so that the experiments also pass in other runtime environments and still catch a real coding error (a loss of order, a wrong coefficient).`,
+              r`**The tolerances are wider than the measured errors, but not by the same factor in every criterion.** The margin, i.e. the ratio of the tolerance to the measured error (for a lower bound, of the measured value to the bound), is two orders of magnitude or more in 47 of the 67 criteria, between one and two orders in 12, and less than a factor of ten in 8. Of these eight, Table 7.1 contains the free response without damping (a factor of 6), the energy drift of the six-link chain (3) and the two Lyapunov bounds (3 and 2). The others are the observed order of the Dormand–Prince method (4), the drift of the fixed step in the hardest corner of the parameter range (6), the change of the Lyapunov estimate when the step is halved (4) and the comparison of the six-link chain with the hanging rope (1.3); in the last of these the difference measured is not a numerical error but the physical difference between six links and a continuum. The tolerances were chosen so that the experiments also pass in other runtime environments and still catch a real coding error (a loss of order, a wrong coefficient); whether the criteria with a narrow margin pass in another environment has not been tested (Chapter 9).`,
               r`**Energy drift grows with the number of links.** More links mean higher angular speeds and a stiffer non-linear coupling; with the same step the drift of the six-link chain is about 160 times that of the double pendulum, but still below $10^{-6}$.`,
               r`**The step size is decisive.** For the double pendulum, a step of 3.3 ms instead of 1 ms raises the drift from $2.0 \times 10^{-9}$ to $5.3 \times 10^{-7}$. Explicit Euler produces, in the same experiment with the same step, a deviation of 24 % in the energy ledger; this row is in the suite on purpose as a **lower-bound** criterion.`,
               r`**The order of the method is observed on a chaotic trajectory too.** For the three-link chain the difference between RK4 and the error-controlled reference solution shrinks by a factor of 256.6 when the step is made four times smaller; the value expected of a fourth-order method is $4^4 = 256$.`,
@@ -110,7 +110,7 @@ export const evidenceEn: TheoryDocument = [
             kind: "note",
             tone: "correction",
             title: "“Resonance occurs exactly at the natural frequency”",
-            text: r`That is true of the absorbed power and of the velocity amplitude. The displacement amplitude is largest at $\omega_0\sqrt{1-2\zeta^2}$, below the natural frequency, and has no peak at all for $\zeta \ge 1/\sqrt{2}$ (Chapter 2). For light damping the difference is small but measurable: the task sheet “Find the resonance peak” has exactly this measured.`,
+            text: r`That is true of the absorbed power and of the velocity amplitude. The displacement amplitude is largest at $\omega_0\sqrt{1-2\zeta^2}$, below the natural frequency, and has no peak at all for $\zeta \ge 1/\sqrt{2}$ (Chapter 2). For light damping the difference is small: at $\zeta = 0.1$ the peak lies 1 % below $\omega_0$, and the amplitude at $\omega_0$ itself is 99.5 % of the peak value. The task sheet “Find the resonance peak” is therefore set up with $\zeta = 0.25$, where the peak lies 6.5 % below $\omega_0$ and the amplitude at $\omega_0$ is 96.8 % of the peak value. The sheet requires the amplitude measured in the steady state to be at least 98 % of the peak value, so it is completed below the natural frequency and not at it.`,
           },
           {
             kind: "note",
@@ -226,10 +226,11 @@ export const evidenceEn: TheoryDocument = [
           {
             kind: "list",
             items: [
-              r`**Energy drift accumulates.** RK4 is not symplectic; the drift grows with time. The values given belong to 60-second experiments; in a run lasting hours the residual should be watched and, if necessary, the step reduced or the adaptive method selected.`,
+              r`**Energy drift accumulates.** RK4 is not symplectic; the drift grows with time. The values given belong to 60-second experiments; in a run lasting hours the residual should be watched and, if necessary, the step reduced or the adaptive method selected. Either change starts the experiment afresh (Chapter 4).`,
+              r`**A solution can diverge.** With a low-order method and a coarse step the solution of the pendulum chain can leave the finite range. The experiment is then halted (Chapter 4); restarted unchanged with the same solver, it is halted again at the same instant.`,
               r`**Chaotic trajectories are not individually meaningful beyond the horizon.** As explained in Chapter 5, after a few tens of seconds the state shown is not the state of the exact solution; what is meaningful are the statistical and geometric properties.`,
               r`**The Lyapunov exponent is a finite-time estimate** and depends on the trajectory; no single number can be given as “the exponent” of an apparatus.`,
-              r`**There is no real-time guarantee.** On a slow device or at a very high step frequency simulated time can fall behind the wall clock; the status bar reports this. The physical result is not affected.`,
+              r`**There is no real-time guarantee.** When a slow device or a high step frequency makes a frame last longer than 0.1 s, the part of the frame beyond 0.1 s is not simulated and simulated time falls behind the wall clock; the status bar counts these frames since the last restart. The physical result is not affected, because the sequence of steps stays the same.`,
               r`**Repeatability across runtime environments has not been tested** (Chapter 4).`,
             ],
           },

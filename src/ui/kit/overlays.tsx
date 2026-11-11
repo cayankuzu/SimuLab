@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { Dialog as RadixDialog, DropdownMenu, Popover as RadixPopover } from "radix-ui";
 import { cn } from "./core";
 
@@ -26,7 +26,11 @@ interface DialogProps {
 
 /**
  * Accessible dialog (focus trap, Escape to close, focus restored to the
- * trigger, labelled by its title) built on Radix Dialog.
+ * control that opened it, labelled by its title) built on Radix Dialog.
+ *
+ * Radix returns the focus to its own Trigger element only. These dialogs are
+ * controlled and are opened from several places (buttons, keyboard shortcuts,
+ * links in the text), so the opener is remembered here instead (WCAG 2.4.3).
  */
 export function Dialog({
   open,
@@ -40,11 +44,25 @@ export function Dialog({
   footer,
 }: DialogProps) {
   const sheet = variant === "sheet";
+  const opener = useRef<HTMLElement | null>(null);
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
         <RadixDialog.Overlay className="fixed inset-0 z-[60] bg-black/60 animate-fade-in" />
         <RadixDialog.Content
+          onOpenAutoFocus={() => {
+            // Dispatched before the focus moves into the dialog: the active element is still the opener.
+            const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            // A click puts the focus on the canvas of the 3-D scene, which draws no focus ring; the focus
+            // returns to the scene element around it, which has one and takes the same keys.
+            opener.current = active?.closest<HTMLElement>("[data-scene]") ?? active;
+          }}
+          onCloseAutoFocus={(event) => {
+            // Without a Radix Trigger the default handler would leave the focus on <body>.
+            event.preventDefault();
+            if (opener.current?.isConnected) opener.current.focus();
+            opener.current = null;
+          }}
           className={cn(
             "fixed z-[70] flex flex-col bg-panel shadow-pop outline-none",
             sheet
@@ -88,6 +106,8 @@ export function Dialog({
 interface PopoverProps {
   trigger: ReactNode;
   children: ReactNode;
+  /** Accessible name: Radix exposes the content as a dialog, which must not be anonymous. */
+  ariaLabel: string;
   align?: "start" | "center" | "end";
   side?: "top" | "right" | "bottom" | "left";
   widthClass?: string;
@@ -95,12 +115,22 @@ interface PopoverProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function Popover({ trigger, children, align = "end", side = "bottom", widthClass = "w-80", open, onOpenChange }: PopoverProps) {
+export function Popover({
+  trigger,
+  children,
+  ariaLabel,
+  align = "end",
+  side = "bottom",
+  widthClass = "w-80",
+  open,
+  onOpenChange,
+}: PopoverProps) {
   return (
     <RadixPopover.Root open={open} onOpenChange={onOpenChange}>
       <RadixPopover.Trigger asChild>{trigger}</RadixPopover.Trigger>
       <RadixPopover.Portal>
         <RadixPopover.Content
+          aria-label={ariaLabel}
           align={align}
           side={side}
           sideOffset={8}

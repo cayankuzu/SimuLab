@@ -117,3 +117,17 @@ export function tickLabel(value: number, step: number): string {
   const decimals = Math.max(0, Math.min(6, Math.ceil(-Math.log10(magnitude) - 1e-9)));
   return fixed(value, decimals);
 }
+
+/** Decimal notation: optional sign, digits with a point or a comma, optional exponent. */
+const DECIMAL = /^[+-]?(?:\d+[.,]?\d*|[.,]\d+)(?:e[+-]?\d+)?$/i;
+
+/**
+ * The number written in a numeric field, or NaN if the text is not decimal
+ * notation. A decimal comma and the typographic minus of the read-outs are
+ * accepted; an empty text, words, digit grouping (1.234,5) and the other
+ * notations that Number() would silently accept (0x10, Infinity) are not.
+ */
+export function parseDecimal(text: string): number {
+  const entered = text.trim().replace(MINUS, "-");
+  return DECIMAL.test(entered) ? Number(entered.replace(",", ".")) : Number.NaN;
+}

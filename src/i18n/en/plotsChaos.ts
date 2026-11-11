@@ -13,7 +13,8 @@ export const plotsChaos: typeof source = {
     footer: {
       lyapunov: (value: string, seconds: string) => `λ ≈ ${value} s⁻¹ (finite-time estimate, averaged over ${seconds} s)`,
       lyapunovTime: (value: string) => `Lyapunov time 1/λ ≈ ${value} s`,
-      horizon: (estimate: string, observed: string) => `estimated prediction horizon ${estimate} s, observed divergence ${observed}`,
+      horizon: (estimate: string, observed: string) =>
+        `estimated prediction horizon ${estimate} s, observed time to divergence after the release of the twin: ${observed}`,
       notYet: "not yet",
       seconds: (value: string) => `${value} s`,
       caution:

@@ -14,9 +14,11 @@ export const plotsFrequency: typeof source = {
     cancelSweep: "Cancel",
     progress: (done: number, total: number) => `${done}/${total}`,
     sweepHint:
-      "The solver is run separately at every frequency until the steady state, and amplitude and phase are measured with the virtual instruments.",
-    sweepDisabled:
-      "A sweep needs the drive on and ζ ≥ 0.01; with very small damping the steady state takes impractically long to reach.",
+      "The solver is run separately at every frequency until the steady state, and amplitude and phase are measured with the virtual instruments. No sweep is made for ζ < 0.01, where the steady state takes impractically long to reach.",
+    sweepBlocked: {
+      drive: "A sweep needs the drive on (F₀ > 0).",
+      damping: "A sweep needs ζ ≥ 0.01.",
+    },
     footer: {
       amplitude: "Amplitude",
       phaseLag: "Phase lag",
@@ -37,7 +39,7 @@ export const plotsFrequency: typeof source = {
     mode: (index: number) => `f${index}`,
     amplitudeAxis: (unit: string) => `Amplitude [${unit}]`,
     need: (count: number) => `The spectrum needs at least ${count} samples`,
-    footer: (resolution: string, seconds: string) =>
-      `Resolution Δf = ${resolution} Hz; analysed record ${seconds} s. Sharp lines indicate regular (periodic or quasi-periodic) motion, a broad continuous spectrum indicates chaotic motion.`,
+    footer: (resolution: string, samples: number, seconds: string, minBin: number) =>
+      `Resolution Δf = ${resolution} Hz (latest ${samples} samples, ${seconds} s). The dominant peak is given only from ${minBin}·Δf upwards; its frequency is read between two neighbouring bins by an interpolation that assumes a line of constant amplitude. Sharp lines indicate regular (periodic or quasi-periodic) motion, a broad continuous spectrum indicates chaotic motion.`,
   },
 };

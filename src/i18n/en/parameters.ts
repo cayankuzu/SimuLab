@@ -4,11 +4,12 @@ import type { parameters as source } from "../tr/parameters";
 export const parameters: typeof source = {
   tabs: { parameters: "Parameters", measurements: "Measurements", tasks: "Tasks", label: "Inspector sections" },
   scenarios: "Ready-made experiments",
-  scenarioHint: "Each one sets the parameters and the initial conditions together.",
   physical: "Physical parameters",
   initial: "Initial conditions",
   initialHint: "Entering a value restarts the experiment from these conditions.",
   numerical: "Numerical-method demonstration",
+  timeScaleNote:
+    "Ratio of simulated time to wall-clock time. The step size and the computed states do not change; only the pace at which the motion is shown does.",
 
   oscillator: {
     equation: "Equation of motion",
@@ -30,7 +31,7 @@ export const parameters: typeof source = {
       beats: { name: "Beats", note: "Undamped, driven 10 % below ω₀; the envelope beats every 18 s." },
       eulerDrift: {
         name: "Euler drift",
-        note: "The same undamped system integrated with explicit Euler at 60 Hz: the energy grows artificially.",
+        note: "The same undamped system integrated with explicit Euler at 60 Hz: the energy grows artificially. Choosing another ready-made experiment brings the previous solver back.",
       },
     },
   },
@@ -69,7 +70,10 @@ export const parameters: typeof source = {
       triple: { name: "Triple", note: "N = 3." },
       quad: { name: "Quadruple", note: "N = 4." },
       six: { name: "Six-link chain", note: "N = 6. The small-oscillation spectrum approaches that of a hanging rope." },
-      moon: { name: "On the Moon", note: "g = 1.62 m/s². Same angles, √(9.81/1.62) ≈ 2.5 times slower." },
+      moon: {
+        name: "On the Moon",
+        note: "g = 1.62 m/s². Released like the double pendulum: the same motion, √(9.81/1.62) ≈ 2.5 times slower.",
+      },
       mars: { name: "On Mars", note: "g = 3.73 m/s²." },
       microgravity: { name: "Free fall", note: "g = 0. No restoring torque; angular momentum is conserved." },
     },

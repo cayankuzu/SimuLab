@@ -151,7 +151,20 @@ export class PendulumModel {
       }
       alpha[i] = r;
     }
-    if (!choleskyFactor(a, n)) throw new Error("PendulumModel: mass matrix is not positive definite");
+    if (!choleskyFactor(a, n)) {
+      // For a finite state the mass matrix is positive definite, so a failure
+      // there is a defect of the model. A state that has already blown up (NaN
+      // or Infinity) cannot be factorised either: hand the non-finite result
+      // on, so that the caller's divergence guard halts the run instead of an
+      // exception escaping from the frame loop.
+      for (let i = 0; i < 2 * n; i++) {
+        if (!Number.isFinite(y[i])) {
+          alpha.fill(Number.NaN, 0, n);
+          return;
+        }
+      }
+      throw new Error("PendulumModel: mass matrix is not positive definite");
+    }
     choleskySolve(a, n, alpha);
   }
 

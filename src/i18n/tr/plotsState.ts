@@ -3,12 +3,7 @@ export const plotsState = {
   phase: {
     history: (seconds: number) => `Son ${seconds} saniyenin yörüngesi çizilir; eski kısımlar daha soluk gösterilir.`,
     stop: "durdurucu",
-    stopsNote: "Mekanik durdurucular görünen aralığa girdiğinde konumları düşey kesikli çizgilerle belirtilir.",
-    twinNote: "Kesikli mor eğri ikiz sarkacın yörüngesidir.",
     separatrix: "separatris",
-    separatrixHint:
-      "Sönümsüz sarkacın separatrisi: ω = ±2√(g/L) cos(θ/2). İçinde kalan yörüngeler salınım, dışında kalanlar dönme hareketidir.",
-    separatrixNote: "Kesikli turuncu eğri separatristir; salınım bölgesini dönme bölgesinden ayırır.",
   },
 
   energy: {

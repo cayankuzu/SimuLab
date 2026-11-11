@@ -148,7 +148,7 @@ export const physicsEn: TheoryDocument = [
           { kind: "eq", label: "2.1", tex: r`m\ddot{x} + c\dot{x} + kx = F_0\cos\varphi, \qquad \dot{\varphi} = \omega` },
           {
             kind: "p",
-            text: r`The phase $\varphi$ of the drive is integrated as a separate state variable. The force therefore has no discontinuity when the frequency is changed during a run; a real function generator is phase-continuous too. Damping proportional to velocity is represented in the apparatus by an eddy-current brake: the motion of a conducting strip between the poles of a magnet produces, at low speed, a force of the form $F = -c\dot{x}$ [@wiederick1987; @heald1988]. Two parameters make the equation dimensionless:`,
+            text: r`The phase $\varphi$ of the drive is a state variable of its own. The force therefore has no discontinuity when the frequency is changed during a run; a real function generator is phase-continuous too. Between two changes of a parameter $\dot{\varphi} = \omega$ is constant, so the phase is not accumulated step by step: at the end of every step it is set to $\varphi_b + \omega\,(t - t_b)$, where $t_b$ and $\varphi_b$ are the time and the phase at the start of the run or at the last such change (Chapter 4). Damping proportional to velocity is represented in the apparatus by an eddy-current brake: the motion of a conducting strip between the poles of a magnet produces, at low speed, a force of the form $F = -c\dot{x}$ [@wiederick1987; @heald1988]. Two parameters make the equation dimensionless:`,
           },
           {
             kind: "eq",
@@ -193,7 +193,7 @@ export const physicsEn: TheoryDocument = [
           },
           {
             kind: "p",
-            text: r`The application evaluates this closed-form solution alongside the numerical one and shows the largest difference; as long as no stop is hit, the difference is the error of the solver. In the underdamped case the ratio of two successive peaks is constant. Its natural logarithm is the **logarithmic decrement**, and the sharpness of the oscillation is measured by the **quality factor**:`,
+            text: r`The application evaluates this closed-form solution alongside the numerical one and shows the largest difference; as long as no stop is hit, the difference is the error of the solver. In the ready-made experiment “Undamped” ($m = 2$ kg, $k = 24$ N/m, $x_0 = 2$ m) it amounts to $4.9 \times 10^{-10}$ m after 60 s with the default step of 1 ms and to $3.1 \times 10^{-11}$ m with half that step: the factor of 16 that a fourth-order method must show. In the underdamped case the ratio of two successive peaks is constant. Its natural logarithm is the **logarithmic decrement**, and the sharpness of the oscillation is measured by the **quality factor**:`,
           },
           {
             kind: "eq",
@@ -212,7 +212,7 @@ export const physicsEn: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: r`With damping the transient decays as $e^{-\gamma t}$ and what remains is an oscillation at the drive frequency that lags the drive by $\delta$: $x(t) = A\cos(\omega t - \delta)$. Amplitude and phase lag are [@french1971; @taylor2005; @thornton2004]`,
+            text: r`With damping the transient decays, at the rate $\gamma$ for $\zeta \le 1$ and at the rate $\gamma - \sqrt{\gamma^2 - \omega_0^2}$ of its slower term for $\zeta > 1$. What remains is an oscillation at the drive frequency that lags the drive by $\delta$: $x(t) = A\cos(\omega t - \delta)$. Amplitude and phase lag are [@french1971; @taylor2005; @thornton2004]`,
           },
           {
             kind: "eq",
@@ -245,7 +245,7 @@ export const physicsEn: TheoryDocument = [
             kind: "note",
             tone: "info",
             title: "The measured response curve",
-            text: r`The curve in the Frequency tab is relation (2.6); the points on it are amplitudes measured by the virtual instruments in steady state. The “frequency sweep” performs the same measurement automatically for a series of frequencies. At five frequencies the relative deviation of the measured amplitude from theory is at most $3.3 \times 10^{-8}$ (Chapter 7).`,
+            text: r`The curve in the Frequency tab is relation (2.6); the points on it are amplitudes measured by the virtual instruments. The running experiment adds one point per oscillation, and these points settle onto the curve as the transient decays. The “frequency sweep” makes the measurement in the steady state at 25 frequencies between $0.3\,\omega_0$ and $2\,\omega_0$: for each of them the equation is integrated separately (RK4, $h = 2$ ms) until the slowest term of the transient has decayed by a factor of $e^{-12}$. The sweep is offered for $\zeta \ge 0.01$; with less damping the steady state takes impractically long to reach. In the verification experiment, at five frequencies, the relative deviation of the measured amplitude from theory is at most $3.3 \times 10^{-8}$ (Chapter 7).`,
           },
         ],
       },
@@ -354,7 +354,7 @@ export const physicsEn: TheoryDocument = [
           },
           {
             kind: "p",
-            text: r`where $Q_i$ is the non-conservative generalised force. The coefficient matrix of the accelerations, $A_{ij} = \mu_{\max(i,j)}L_iL_j\cos(\theta_i-\theta_j)$, is symmetric and positive definite, because $T = \tfrac12\dot{\boldsymbol\theta}^{\mathsf T}\mathbf{A}\,\dot{\boldsymbol\theta}$ is positive for every non-zero velocity. The accelerations are therefore obtained at every step by Cholesky factorisation [@golub2013]; a failure of the factorisation would indicate an error in the model. For $N = 1$ the equation reduces to the familiar $\ddot\theta = -(g/L)\sin\theta$. The same Lagrangian for the multiple pendulum is given in peer-reviewed publications [@konishi2023; @braun2003; @udwadia2015].`,
+            text: r`where $Q_i$ is the non-conservative generalised force. The coefficient matrix of the accelerations, $A_{ij} = \mu_{\max(i,j)}L_iL_j\cos(\theta_i-\theta_j)$, is symmetric and positive definite, because $T = \tfrac12\dot{\boldsymbol\theta}^{\mathsf T}\mathbf{A}\,\dot{\boldsymbol\theta}$ is positive for every non-zero velocity. The accelerations are therefore obtained at every step by Cholesky factorisation [@golub2013]; for a finite state a failure of the factorisation would indicate an error in the model. A state that contains a value which is not a finite number cannot be factorised either; the model then hands the non-finite result on, and the runtime halts the run (Chapter 4). For $N = 1$ the equation reduces to the familiar $\ddot\theta = -(g/L)\sin\theta$. The same Lagrangian for the multiple pendulum is given in peer-reviewed publications [@konishi2023; @braun2003; @udwadia2015].`,
           },
         ],
       },

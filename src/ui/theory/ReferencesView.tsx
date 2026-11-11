@@ -75,7 +75,8 @@ export function ReferencesView({ keys, focusKey, onBack }: ReferencesViewProps) 
                       target="_blank"
                       rel="noreferrer noopener"
                       aria-label={`${text.openSource}: ${parts.link.label}`}
-                      className="num inline-flex min-w-0 items-center gap-1 break-all text-[12px] text-oi-sky hover:underline"
+                      // A 24 px target (WCAG 2.5.8) on an 18 px line: the negative margin keeps the line height.
+                      className="num -my-[3px] inline-flex min-h-6 min-w-0 items-center gap-1 break-all text-[12px] text-oi-sky hover:underline"
                     >
                       {parts.link.label}
                       <ExternalLink aria-hidden className="size-3 shrink-0" />

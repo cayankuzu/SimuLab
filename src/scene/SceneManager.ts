@@ -51,6 +51,9 @@ const VIEW_DIRECTIONS: Record<ViewPreset, THREE.Vector3> = {
 
 const Z_AXIS = new THREE.Vector3(0, 0, 1);
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+/** Camera steps of one arrow-key press: orbit angle [rad] and pan distance [px of viewport]. */
+const KEY_ORBIT_ANGLE = Math.PI / 60;
+const KEY_PAN_PX = 24;
 const DRAG_THRESHOLD_PX = 4;
 const FLING_WINDOW_MS = 90;
 const MIN_FLING_SAMPLES = 3;
@@ -73,6 +76,8 @@ export class SceneManager {
   private readonly keyLight: THREE.DirectionalLight;
   private readonly resizeObserver: ResizeObserver;
   private readonly unsubscribeFrame: () => void;
+  /** Operating-system preference "reduce motion": no camera glide and no orbit inertia while it is set. */
+  private readonly reducedMotion: MediaQueryList;
 
   private overlays: Overlays;
   private strobeInterval = 0.1;
@@ -105,6 +110,8 @@ export class SceneManager {
   onCursor: (cursor: "default" | "grab" | "grabbing") => void = () => {};
   /** Called once per gesture when a body is actually being dragged. */
   onGrab: () => void = () => {};
+  /** Called when the pendulum mass that carries the vectors was chosen, with the pointer or through selectLink. */
+  onSelectLink: () => void = () => {};
 
   constructor(
     private readonly container: HTMLElement,
@@ -128,6 +135,9 @@ export class SceneManager {
     canvas.style.height = "100%";
     canvas.style.touchAction = "none";
     canvas.style.outline = "none";
+    // A click puts the focus on the canvas itself, which shows no ring; the ring of the container is
+    // left to the keyboard. Keys pressed in either place reach the listener on the container.
+    canvas.tabIndex = -1;
     container.appendChild(canvas);
 
     this.labelRenderer = new CSS2DRenderer();
@@ -203,7 +213,6 @@ export class SceneManager {
     /* ---- camera ---- */
     this.camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 400);
     this.controls = new OrbitControls(this.camera, canvas);
-    this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.09;
     this.controls.rotateSpeed = 0.7;
     this.controls.zoomSpeed = 0.9;
@@ -212,6 +221,9 @@ export class SceneManager {
     this.controls.maxPolarAngle = Math.PI / 2 - 0.015;
     this.controls.addEventListener("change", this.markDirty);
     this.controls.addEventListener("start", this.cancelAnimation);
+    this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    this.reducedMotion.addEventListener("change", this.applyMotionPreference);
+    this.applyMotionPreference();
 
     this.resize();
     this.applyModule();
@@ -225,6 +237,7 @@ export class SceneManager {
     canvas.addEventListener("pointerleave", this.onPointerLeave);
     canvas.addEventListener("webglcontextlost", this.onContextLost);
     canvas.addEventListener("webglcontextrestored", this.markDirty);
+    container.addEventListener("keydown", this.onKeyDown);
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(container);
     this.unsubscribeFrame = sim.onFrame(this.onFrame);
@@ -263,6 +276,18 @@ export class SceneManager {
     this.dirty = true;
   }
 
+  /**
+   * Chooses the pendulum mass whose velocity and force vectors are drawn
+   * (index from 0). The last mass, like null, means "the free end": the
+   * vectors then stay on the end of the chain when links are added or removed.
+   */
+  selectLink(link: number | null): void {
+    const last = this.sim.model.n - 1;
+    this.pendulum.selectedLink = link === null || !(link < last) ? null : Math.max(0, Math.floor(link));
+    this.dirty = true;
+    this.onSelectLink();
+  }
+
   readout(): SceneReadout {
     const rig = this.module === "oscillator" ? this.oscillator : this.pendulum;
     return {
@@ -285,6 +310,8 @@ export class SceneManager {
     canvas.removeEventListener("pointerleave", this.onPointerLeave);
     canvas.removeEventListener("webglcontextlost", this.onContextLost);
     canvas.removeEventListener("webglcontextrestored", this.markDirty);
+    this.container.removeEventListener("keydown", this.onKeyDown);
+    this.reducedMotion.removeEventListener("change", this.applyMotionPreference);
     this.controls.removeEventListener("change", this.markDirty);
     this.controls.removeEventListener("start", this.cancelAnimation);
     this.controls.dispose();
@@ -314,6 +341,40 @@ export class SceneManager {
     this.userCamera = true;
   };
 
+  /**
+   * The inertia of the orbit controls is decoration, like the glide between
+   * two views (see onFrame): neither runs while the user asks for reduced
+   * motion. The motion of the experiment is the content and is not affected.
+   */
+  private readonly applyMotionPreference = (): void => {
+    this.controls.enableDamping = !this.reducedMotion.matches;
+    this.dirty = true;
+  };
+
+  /**
+   * Camera from the keyboard while the scene has the focus: the arrow keys
+   * orbit, with Shift they pan (zoom and the named views have buttons). The
+   * steps go through the orbit controls, so their limits apply and the
+   * movement is eased exactly as a pointer movement is.
+   */
+  private readonly onKeyDown = (event: KeyboardEvent): void => {
+    if (event.ctrlKey || event.metaKey || event.altKey || this.drag) return;
+    const horizontal = event.key === "ArrowLeft" ? 1 : event.key === "ArrowRight" ? -1 : 0;
+    const vertical = event.key === "ArrowUp" ? 1 : event.key === "ArrowDown" ? -1 : 0;
+    if (horizontal === 0 && vertical === 0) return;
+    event.preventDefault();
+    // The view now belongs to the user, as after a pointer gesture: no glide and no automatic re-framing.
+    this.cancelAnimation();
+    if (event.shiftKey) {
+      this.controls.pan(horizontal * KEY_PAN_PX, vertical * KEY_PAN_PX);
+    } else if (horizontal !== 0) {
+      this.controls.rotateLeft(horizontal * KEY_ORBIT_ANGLE);
+    } else {
+      this.controls.rotateUp(vertical * KEY_ORBIT_ANGLE);
+    }
+    this.dirty = true;
+  };
+
   private readonly onContextLost = (event: Event): void => {
     event.preventDefault();
   };
@@ -336,7 +397,8 @@ export class SceneManager {
     }
 
     if (this.animating) {
-      const blend = 1 - Math.exp(-Math.min(dt, 0.1) * 7);
+      // With reduced motion the camera is placed at its goal at once instead of gliding there.
+      const blend = this.reducedMotion.matches ? 1 : 1 - Math.exp(-Math.min(dt, 0.1) * 7);
       this.camera.position.lerp(this.goalPosition, blend);
       this.controls.target.lerp(this.goalTarget, blend);
       if (
@@ -569,10 +631,7 @@ export class SceneManager {
     if (!drag.active) {
       this.sim.release();
       // A click without movement selects the link whose vectors are displayed.
-      if (drag.kind === "pendulum") {
-        const n = this.sim.model.n;
-        this.pendulum.selectedLink = drag.link === n - 1 ? null : drag.link;
-      }
+      if (drag.kind === "pendulum") this.selectLink(drag.link);
       this.dirty = true;
       return;
     }

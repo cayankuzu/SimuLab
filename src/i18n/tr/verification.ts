@@ -41,7 +41,7 @@ const cases: Record<ValidationCaseId, ValidationCaseText> = {
   criticalDamping: {
     title: "Basamak yanıtı: aşım ve yerleşme süresi",
     description:
-      "$m = 4$ kg, $k = 36$ N/m, $x_0 = 2$ m. Kritik sönümde aşım olmamalı ve %2 yerleşme süresi $5{,}834/\\omega_0$ değerine eşit olmalıdır; $\\zeta = 0{,}5$ için aşım $e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}$ değerini vermelidir. Yerleşme süresi 1 ms çözünürlükle ölçülür.",
+      "$m = 4$ kg, $k = 36$ N/m, $x_0 = 2$ m. Kritik sönümde aşım olmamalı ve %2 yerleşme süresi $5{,}834/\\omega_0$ değerine eşit olmalıdır; $\\zeta = 0{,}5$ için aşım $e^{-\\pi\\zeta/\\sqrt{1-\\zeta^2}}$ değerini vermelidir. Basamak yanıtı ölçer her 1 ms'lik adımın sonunda bir örnek alır ve %2'lik banda giriş anını iki örnek arasında doğrusal ara değerlemeyle bulur.",
     rows: ["Aşım, $\\zeta = 1$", "%2 yerleşme süresi, $\\zeta = 1$", "Aşım, $\\zeta = 0{,}5$"],
   },
   impact: {

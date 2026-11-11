@@ -201,8 +201,10 @@ export interface SteadyStateMeasurement {
 /**
  * Numerical frequency-response measurement: drive the oscillator at omega
  * until transients have decayed by exp(-settle), then read amplitude and
- * phase lag with the virtual instruments. Used by the validation suite and by
- * the interactive "frequency sweep" experiment.
+ * phase lag with the virtual instruments. The wait is counted in decay times
+ * of the slowest transient term (OscillatorTheory.transientRate), which is
+ * gamma = c/(2m) up to critical damping and smaller above it. Used by the
+ * validation suite and by the interactive "frequency sweep" experiment.
  */
 export function measureSteadyState(
   params: OscillatorParams,
@@ -215,10 +217,10 @@ export function measureSteadyState(
   const system = new OscillatorSystem(driven);
   system.reset(0, 0);
   const advancer = createAdvancer(method, OSC.SIZE, { positions: 1 });
-  const gamma = driven.damping / (2 * driven.mass);
+  const rate = oscillatorTheory(driven).transientRate;
   const period = (2 * Math.PI) / omega;
   // Without damping there is no steady state: fall back to a fixed observation time.
-  const waitTime = gamma > 0 ? Math.min(settle / gamma, 2000 * period) : 60 * period;
+  const waitTime = rate > 0 ? Math.min(settle / rate, 2000 * period) : 60 * period;
   const waitSteps = Math.ceil(waitTime / h);
   for (let i = 0; i < waitSteps; i++) system.step(advancer, h);
 

@@ -8,8 +8,8 @@ export const plots = {
     frequency: "Frekans",
     chaos: "Kaos",
   },
-  collapse: "Grafik panelini daralt",
-  expand: "Grafik panelini aç",
+  /** Name of the button that opens and closes the panel; the state is its aria-expanded attribute. */
+  toggle: "Grafik paneli",
   resize: "Grafik panelinin yüksekliğini değiştir",
   window: "Zaman penceresi",
   seconds: (value: number) => `${value} s`,

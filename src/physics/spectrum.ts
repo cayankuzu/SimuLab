@@ -53,21 +53,30 @@ export interface AmplitudeSpectrum {
   frequency: Float64Array;
   /** Single-sided amplitude spectrum in signal units (a sine of amplitude A peaks at about A). */
   amplitude: Float64Array;
-  /** Frequency resolution fs / N [Hz]. */
+  /** Frequency resolution fs / N [Hz], N being the number of samples analysed. */
   resolution: number;
+  /** Number of samples analysed: the largest power of two that fits both `size` and the record. */
+  samples: number;
 }
 
 /**
- * Single-sided amplitude spectrum of the last `size` samples (size a power of
- * two). The mean is removed and a periodic Hann window applied; amplitudes are
- * corrected for the window's coherent gain of 1/2.
+ * Single-sided amplitude spectrum of the newest samples. The transform length
+ * is the largest power of two that does not exceed `size` (a power of two)
+ * or the number of samples supplied. The record is never zero-padded:
+ * padding oversamples the main lobe of the window, and the two-bin
+ * interpolation of dominantPeak, which assumes bins one reciprocal record
+ * length apart, would then be wrong by up to half a bin in frequency and 18 %
+ * in amplitude. The mean is removed and a periodic Hann window applied;
+ * amplitudes are corrected for the window's coherent gain of 1/2.
  */
 export function amplitudeSpectrum(samples: ArrayLike<number>, sampleRate: number, size: number): AmplitudeSpectrum {
-  if ((size & (size - 1)) !== 0) throw new RangeError("amplitudeSpectrum: size must be a power of two");
-  const available = Math.min(size, samples.length);
+  if (size < 2 || (size & (size - 1)) !== 0) throw new RangeError("amplitudeSpectrum: size must be a power of two");
+  let n = size;
+  while (n > 2 && n > samples.length) n >>= 1;
+  const available = Math.min(n, samples.length);
   const offset = samples.length - available;
-  const re = new Float64Array(size);
-  const im = new Float64Array(size);
+  const re = new Float64Array(n);
+  const im = new Float64Array(n);
 
   let mean = 0;
   for (let i = 0; i < available; i++) mean += samples[offset + i];
@@ -81,16 +90,18 @@ export function amplitudeSpectrum(samples: ArrayLike<number>, sampleRate: number
   }
   fft(re, im);
 
-  const half = size >> 1;
+  const half = n >> 1;
   const frequency = new Float64Array(half + 1);
   const amplitude = new Float64Array(half + 1);
   const norm = windowSum > 0 ? 2 / windowSum : 0;
   for (let k = 0; k <= half; k++) {
-    frequency[k] = (k * sampleRate) / size;
+    frequency[k] = (k * sampleRate) / n;
     amplitude[k] = Math.hypot(re[k], im[k]) * norm;
   }
+  // The zero-frequency and Nyquist bins have no mirror image to fold in.
   amplitude[0] *= 0.5;
-  return { frequency, amplitude, resolution: sampleRate / size };
+  amplitude[half] *= 0.5;
+  return { frequency, amplitude, resolution: sampleRate / n, samples: available };
 }
 
 export interface SpectralPeak {
@@ -102,8 +113,11 @@ export interface SpectralPeak {
 
 /**
  * Strongest spectral line above `minFrequency`, refined with the two-bin
- * interpolation that is exact for a single sinusoid under a Hann window
- * [grandke1983]. With alpha the ratio of the larger neighbour to the peak bin,
+ * interpolation for a Hann window [grandke1983]. It is exact for a single
+ * complex exponential; for a real sinusoid the mirror line at the negative
+ * frequency leaks into the bins as well, and the error it causes falls off
+ * with the bin index of the peak (the plot shows a peak only from bin 4, see
+ * src/ui/plots/spectrumRecord.ts). With alpha the ratio of the larger neighbour to the peak bin,
  * the fractional bin offset is  d = (2 alpha - 1) / (alpha + 1)  and the
  * scalloping loss is corrected by  pi d (1 - d^2) / sin(pi d).
  */

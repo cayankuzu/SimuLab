@@ -65,17 +65,18 @@ function TaskList({ session }: { session: TaskSession }) {
 
       {(["oscillator", "pendulum"] as const).map((moduleId) => (
         <Section key={moduleId} title={text.groups[moduleId]}>
-          <ol className="-mx-2 -my-1">
+          {/* The numbering runs on across both groups, as the badges show it. */}
+          <ol start={TASKS.findIndex((task) => task.module === moduleId) + 1} className="-mx-2 -my-1">
             {TASKS.map((task, index) => {
               if (task.module !== moduleId) return null;
               const item = text.items[task.id];
               const isDone = completed.includes(task.id);
               return (
                 <li key={task.id}>
+                  {/* The row is named by its content (title, state, summary); an aria-label would replace it and hide the state. */}
                   <button
                     type="button"
                     onClick={() => viewTask(task.id)}
-                    aria-label={text.openTask(item.title)}
                     className="group flex w-full items-start gap-2.5 rounded-sm px-2 py-2 text-left transition-colors duration-100 hover:bg-hover"
                   >
                     <span
@@ -91,7 +92,8 @@ function TaskList({ session }: { session: TaskSession }) {
                       <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                         <span className="text-[13px] font-medium text-ink">{item.title}</span>
                         {session.active === task.id ? <Chip tone="accent">{text.status.active}</Chip> : null}
-                        {isDone ? <span className="sr-only">{text.status.completed}</span> : null}
+                        {/* The check mark in the badge is the visible form of this state. */}
+                        {isDone ? <span className="sr-only"> — {text.status.completed}</span> : null}
                       </span>
                       <span className="mt-0.5 block text-[12px] leading-snug text-ink-3">{item.summary}</span>
                     </span>
@@ -191,7 +193,7 @@ function TaskSheet({ id, session }: { id: TaskId; session: TaskSession }) {
                   className={cn(
                     "flex items-start gap-2.5 rounded-sm border px-2.5 py-2 text-[12.5px] leading-snug transition-colors duration-100",
                     "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent",
-                    checked ? "border-accent/60 bg-accent-soft text-ink" : "border-line text-ink-2",
+                    checked ? "border-accent/70 bg-accent-soft text-ink" : "border-line text-ink-2",
                     !unlocked && "cursor-pointer",
                     !unlocked && !checked && "hover:bg-hover",
                   )}
@@ -207,12 +209,17 @@ function TaskSheet({ id, session }: { id: TaskId; session: TaskSession }) {
                     aria-hidden
                     className={cn(
                       "mt-[3px] flex size-3 shrink-0 items-center justify-center rounded-full border",
-                      checked ? "border-accent" : "border-line-strong",
+                      // The ring marks an option that can be chosen: at least 3:1 on the panel and on hover (WCAG 1.4.11).
+                      checked ? "border-accent" : "border-edge",
                     )}
                   >
                     {checked ? <span className="size-1.5 rounded-full bg-accent" /> : null}
                   </span>
-                  <span className="min-w-0 flex-1">{option}</span>
+                  <span className="min-w-0 flex-1">
+                    {option}
+                    {/* Text for the check mark: if the explanation was opened before completion, the mark is the only sign of the answer. */}
+                    {right ? <span className="sr-only"> — {text.predict.agrees}</span> : null}
+                  </span>
                   {right ? <Check aria-hidden className="mt-0.5 size-3.5 shrink-0 text-ok" strokeWidth={2.5} /> : null}
                 </label>
               );

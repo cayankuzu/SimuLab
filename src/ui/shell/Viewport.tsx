@@ -13,7 +13,7 @@ import {
   ZoomOut,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { oscillatorTheory } from "@/physics/oscillator";
 import { exactPendulumPeriod } from "@/physics/special";
 import { SceneManager, type ViewPreset } from "@/scene/SceneManager";
@@ -59,6 +59,8 @@ export function Viewport({ onScene, scene }: ViewportProps) {
   const moduleId = useSimState((state) => state.module);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [failed, setFailed] = useState(false);
+  // The selected pendulum mass is state of the scene; a change of it only has to make the selector below read it again.
+  const [, refreshSelection] = useReducer((count: number) => count + 1, 0);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -77,6 +79,7 @@ export function Viewport({ onScene, scene }: ViewportProps) {
     instance.onGrab = () => {
       if (!getPrefs().dragHintSeen) setPrefs({ dragHintSeen: true });
     };
+    instance.onSelectLink = refreshSelection;
     onScene(instance);
     return () => {
       onScene(null);
@@ -97,8 +100,21 @@ export function Viewport({ onScene, scene }: ViewportProps) {
   );
 
   return (
-    <section className="@container relative min-h-0 min-w-0 flex-1 overflow-hidden bg-bg" aria-label={t.modules[moduleId].full}>
-      <div ref={mountRef} className="absolute inset-0" role="img" aria-label={t.viewport.ariaLabel} />
+    // A size container: the overlays answer to the width and, in a short scene, to the height of the scene.
+    <section className="relative min-h-0 min-w-0 flex-1 overflow-hidden bg-bg [container-type:size]" aria-label={t.modules[moduleId].full}>
+      {/*
+        The scene takes the keyboard focus so that the camera can be turned without a pointer (see
+        SceneManager.onKeyDown); it handles its own keys, hence the role. The focus ring is drawn inside
+        the box, where the clipping of the section cannot cut it off.
+      */}
+      <div
+        ref={mountRef}
+        data-scene
+        role="application"
+        tabIndex={failed ? undefined : 0}
+        aria-label={t.viewport.ariaLabel}
+        className="absolute inset-0 focus-visible:-outline-offset-2!"
+      />
 
       {failed ? (
         <p className="absolute inset-0 flex items-center justify-center p-8 text-center text-[13px] text-ink-3">
@@ -106,9 +122,12 @@ export function Viewport({ onScene, scene }: ViewportProps) {
         </p>
       ) : null}
 
-      {/* Experiment identity and live regime */}
-      {/* In a narrow viewport the title moves below the camera bar instead of running under it. */}
-      <div className="pointer-events-none absolute left-3 top-14 flex max-w-[calc(100%-24px)] flex-col items-start gap-1.5 @md:top-3 @md:max-w-[calc(100%-260px)]">
+      {/*
+        Experiment identity and live regime. In a narrow scene the title moves below the camera bar instead of
+        running under it. In a very short scene (a phone with the plot panel open) it gives way to the scale key
+        and the mass selector, which would otherwise overlap it; the top bar still names the experiment.
+      */}
+      <div className="pointer-events-none absolute left-3 top-14 flex max-w-[calc(100%-24px)] flex-col items-start gap-1.5 @md:top-3 @md:max-w-[calc(100%-260px)] [@container(height<230px)]:hidden [@container(height<280px)_and_(width<28rem)]:hidden">
         <h2 className="rounded-sm bg-bg/70 px-2 py-1 text-[12.5px] font-medium text-ink-2 backdrop-blur-sm">
           {t.modules[moduleId].full}
         </h2>
@@ -128,16 +147,22 @@ export function Viewport({ onScene, scene }: ViewportProps) {
       </div>
 
       {/* Scale key and hints */}
-      <div className="pointer-events-none absolute bottom-14 left-3 flex flex-col items-start gap-1">
+      <div className="pointer-events-none absolute bottom-14 left-3 flex max-w-[calc(100%-24px)] flex-col items-start gap-1">
+        {/* The first-use hint (the welcome dialog says the same) is left out of a short scene, where it would cover the title. */}
         {!hintSeen ? (
-          <p className="rounded-sm bg-bg/70 px-2 py-1 text-[12px] text-ink-2 backdrop-blur-sm">{t.viewport.hint}</p>
+          <p className="rounded-sm bg-bg/70 px-2 py-1 text-[12px] text-ink-2 backdrop-blur-sm [@container(height<360px)]:hidden">
+            {t.viewport.hint}
+          </p>
         ) : null}
         <ScaleKey scene={scene} />
       </div>
 
-      {/* Scene layers */}
+      {/*
+        Scene layers. A plain group: every button is a tab stop, which a toolbar role would not lead one to
+        expect. The 12 px below it stay free of controls: the handle of the plot dock reaches into them.
+      */}
       <div
-        role="toolbar"
+        role="group"
         aria-label={t.viewport.overlaysLabel}
         className="absolute bottom-3 left-1/2 flex max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-0.5 overflow-x-auto rounded-md border border-line bg-panel/90 p-1 backdrop-blur-sm"
       >
@@ -151,7 +176,6 @@ export function Viewport({ onScene, scene }: ViewportProps) {
                 pressed={overlays[key]}
                 onClick={() => toggleOverlay(key)}
                 aria-label={t.viewport.overlays[key]}
-                className="gap-1.5 px-2"
               >
                 <Icon aria-hidden className="size-3.5" />
                 <span aria-hidden className="hidden @4xl:inline">
@@ -181,7 +205,7 @@ export function Viewport({ onScene, scene }: ViewportProps) {
 function ViewButtons({ scene }: { scene: SceneManager | null }) {
   const t = useT();
   const views: Array<[ViewPreset, string, string]> = [
-    ["iso", "3B", t.viewport.views.iso],
+    ["iso", t.viewport.views.isoCode, t.viewport.views.iso],
     ["front", "XY", t.viewport.views.front],
     ["top", "XZ", t.viewport.views.top],
     ["side", "YZ", t.viewport.views.side],
@@ -193,11 +217,12 @@ function ViewButtons({ scene }: { scene: SceneManager | null }) {
           <Button
             variant="ghost"
             size="sm"
-            aria-label={label}
+            // The name starts with the text on the button, so that it can be spoken as it is seen (WCAG 2.5.3).
+            aria-label={`${code} – ${label}`}
             onClick={() => scene?.setView(view)}
-            className="num w-8 px-0 text-[11.5px]"
+            className="num w-8"
           >
-            {code === "3B" && t.meta.locale === "en" ? "3D" : code}
+            {code}
           </Button>
         </Tooltip>
       ))}
@@ -205,24 +230,44 @@ function ViewButtons({ scene }: { scene: SceneManager | null }) {
   );
 }
 
-/** Key relating arrow lengths to physical magnitudes, plus the selected pendulum mass. */
+/** Key relating arrow lengths to physical magnitudes, plus the choice of the pendulum mass that carries the vectors. */
 function ScaleKey({ scene }: { scene: SceneManager | null }) {
   const t = useT();
   const overlays = usePrefs((prefs) => prefs.overlays);
   const moduleId = useSimState((state) => state.module);
   const links = useSimState((state) => state.pendulum.count);
+  const timeScale = useSimState((state) => state.timeScale);
   useLiveTick(2);
   if (!scene) return null;
   const forces = overlays.netForce || overlays.freeBody;
-  if (!forces && !overlays.velocity) return null;
+  const vectors = forces || overlays.velocity;
+  // A time scale other than 1 is a scale of the picture too: the motion on screen is slower or faster than
+  // the real one. It is named here, in the one overlay that every scene size keeps (the title block and the
+  // hint give way in a short scene), also when the top bar has no room for its time-scale selector.
+  const rescaled = timeScale !== 1;
+  if (!vectors && !rescaled) return null;
   const readout = scene.readout();
   return (
     <div className="num rounded-sm bg-bg/70 px-2 py-1 text-[11px] leading-relaxed text-ink-3 backdrop-blur-sm">
-      <span className="sr-only">{t.viewport.scale.title}: </span>
+      {rescaled ? <div className="font-sans text-accent-strong">{t.viewport.scale.time(String(timeScale))}</div> : null}
+      {vectors ? <span className="sr-only">{t.viewport.scale.title}: </span> : null}
       {forces ? <div>{t.viewport.scale.force(auto(readout.forcePerMetre, 2))}</div> : null}
       {overlays.velocity ? <div>{t.viewport.scale.velocity(auto(readout.velocityPerMetre, 2))}</div> : null}
-      {moduleId === "pendulum" && links > 1 ? (
-        <div className="font-sans text-ink-4">{t.viewport.selectedLink(readout.activeLink + 1)}</div>
+      {vectors && moduleId === "pendulum" && links > 1 ? (
+        // The same choice as a click on a mass, for those who cannot or do not want to point at the scene.
+        // The value is read from the scene, so it follows a click, a preset and a change of the chain.
+        <Tooltip label={t.viewport.vectorMass.hint} side="top">
+          <div className="pointer-events-auto mb-0.5 mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 font-sans">
+            <span>{t.viewport.vectorMass.label}</span>
+            <Segmented
+              size="sm"
+              ariaLabel={t.viewport.vectorMass.label}
+              value={String(readout.activeLink + 1)}
+              onChange={(value) => scene.selectLink(Number(value) - 1)}
+              options={Array.from({ length: links }, (_, index) => ({ value: String(index + 1), label: String(index + 1) }))}
+            />
+          </div>
+        </Tooltip>
       ) : null}
     </div>
   );

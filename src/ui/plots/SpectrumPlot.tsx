@@ -1,10 +1,9 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { oscillatorTheory } from "@/physics/oscillator";
 import { linearModes } from "@/physics/pendulum";
-import { amplitudeSpectrum, dominantPeak, type AmplitudeSpectrum, type SpectralPeak } from "@/physics/spectrum";
-import { useLiveTick, useSimState } from "@/sim/react";
+import { useSimState } from "@/sim/react";
 import { OSC_CH, PEND_CH } from "@/sim/Simulation";
 import { useT } from "@/i18n";
 import { deviation, fixed, scientific } from "../format";
@@ -22,9 +21,8 @@ import {
   usePlot,
   type LegendItem,
 } from "./plotKit";
+import { MIN_SAMPLES, PEAK_MIN_BIN, recordSpectrum, type RecordSpectrum } from "./spectrumRecord";
 
-const FFT_SIZE = 4096;
-const MIN_SAMPLES = 256;
 const DECADES = 4;
 /** Minimum time between two transforms [ms]. */
 const REFRESH_MS = 500;
@@ -32,14 +30,15 @@ const REFRESH_MS = 500;
 interface Cache {
   time: number;
   key: string;
-  spectrum: AmplitudeSpectrum | null;
-  peak: SpectralPeak | null;
-  samples: number;
-  sampleRate: number;
+  /** Latest transform; null while the record is too short. */
+  analysed: RecordSpectrum | null;
 }
 
 /**
- * Amplitude spectrum of the recorded motion (Hann window, 4096-point FFT).
+ * Amplitude spectrum of the recorded motion: Hann window and FFT over the
+ * newest samples, as many as the largest power of two that the record fills
+ * (at most 4096). Resolution, record length, Nyquist limit and peak read-out
+ * are those of the record actually analysed (see spectrumRecord.ts).
  * Oscillator: x(t). Pendulum: the angular velocity of the last link, which is
  * bounded and has no wrap-around. Theoretical frequencies are marked.
  */
@@ -49,7 +48,9 @@ export function SpectrumPlot() {
   const epoch = useSimState((state) => state.epoch);
   const oscillator = useSimState((state) => state.oscillator);
   const pendulum = useSimState((state) => state.pendulum);
-  useLiveTick(2);
+  // Legend and footer quote the transform that the drawing loop keeps in `cache`; the loop asks
+  // for a render whenever it has computed a new one, also while the experiment is paused.
+  const [, setRevision] = useState(0);
 
   const isOscillator = moduleId === "oscillator";
   const theory = useMemo(() => oscillatorTheory(oscillator), [oscillator]);
@@ -57,38 +58,33 @@ export function SpectrumPlot() {
     () => (pendulum.gravity > 0 ? Array.from(linearModes(pendulum).omega, (omega) => omega / (2 * Math.PI)) : []),
     [pendulum],
   );
-  const cache = useRef<Cache>({ time: 0, key: "", spectrum: null, peak: null, samples: 0, sampleRate: 0 });
+  const cache = useRef<Cache>({ time: 0, key: "", analysed: null });
   const text = t.plotsFrequency.spectrum;
   const unit = isOscillator ? "m" : "rad/s";
+  const channel = isOscillator ? OSC_CH.x : PEND_CH.omega + pendulum.count - 1;
+  // One spectrum belongs to one run of one signal.
+  const key = `${moduleId}:${epoch}:${channel}`;
 
   const canvasRef = usePlot(
     (surface, simulation) => {
       const series = isOscillator ? simulation.oscSeries : simulation.pendSeries;
-      const channel = isOscillator ? OSC_CH.x : PEND_CH.omega + pendulum.count - 1;
-      const sampleRate = 1 / simulation.sampleInterval;
-      const key = `${moduleId}:${epoch}:${channel}`;
       const now = performance.now();
       const stored = cache.current;
       if (stored.key !== key || now - stored.time >= REFRESH_MS) {
         stored.key = key;
         stored.time = now;
-        stored.samples = Math.min(series.length, FFT_SIZE);
-        stored.sampleRate = sampleRate;
-        if (series.length >= MIN_SAMPLES) {
-          stored.spectrum = amplitudeSpectrum(series.tail(channel, FFT_SIZE), sampleRate, FFT_SIZE);
-          stored.peak = dominantPeak(stored.spectrum, 2 * stored.spectrum.resolution);
-        } else {
-          stored.spectrum = null;
-          stored.peak = null;
-        }
+        stored.analysed = recordSpectrum(series, isOscillator ? OSC_CH.t : PEND_CH.t, channel);
+        setRevision((revision) => revision + 1);
       }
+      const spectrum = stored.analysed?.spectrum ?? null;
+      const peak = stored.analysed?.peak ?? null;
 
-      const nyquist = sampleRate / 2;
+      // The Nyquist limit of the record that is shown; without a spectrum only the empty frame is drawn.
+      const nyquist = (stored.analysed?.sampleRate ?? 1 / simulation.sampleInterval) / 2;
       const fMax = isOscillator
         ? Math.min(nyquist, Math.max(2.5 * (theory.omega0 / (2 * Math.PI)), (1.5 * oscillator.driveFrequency) / (2 * Math.PI), 1.5))
         : Math.min(nyquist, Math.max(2, 1.6 * (modes.length > 0 ? modes[modes.length - 1] : 1)));
       const area = surface.area();
-      const spectrum = stored.spectrum;
 
       let peakValue = 1e-3;
       if (spectrum) {
@@ -137,11 +133,11 @@ export function SpectrumPlot() {
         { color: isOscillator ? QUANTITY.position : QUANTITY.velocity, width: 1.4 },
       );
       surface.ctx.restore();
-      if (stored.peak && stored.peak.frequency <= fMax) {
+      if (peak && peak.frequency <= fMax) {
         drawMarker(
           surface,
-          xScale(stored.peak.frequency),
-          yScale(Math.min(stored.peak.amplitude, yMax)),
+          xScale(peak.frequency),
+          yScale(Math.min(peak.amplitude, yMax)),
           isOscillator ? QUANTITY.position : QUANTITY.velocity,
           3,
         );
@@ -150,8 +146,10 @@ export function SpectrumPlot() {
     [moduleId, epoch, oscillator, pendulum, theory, modes, t],
   );
 
-  const stored = cache.current;
-  const peak = stored.peak;
+  // The cache is filled by the drawing loop. Right after a restart it still holds the spectrum
+  // of the previous run, which must not be quoted in the legend or the footer of the new one.
+  const analysed = cache.current.key === key ? cache.current.analysed : null;
+  const peak = analysed?.peak ?? null;
   // For free motion compare the measured line with the frequency the linear theory predicts.
   const expected =
     isOscillator && oscillator.driveAmplitude === 0 && theory.omegaD !== null ? theory.omegaD / (2 * Math.PI) : null;
@@ -178,9 +176,14 @@ export function SpectrumPlot() {
       legend={legend}
       canvasRef={canvasRef}
       footer={
-        stored.spectrum ? (
+        analysed ? (
           <p className="px-1 pt-1.5 text-[11.5px] leading-snug text-ink-3">
-            {text.footer(fixed(stored.spectrum.resolution, 4), fixed(stored.samples / stored.sampleRate, 1))}
+            {text.footer(
+              fixed(analysed.spectrum.resolution, 4),
+              analysed.spectrum.samples,
+              fixed(analysed.spectrum.samples / analysed.sampleRate, 2),
+              PEAK_MIN_BIN,
+            )}
           </p>
         ) : null
       }

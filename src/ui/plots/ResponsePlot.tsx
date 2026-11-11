@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { OSC_GEOMETRY } from "@/physics/constants";
 import {
   oscillatorTheory,
@@ -34,6 +34,8 @@ import {
 const CURVE_POINTS = 300;
 const SWEEP_POINTS = 25;
 const SWEEP_STEP = 1 / 500;
+/** A sweep point is read after the slowest transient term has decayed by exp(-12), about 6e-6. */
+const SWEEP_SETTLE = 12;
 const MIN_SWEEP_ZETA = 0.01;
 /** Largest amplitude the carriage can reach symmetrically before touching a stop. */
 const STOP_LIMIT = Math.min(Math.abs(OSC_GEOMETRY.xMin), OSC_GEOMETRY.xMax);
@@ -88,6 +90,7 @@ export function ResponsePlot() {
   const theory = useMemo(() => oscillatorTheory(params), [params]);
   const [sweep, setSweep] = useState<Sweep | null>(null);
   const timer = useRef(0);
+  const reasonId = useId();
   useLiveTick(4);
 
   const text = t.plotsFrequency.response;
@@ -110,7 +113,7 @@ export function ResponsePlot() {
     const points: SteadyStateMeasurement[] = [];
     const next = () => {
       // One frequency per macrotask keeps the interface responsive.
-      points.push(measureSteadyState(target, frequencies[points.length], SWEEP_STEP, 12));
+      points.push(measureSteadyState(target, frequencies[points.length], SWEEP_STEP, SWEEP_SETTLE));
       const running = points.length < frequencies.length;
       setSweep({ params: target, points: [...points], total: frequencies.length, running });
       if (running) timer.current = window.setTimeout(next, 0);
@@ -251,8 +254,14 @@ export function ResponsePlot() {
 
   /* ---- footer: theory against the live measurement at the current drive frequency ---- */
   const measuredAmplitude = sim.oscMeter.amplitude;
-  const settled = steadyState(sim.oscMeter.amplitudeDrift, sim.oscUndisturbedFor, theory.gamma);
-  const steady = settled.steady && sim.oscMeter.cycles >= 4;
+  const settled = steadyState(
+    sim.oscMeter.amplitudeDrift,
+    sim.oscMeter.centreDrift,
+    sim.oscUndisturbedFor,
+    theory.transientRate,
+  );
+  // The same three-condition test as in the Measurements panel and in the task sheets.
+  const steady = settled.steady;
   const trail = sim.responseTrail;
   const measuredPhase = trail.length > 0 ? trail.latest(RESPONSE_CH.phaseLag) : null;
 
@@ -263,23 +272,33 @@ export function ResponsePlot() {
       legend={legend}
       canvasRef={canvasRef}
       actions={
-        current?.running ? (
+        current?.running || canSweep ? (
           <>
-            <span className="num text-[12px] text-ink-3" role="status">
-              {text.progress(current.points.length, current.total)}
-            </span>
-            <Button size="sm" onClick={cancelSweep}>
-              {text.cancelSweep}
-            </Button>
+            {current?.running ? (
+              <span className="num text-[12px] text-ink-3" role="status">
+                {text.progress(current.points.length, current.total)}
+              </span>
+            ) : null}
+            {/* One button starts and cancels: the keyboard focus stays on it when a sweep begins or ends. */}
+            <Tooltip label={text.sweepHint} side="top">
+              <Button size="sm" onClick={current?.running ? cancelSweep : runSweep}>
+                {current?.running ? text.cancelSweep : text.runSweep}
+              </Button>
+            </Tooltip>
           </>
         ) : (
-          <Tooltip label={canSweep ? text.sweepHint : text.sweepDisabled} side="top">
-            <span>
-              <Button size="sm" onClick={runSweep} disabled={!canSweep}>
-                {text.runSweep}
-              </Button>
+          <>
+            {/*
+              Why the sweep is unavailable is written next to the button. A tooltip on a disabled
+              control can be reached neither with the keyboard nor by a screen reader.
+            */}
+            <span id={reasonId} className="text-[12px] leading-snug text-ink-3">
+              {driven ? text.sweepBlocked.damping : text.sweepBlocked.drive}
             </span>
-          </Tooltip>
+            <Button size="sm" disabled aria-describedby={reasonId}>
+              {text.runSweep}
+            </Button>
+          </>
         )
       }
       footer={
@@ -293,7 +312,9 @@ export function ResponsePlot() {
             {fixed(theory.phaseLag, 4)} · {fixed(measuredPhase, 4)} rad
             <span className="mx-2 text-ink-4">|</span>
             <span className={`font-sans ${steady ? "text-ok" : "text-warn"}`}>{steady ? text.footer.steady : text.footer.transient}
-              {!steady && Number.isFinite(settled.remaining) && settled.remaining > 0 ? ` (${text.footer.wait(fixed(settled.remaining, 0))})` : ""}
+              {!steady && Number.isFinite(settled.remaining) && settled.remaining > 0
+                ? ` (${text.footer.wait(fixed(Math.ceil(settled.remaining), 0))})`
+                : ""}
             </span>
             {anyImpact ? <span className="font-sans"> {text.footer.impactNote}</span> : null}
           </p>

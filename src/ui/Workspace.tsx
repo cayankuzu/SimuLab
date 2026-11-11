@@ -11,7 +11,7 @@ import { useT } from "@/i18n";
 import { useTaskRunner } from "./inspector/taskRunner";
 import { Button, TooltipProvider, useMediaQuery } from "./kit/core";
 import { Dialog } from "./kit/overlays";
-import { setPrefs, toggleOverlay, usePrefs } from "./prefs";
+import { getPrefs, setPrefs, toggleOverlay, usePrefs } from "./prefs";
 import { AnalysisDock } from "./shell/AnalysisDock";
 import { ShortcutsDialog, WelcomeDialog } from "./shell/Dialogs";
 import { Inspector } from "./shell/Inspector";
@@ -108,10 +108,15 @@ function Layout() {
       if (target) {
         const tag = target.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable) return;
-        // Space and Enter belong to the focused control.
-        if ((event.key === " " || event.key === "Enter") && (tag === "BUTTON" || tag === "A" || target.getAttribute("role"))) return;
+        // Space and Enter belong to the focused control. The 3-D scene is not one: of the keys it only takes the arrows.
+        const control = tag === "BUTTON" || tag === "A" || (target.hasAttribute("role") && !target.hasAttribute("data-scene"));
+        if ((event.key === " " || event.key === "Enter") && control) return;
       }
-      if (document.querySelector('[role="dialog"]')) return;
+      // The shortcuts act on the laboratory behind any overlay: not while a dialog, a menu or a
+      // list is open in front of it, and not while a body is held (the hand stays on one experiment).
+      if (sim.isDragging || document.querySelector('[role="dialog"], [role="menu"], [role="listbox"]')) return;
+      // Single-character shortcuts can be switched off (WCAG 2.1.4); the space bar is not one of them.
+      if (event.key.length === 1 && event.key !== " " && !getPrefs().charShortcuts) return;
       const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
       switch (key) {
         case " ":

@@ -28,7 +28,8 @@ export const SURFACE = {
   ink: "#eef1f5",
   ink2: "#c4cad3",
   ink3: "#939ba8",
-  ink4: "#6b7482",
+  ink4: "#828b99",
+  edge: "#6b7482",
 } as const;
 
 /** One colour per physical quantity, used consistently in vectors, traces and legends. */

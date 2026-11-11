@@ -2,11 +2,12 @@
 export const parameters = {
   tabs: { parameters: "Parametreler", measurements: "Ölçümler", tasks: "Föyler", label: "Denetçi bölümleri" },
   scenarios: "Hazır deneyler",
-  scenarioHint: "Her biri parametreleri ve başlangıç koşullarını birlikte kurar.",
   physical: "Fiziksel parametreler",
   initial: "Başlangıç koşulları",
   initialHint: "Değer girildiğinde deney bu koşullardan yeniden başlar.",
   numerical: "Sayısal yöntem gösterimi",
+  timeScaleNote:
+    "Benzetim zamanının duvar saatine oranı. Adım boyu ve hesaplanan durumlar değişmez; yalnızca hareketin gösterilme hızı değişir.",
 
   oscillator: {
     equation: "Hareket denklemi",
@@ -28,7 +29,7 @@ export const parameters = {
       beats: { name: "Vuru", note: "Sönümsüz, ω₀'ın %10 altında sürülür; zarf 18 s'de bir atar." },
       eulerDrift: {
         name: "Euler kayması",
-        note: "Aynı sönümsüz sistem, 60 Hz açık Euler ile: enerji yapay olarak artar.",
+        note: "Aynı sönümsüz sistem, 60 Hz açık Euler ile: enerji yapay olarak artar. Başka bir hazır deneye geçildiğinde önceki çözücü geri gelir.",
       },
     },
   },
@@ -67,7 +68,10 @@ export const parameters = {
       triple: { name: "Üçlü", note: "N = 3." },
       quad: { name: "Dörtlü", note: "N = 4." },
       six: { name: "Altılı zincir", note: "N = 6. Küçük salınım spektrumu asılı ipinkine yaklaşır." },
-      moon: { name: "Ay'da", note: "g = 1,62 m/s². Aynı açılar, √(9,81/1,62) ≈ 2,5 kat yavaş." },
+      moon: {
+        name: "Ay'da",
+        note: "g = 1,62 m/s². Çift sarkaçla aynı açılardan bırakılır: aynı hareket, √(9,81/1,62) ≈ 2,5 kat yavaş.",
+      },
       mars: { name: "Mars'ta", note: "g = 3,73 m/s²." },
       microgravity: { name: "Serbest düşüş", note: "g = 0. Geri çağırıcı tork yok; açısal momentum korunur." },
     },

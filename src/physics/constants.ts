@@ -122,5 +122,9 @@ export const SOLVER_RATES: readonly number[] = [60, 120, 300, 600, 1000, 2000];
 
 export const DEFAULT_SOLVER: SolverSettings = { method: "rk4", rateHz: 1000 };
 
-/** Telemetry is decimated to (approximately) this rate regardless of the solver rate. */
+/**
+ * Target rate of the recorded telemetry. Every round(f_s / 100)-th step is
+ * recorded: at 100 Hz for step rates from 300 Hz up, at the step rate itself
+ * for 60 and 120 Hz (stride 1).
+ */
 export const TELEMETRY_RATE_HZ = 100;
