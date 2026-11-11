@@ -4,7 +4,7 @@ import { useState } from "react";
 import { INTEGRATORS } from "@/physics/integrators";
 import { DEFAULT_SOLVER } from "@/physics/constants";
 import { useLiveTick, useSim, useSimState } from "@/sim/react";
-import { MAX_FRAME_SECONDS } from "@/sim/Simulation";
+import { LAG_FRAMES, LAG_WINDOW_SECONDS, MAX_FRAME_SECONDS } from "@/sim/Simulation";
 import { useT } from "@/i18n";
 import { fixed, scientific } from "../format";
 import { cn, Tooltip } from "../kit/core";
@@ -47,7 +47,8 @@ export function StatusBar() {
   if (reached && advisedRun !== run) setAdvisedRun(run);
   const advise = (reached || advisedRun === run) && !INTEGRATORS[solver.method].adaptive && status === "ok";
   // Frames of this run that were cut to the frame cap, so that simulated time fell behind (Simulation.advance).
-  const late = sim.perf.droppedFrames;
+  // Shown once they recur: a single long frame, such as the one in which a scene is built, is no lasting lag.
+  const late = sim.perf.lagging ? sim.perf.droppedFrames : 0;
   const notice = advise || late > 0;
 
   return (
@@ -119,7 +120,7 @@ export function StatusBar() {
 
       {/* Shown at every width: it is the only sign that simulated time is no longer keeping up. */}
       {late > 0 ? (
-        <Tooltip label={t.status.droppedHint(MAX_FRAME_SECONDS)} side="top">
+        <Tooltip label={t.status.droppedHint(MAX_FRAME_SECONDS, LAG_FRAMES, LAG_WINDOW_SECONDS)} side="top">
           <span tabIndex={0} className="cursor-help rounded-xs text-warn">
             <span className="font-sans">{t.status.dropped} </span>
             {late}

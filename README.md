@@ -82,7 +82,7 @@ Yayımlarken `NEXT_PUBLIC_SITE_URL` ortam değişkenine sitenin adresi verilirse
 | --- | --- |
 | `npm run dev` | Geliştirme sunucusu |
 | `npm run build` | Üretim derlemesi |
-| `npm test` | Birim sınamaları, doğrulama paketi ve içerik tutarlılığı (153 sınama) |
+| `npm test` | Birim sınamaları, doğrulama paketi ve içerik tutarlılığı (154 sınama) |
 | `npm run typecheck` | TypeScript tür denetimi |
 | `npm run lint` | ESLint |
 | `npm run check` | Tür denetimi, lint ve sınamalar |
@@ -129,7 +129,7 @@ Harf, rakam ve noktalama tuşlarıyla verilen tek tuşlu kısayollar, kısayolla
 - Doğrulama, denklemlerin doğru çözüldüğünü gösterir; ideal modelin gerçek bir düzenekle uyumunu sınamaz.
 - Açık, sabit adımlı yöntemlerde hata adım büyüklüğüne bağlıdır. Durum çubuğu enerji defteri kalıntısını sayıyla ve renkle gösterir; bağıl kalıntı $10^{-5}$ değerine ulaştığında uyarlamalı çözücüyle yeniden başlatmayı önerir. Yöntemin ya da adım frekansının değiştirilmesi iki deneyi de başlangıç koşullarından yeniden başlatır; böylece her kayıt tek bir çözücüye aittir.
 - Düşük mertebeli bir yöntem ve iri bir adımla çözüm ıraksayabilir. Durum değişkenleri sonlu aralıktan çıktığında deney durdurulur ve son geçerli durum ekranda kalır.
-- Gerçek zaman güvencesi yoktur: 0,1 s'den uzun süren bir karenin 0,1 s'yi aşan bölümü benzetime aktarılmaz, benzetim zamanı duvar saatinin gerisinde kalır; durum çubuğu bu kareleri sayar.
+- Gerçek zaman güvencesi yoktur: 0,1 s'den uzun süren bir karenin 0,1 s'yi aşan bölümü benzetime aktarılmaz, benzetim zamanı duvar saatinin gerisinde kalır; durum çubuğu bu karelerin sayısını, kareler yinelendiğinde (iki saniye içinde dört) gösterir.
 - Saat ile analitik çözümü gösteren anahtar yalnızca 768 piksel ve üzerindeki pencere genişliklerinde görünür. Zaman ölçeği üst çubukta 1536 pikselden başlayarak, daha dar pencerelerde parametre panelinin başında ayarlanır.
 - Lyapunov üsteli ve öngörü ufku sonlu zaman kestirimleridir.
 - Laboratuvarın öğrenmeye etkisi ölçülmemiştir.

@@ -230,7 +230,7 @@ export const evidenceTr: TheoryDocument = [
               r`**Çözüm ıraksayabilir.** Düşük mertebeli bir yöntem ve iri bir adımla sarkaç zincirinin çözümü sonlu aralıktan çıkabilir. Deney o zaman durdurulur (Bölüm 4); hiçbir şey değiştirilmeden aynı çözücüyle yeniden başlatılırsa aynı anda yine durdurulur.`,
               r`**Kaotik yörüngeler ufkun ötesinde tek tek anlamlı değildir.** Bölüm 5'te açıklandığı gibi, birkaç on saniyeden sonra gösterilen durum tam çözümün durumu değildir; anlamlı olan istatistiksel ve geometrik özelliklerdir.`,
               r`**Lyapunov üsteli sonlu süreli bir kestirimdir** ve yörüngeye bağlıdır; bir düzeneğin “üsteli” olarak tek bir sayı verilemez.`,
-              r`**Gerçek zaman güvencesi yoktur.** Yavaş bir aygıt ya da yüksek bir adım frekansı bir karenin 0,1 saniyeden uzun sürmesine yol açtığında, karenin 0,1 saniyeyi aşan bölümü benzetime aktarılmaz ve benzetim zamanı duvar saatinin gerisinde kalır; durum çubuğu son başlatmadan beri bu kareleri sayar. Adım dizisi aynı kaldığı için fiziksel sonuç etkilenmez.`,
+              r`**Gerçek zaman güvencesi yoktur.** Yavaş bir aygıt ya da yüksek bir adım frekansı bir karenin 0,1 saniyeden uzun sürmesine yol açtığında, karenin 0,1 saniyeyi aşan bölümü benzetime aktarılmaz ve benzetim zamanı duvar saatinin gerisinde kalır; durum çubuğu son başlatmadan beri bu karelerin sayısını, kareler yinelendiğinde (iki saniye içinde dört) gösterir; böylece tek bir uzun kare bildirime yol açmaz. Adım dizisi aynı kaldığı için fiziksel sonuç etkilenmez.`,
               r`**Çalışma ortamları arası yinelenebilirlik sınanmamıştır** (Bölüm 4).`,
             ],
           },

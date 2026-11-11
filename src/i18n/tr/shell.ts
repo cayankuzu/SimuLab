@@ -183,9 +183,9 @@ export const shell = {
     paused: "Duraklatıldı",
     held: "Cisim tutuluyor",
     dropped: "Geciken kare",
-    droppedHint: (cap: number) => {
+    droppedHint: (cap: number, frames: number, window: number) => {
       const seconds = String(cap).replace(".", ",");
-      return `Son başlatmadan beri ${seconds} s'den uzun süren karelerin sayısı. Böyle bir karenin ${seconds} s'yi aşan bölümü benzetime aktarılmaz; benzetim zamanı geride kalır.`;
+      return `Son başlatmadan beri ${seconds} s'den uzun süren karelerin sayısı. Böyle bir karenin ${seconds} s'yi aşan bölümü benzetime aktarılmaz; benzetim zamanı geride kalır. Sayı, bu kareler yinelendiğinde (${window} s içinde ${frames}) görünür; bir sahnenin kurulduğu kare gibi tek bir uzun kare onu göstermez.`;
     },
   },
 

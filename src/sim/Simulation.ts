@@ -144,6 +144,14 @@ const POINCARE_CAPACITY = 20_000;
  * status bar quotes this figure (status.droppedHint), and a test holds the two together.
  */
 export const MAX_FRAME_SECONDS = 0.1;
+/**
+ * Cut frames that make falling behind a lasting state: this many within this
+ * wall-clock window [s]. Loading the page, switching the experiment or opening
+ * the theory reader costs one or two long frames, which stay below it; a device
+ * that cannot keep up exceeds it within a second.
+ */
+export const LAG_FRAMES = 4;
+export const LAG_WINDOW_SECONDS = 2;
 const LYAPUNOV_INTERVAL = 0.01;
 /** A state component beyond this magnitude (or NaN) counts as a diverged solution. */
 const STATE_LIMIT = 1e7;
@@ -272,6 +280,13 @@ export interface PerformanceStats {
    * simulated time fell behind the wall clock (a slow device, or a stall).
    */
   droppedFrames: number;
+  /**
+   * Set once such frames recur within the run (LAG_FRAMES of them within
+   * LAG_WINDOW_SECONDS of wall-clock time): simulated time is then falling
+   * behind for a reason that lasts. A single long frame, such as the one in
+   * which the interface builds a scene, does not set it. Cleared by a restart.
+   */
+  lagging: boolean;
 }
 
 type Listener = () => void;
@@ -338,7 +353,10 @@ export class Simulation {
   /* ---- loop ---- */
   /** Incremented whenever the continuous state changed (render-on-demand). */
   frame = 0;
-  readonly perf: PerformanceStats = { fps: 60, stepsPerFrame: 0, physicsMs: 0, droppedFrames: 0 };
+  readonly perf: PerformanceStats = { fps: 60, stepsPerFrame: 0, physicsMs: 0, droppedFrames: 0, lagging: false };
+  /** Wall-clock time of the running frames since the last restart [s], and the instants of the recent cut frames. */
+  private wallClock = 0;
+  private readonly lateFrames: number[] = [];
   private dragging = false;
   private accumulator = 0;
   /** Steps taken since the last restart, per experiment: the sampling grid starts at the release. */
@@ -479,12 +497,30 @@ export class Simulation {
     this.perf.stepsPerFrame = 0;
     if (!this.state.running || this.dragging || this.state.status !== "ok") return;
     const h = this.stepSize;
-    if (realDt > MAX_FRAME_SECONDS) this.perf.droppedFrames++;
+    this.wallClock += realDt;
+    if (realDt > MAX_FRAME_SECONDS) this.countLateFrame();
     this.accumulator += Math.min(realDt, MAX_FRAME_SECONDS) * this.state.timeScale;
     const steps = Math.floor(this.accumulator / h + 1e-9);
     if (steps <= 0) return;
     this.accumulator -= steps * h;
     this.run(steps);
+  }
+
+  /** Counts a frame cut to the frame cap and decides whether such frames now recur (see PerformanceStats.lagging). */
+  private countLateFrame(): void {
+    this.perf.droppedFrames++;
+    const late = this.lateFrames;
+    late.push(this.wallClock);
+    while (late.length > 0 && this.wallClock - (late[0] ?? this.wallClock) > LAG_WINDOW_SECONDS) late.shift();
+    if (late.length >= LAG_FRAMES) this.perf.lagging = true;
+  }
+
+  /** A restart begins a new account of cut frames. */
+  private resetLateFrames(): void {
+    this.perf.droppedFrames = 0;
+    this.perf.lagging = false;
+    this.lateFrames.length = 0;
+    this.wallClock = 0;
   }
 
   /** Advances by one display frame (1/60 s of simulated time) while paused. */
@@ -663,7 +699,7 @@ export class Simulation {
     this.oscAdvancer.reset();
     this.accumulator = 0;
     this.oscStepIndex = 0;
-    this.perf.droppedFrames = 0;
+    this.resetLateFrames();
     this.recordOscillator();
     this.clearDivergence("oscillator");
     if (notify) this.update({ epoch: this.state.epoch + 1, status: "ok" });
@@ -828,7 +864,7 @@ export class Simulation {
     this.clearPendulumInstruments();
     this.accumulator = 0;
     this.pendStepIndex = 0;
-    this.perf.droppedFrames = 0;
+    this.resetLateFrames();
     this.recordPendulum();
     this.clearDivergence("pendulum");
     if (notify) this.update({ epoch: this.state.epoch + 1, status: "ok" });

@@ -37,7 +37,7 @@ export const designTr: TheoryDocument = [
         blocks: [
           {
             kind: "p",
-            text: "Her canlandırma karesinin duvar saati süresi bir bütçeye eklenir; bütçe, tam olarak $h = 1/f_s$ büyüklüğünde adımlarla harcanır ve artan kısım bir sonraki kareye devreder [@fiedler2004]. Bir kare bütçeye en çok 0,1 s'lik duvar saati süresi ekler; kare başına adım sayısı böylece sınırlıdır (en yüksek adım frekansında ve zaman ölçeğinde 400). Daha uzun süren kare bu uzunluğa kırpılır ve durum çubuğunda sayılır; sekmenin arka planda geçirdiği süre ise atılır. Bu düzenle durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $h$ değerine bağlıdır. Sınama paketi bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarında durumların bit düzeyinde eşit olduğu doğrulanır.",
+            text: "Her canlandırma karesinin duvar saati süresi bir bütçeye eklenir; bütçe, tam olarak $h = 1/f_s$ büyüklüğünde adımlarla harcanır ve artan kısım bir sonraki kareye devreder [@fiedler2004]. Bir kare bütçeye en çok 0,1 s'lik duvar saati süresi ekler; kare başına adım sayısı böylece sınırlıdır (en yüksek adım frekansında ve zaman ölçeğinde 400). Daha uzun süren kare bu uzunluğa kırpılır ve sayılır (durum çubuğu sayıyı bu tür kareler yinelendiğinde gösterir); sekmenin arka planda geçirdiği süre ise atılır. Bu düzenle durum dizisi yalnızca başlangıç koşullarına, parametrelere, yönteme ve $h$ değerine bağlıdır. Sınama paketi bunu doğrudan denetler: aynı deney bir kez düzgün 60 Hz karelerle, bir kez rastgele kare süreleriyle yürütülür ve ortak adım sayılarında durumların bit düzeyinde eşit olduğu doğrulanır.",
           },
           {
             kind: "note",
@@ -55,7 +55,7 @@ export const designTr: TheoryDocument = [
             kind: "list",
             items: [
               "TypeScript katı kipte derlenir; statik çözümleme (ESLint) uyarısız geçer.",
-              "153 otomatik sınama vardır: doğrusal cebir, özel fonksiyonlar, integratörler, her iki model, ölçüm cihazları, çalışma zamanı, veri alışverişi ve on dört doğrulama deneyi; arayüz renklerinin karşıtlık oranları (ve bu bölümün onların verdiği değerleri doğru aktardığı), sayı girişinin okunması, saklanan tercihlerin doğrulanması ve spektrum göstergesinin kayıt ve tepe kuralları da sınanır. Her deney föyü için sınamalar, föyün öngörülen ölçümle tamamlandığını ve yanlış bir ayarla açık kaldığını gösterir. İçerik de sınanır: kuram metninin iki dilde aynı yapıda olması, her atfın kaynakçada bulunması, her formülün dizilebilmesi ve föy ile doğrulama metinlerinin koddaki ölçüt ve satır sayılarıyla uyuşması.",
+              "154 otomatik sınama vardır: doğrusal cebir, özel fonksiyonlar, integratörler, her iki model, ölçüm cihazları, çalışma zamanı, veri alışverişi ve on dört doğrulama deneyi; arayüz renklerinin karşıtlık oranları (ve bu bölümün onların verdiği değerleri doğru aktardığı), sayı girişinin okunması, saklanan tercihlerin doğrulanması ve spektrum göstergesinin kayıt ve tepe kuralları da sınanır. Her deney föyü için sınamalar, föyün öngörülen ölçümle tamamlandığını ve yanlış bir ayarla açık kaldığını gösterir. İçerik de sınanır: kuram metninin iki dilde aynı yapıda olması, her atfın kaynakçada bulunması, her formülün dizilebilmesi ve föy ile doğrulama metinlerinin koddaki ölçüt ve satır sayılarıyla uyuşması.",
               "Dışarıdan gelen veri (deney dosyası, paylaşım bağlantısı) kullanılmadan önce doğrulanır. Yapısı yanlış olan ya da bilinmeyen bir yöntem, sunulan altı değerden başka bir adım frekansı ya da sonlu bir sayı olmayan bir değer içeren veri bütünüyle reddedilir. Aralığının dışındaki bir parametre en yakın sınıra çekilir; başlangıç koşullarına sayı alanlarının sınırları uygulanır: konum iki durdurucunun arasında, hız ±30 m/s, açılar ±1800°, açısal hızlar ±40 rad/s içinde kalır. Sınırı aşan bir açı tam turlar atılarak (−180°, 180°] aralığına indirgenir; böylece zincirin biçimi korunur. İşaretçiyle tutulan bir zincir de bırakıldığında aynı biçimde saklanır. Tarayıcının yerel deposunda saklanan tercihler de aynı biçimde doğrulanır: arayüzün kullanamayacağı bir değerin yerine varsayılanı alınır.",
               "Sürekli tümleştirme her değişiklikte tür denetimi, statik çözümleme, sınamalar ve üretim derlemesini çalıştırır.",
             ],
@@ -112,7 +112,7 @@ export const designTr: TheoryDocument = [
                 "Karede yeniden oluşturulur: 1031 KiB bellek, 0,57 ms",
                 "Aynı tamponda güncellenir; bellek ayrılmaz",
               ],
-              ["Otomatik sınama", "Yok", "153 sınama, 14'ü doğrulama deneyi"],
+              ["Otomatik sınama", "Yok", "154 sınama, 14'ü doğrulama deneyi"],
               [
                 "Erişilebilirlik",
                 "ARIA özniteliği, klavye denetimi ve iletişim kutusu anlamı yok",

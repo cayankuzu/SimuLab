@@ -16,8 +16,32 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const title = "SimuLab — Salınım ve Kaos Laboratuvarı";
+
 const description =
-  "Doğrulanmış sayısal çözücülerle çalışan etkileşimli 3B fizik laboratuvarı: sönümlü-sürülen osilatör, N-bağlantılı sarkaç, enerji defteri, Lyapunov üsteli ve Poincaré kesiti. An interactive, verified computational-physics laboratory for oscillations and deterministic chaos.";
+  "Doğrulanmış sayısal çözücülerle çalışan etkileşimli 3B fizik laboratuvarı: sönümlü-sürülen osilatör, N bağlantılı sarkaç, enerji defteri, Lyapunov üsteli ve Poincaré kesiti; 14 doğrulama deneyi, 67 ölçüt. An interactive, verified computational-physics laboratory for oscillations and deterministic chaos.";
+
+/**
+ * Images of a shared link: 1200 x 630 px, the size of Open Graph previews and
+ * large Twitter cards. They are screenshots of the running laboratory; the
+ * first is the one most services show.
+ */
+const previews = [
+  {
+    url: "/preview-pendulum.jpg",
+    width: 1200,
+    height: 630,
+    type: "image/jpeg",
+    alt: "SimuLab: kaotik çift sarkaç, ikiz yörüngenin ayrılması, Lyapunov üsteli kestirimi ve Poincaré kesiti",
+  },
+  {
+    url: "/preview-oscillator.jpg",
+    width: 1200,
+    height: 630,
+    type: "image/jpeg",
+    alt: "SimuLab: rezonansta sürülen osilatör, frekans yanıtı ve genlik spektrumu",
+  },
+];
 
 /**
  * Public address of the deployment, used to make the preview image of shared
@@ -31,7 +55,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "SimuLab — Salınım ve Kaos Laboratuvarı",
+    default: title,
     template: "%s · SimuLab",
   },
   description,
@@ -48,17 +72,20 @@ export const metadata: Metadata = {
     "double pendulum",
   ],
   openGraph: {
-    title: "SimuLab — Salınım ve Kaos Laboratuvarı",
-    description,
     type: "website",
-    images: [
-      {
-        url: "/preview-pendulum.jpg",
-        width: 800,
-        height: 500,
-        alt: "SimuLab: çift sarkaç, ikiz yörünge, Lyapunov üsteli kestirimi ve Poincaré kesiti",
-      },
-    ],
+    url: "/",
+    siteName: "SimuLab",
+    locale: "tr_TR",
+    alternateLocale: ["en_US"],
+    title,
+    description,
+    images: previews,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: previews.slice(0, 1),
   },
 };
 

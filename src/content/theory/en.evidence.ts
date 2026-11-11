@@ -230,7 +230,7 @@ export const evidenceEn: TheoryDocument = [
               r`**A solution can diverge.** With a low-order method and a coarse step the solution of the pendulum chain can leave the finite range. The experiment is then halted (Chapter 4); restarted unchanged with the same solver, it is halted again at the same instant.`,
               r`**Chaotic trajectories are not individually meaningful beyond the horizon.** As explained in Chapter 5, after a few tens of seconds the state shown is not the state of the exact solution; what is meaningful are the statistical and geometric properties.`,
               r`**The Lyapunov exponent is a finite-time estimate** and depends on the trajectory; no single number can be given as “the exponent” of an apparatus.`,
-              r`**There is no real-time guarantee.** When a slow device or a high step frequency makes a frame last longer than 0.1 s, the part of the frame beyond 0.1 s is not simulated and simulated time falls behind the wall clock; the status bar counts these frames since the last restart. The physical result is not affected, because the sequence of steps stays the same.`,
+              r`**There is no real-time guarantee.** When a slow device or a high step frequency makes a frame last longer than 0.1 s, the part of the frame beyond 0.1 s is not simulated and simulated time falls behind the wall clock; the status bar shows the number of these frames since the last restart once they recur (four within two seconds), so that a single long frame does not raise the notice. The physical result is not affected, because the sequence of steps stays the same.`,
               r`**Repeatability across runtime environments has not been tested** (Chapter 4).`,
             ],
           },

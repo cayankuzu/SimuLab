@@ -11,7 +11,7 @@ import { oscillatorTheory, settlingTimeFromRest, type OscillatorParams } from "@
 import { PendulumModel } from "@/physics/pendulum";
 import { amplitudeSpectrum, dominantPeak } from "@/physics/spectrum";
 import { buildCsv, CSV_INTERNATIONAL, CSV_SPREADSHEET, decodeShareHash, encodeShareHash, fromExperimentFile, toExperimentFile } from "@/sim/exchange";
-import { INITIAL_LIMITS, Simulation } from "@/sim/Simulation";
+import { INITIAL_LIMITS, LAG_FRAMES, LAG_WINDOW_SECONDS, Simulation } from "@/sim/Simulation";
 import { clearRunMemory, findTask, type TaskId, type TaskMemory, type TaskStatus } from "@/sim/tasks";
 
 /** Runs the simulation for `seconds` of simulated time in 60 Hz frames. */
@@ -311,6 +311,38 @@ describe("solver changes and presets", () => {
     expect(sim.perf.stepsPerFrame).toBe(400);
     sim.reset();
     expect(sim.perf.droppedFrames).toBe(0);
+  });
+
+  it("reports cut frames once they recur, not for a single long frame", () => {
+    const sim = new Simulation();
+    const frames = (count: number, seconds: number) => {
+      for (let i = 0; i < count; i++) sim.advance(seconds);
+    };
+    // Isolated long frames, such as building a scene or opening the theory reader, a few seconds apart.
+    for (let i = 0; i < 3; i++) {
+      sim.advance(0.4);
+      frames(180, 1 / 60);
+    }
+    expect(sim.perf.droppedFrames).toBe(3);
+    expect(sim.perf.lagging).toBe(false);
+    // A device that cannot keep up: LAG_FRAMES cut frames within LAG_WINDOW_SECONDS.
+    frames(LAG_FRAMES - 1, 0.15);
+    expect(sim.perf.lagging).toBe(false);
+    frames(1, 0.15);
+    expect(sim.perf.lagging).toBe(true);
+    expect(sim.perf.droppedFrames).toBe(3 + LAG_FRAMES);
+    // Recovering does not erase the record of the run; a restart does.
+    frames(600, 1 / 60);
+    expect(sim.perf.lagging).toBe(true);
+    sim.reset();
+    expect(sim.perf.lagging).toBe(false);
+    expect(sim.perf.droppedFrames).toBe(0);
+    // Long frames spread over more than the window stay isolated.
+    for (let i = 0; i < 2 * LAG_FRAMES; i++) {
+      sim.advance(0.2);
+      frames(Math.ceil((LAG_WINDOW_SECONDS / (LAG_FRAMES - 1)) * 60), 1 / 60);
+    }
+    expect(sim.perf.lagging).toBe(false);
   });
 });
 

@@ -185,8 +185,8 @@ export const shell: typeof source = {
     paused: "Paused",
     held: "Body held",
     dropped: "Late frames",
-    droppedHint: (cap: number) =>
-      `Number of frames since the last restart that took longer than ${cap} s. The part of such a frame beyond ${cap} s is not simulated, so simulated time falls behind.`,
+    droppedHint: (cap: number, frames: number, window: number) =>
+      `Number of frames since the last restart that took longer than ${cap} s. The part of such a frame beyond ${cap} s is not simulated, so simulated time falls behind. The count appears once such frames recur (${frames} within ${window} s); a single long frame, such as the one in which a scene is built, does not show it.`,
   },
 
   dock: {
